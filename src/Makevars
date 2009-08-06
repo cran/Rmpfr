@@ -1,0 +1,6 @@
+# -*- Makefile -*-
+
+# Link with GMP  (GNU Multiple Precision)
+# and  with MPFR (Multiple Precision Floating point Reliable) Libraries
+#
+PKG_LIBS = -lgmp -lmpfr

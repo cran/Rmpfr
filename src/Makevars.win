@@ -1,0 +1,14 @@
+# -*- Makefile -*-
+
+# Link with GMP  (GNU Multiple Precision)
+# and  with MPFR (Multiple Precision Floating point Reliable) Libraries
+#
+
+# lines below suggested by Uwe Ligges
+
+PKG_CPPFLAGS=-I$(LIB_MPFR)/include
+PKG_LIBS=-L$(LIB_MPFR)/lib -lgmp -lmpfr
+## or rather ?
+# PKG_CPPFLAGS=-I$(LIB_MPFR)/include -I$(LIB_GMP)/include
+# PKG_LIBS=-L$(LIB_GMP)/lib -lgmp -L$(LIB_MPFR)/lib -lmpfr
+

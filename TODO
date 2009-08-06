@@ -1,0 +1,61 @@
+2) NOTA BENE:  Have  "mpfrMatrix", dim(.) <- ..; t(), %*%, crossprod()...
+
+ -  <mpfr> %*% <mpfr>    should work like with numeric vectors
+ -  <mpfr> %*% t(<mpfr>)  ditto
+
+ -  <mpfr>[i] & <mpfrMatrix>[i]  work
+    but   <mpfrMatrix> [i,j]  not yet
+
+ -->  want things to work like
+          which(<mpfrMatrix> == ., arr.ind = TRUE)  - ok
+          outer(....)                               - not yet
+
+ [No longer sure if this is true :]
+ For this, we must ensure that the methods are used, instead of the
+ .Primitive  base functions :
+
+ One way: --> see ~/R/MM/NUMERICS/bessel-large-x.R
+                  --------------------------------
+
+  ## really interesting is  bI(x., nu)  {for "mpfr" argument}:
+  ## it uses outer(), but that needs to dispatch on, e.g. "^",
+  ## i.e., not only look at "base"
+  environment(outer) <- as.environment("package:Rmpfr")
+  environment(dim) <- as.environment("package:Rmpfr")
+  environment(dimnames) <- as.environment("package:Rmpfr")
+  environment(`dim<-`) <- as.environment("package:Rmpfr")
+  environment(`dimnames<-`) <- as.environment("package:Rmpfr")
+  environment(which) <- as.environment("package:Rmpfr")
+
+
+4) format() should get more (optional) arguments; e.g. an option to
+    [ round() after decimal ], and one to drop trailing zeros,
+   see format.default
+
+5) I'd like seq() methods, but that seems currently impossible because of
+   a "design infelicity" in base::seq.default  --- ???? E-mail to R-core ??
+   --> R/mpfr.R
+
+6) It is "wrong" that the class "Mnumber" also extends "character", "list";
+   but it's not clear we can find better definitions, see R/AllClasses.R
+
+7) Add tests for hypot() & atan2() to tests/special-fun-ex.R
+
+8) round(x, .) & signif(x, .) currently return "mpfr" numbers of the same precision.
+   That *looks* ugly.
+   Potentially add a swith 'keepPrec = FALSE' -- i.e. by default *reduce*
+   precision to "match" 'digits' argument.
+
+9) median(mpfr(1:4, 60)) now fails, but mean(.) and quantile() both work.
+   ------ The infelicity could be seen in the way namespaces work :
+   median.default() calls the correct sort() on "mpfr", but calls the *wrong*
+   base::mean() instead of mean() {which is S4 by then} ....
+   all would be fine if  base::mean() was *already* S4 generic ....
+   of course I could replace base::mean() by the S4 generic on
+   package-load time, but would prefer a cleaner solution.
+   ---> talk to Luke and John (and ??) about that
+
+
+50) For *complex* arithmetic, build interface to the  "MPC" library
+   ---> http://www.multiprecision.org/mpc -- which is LGPL and itself
+   builds on MPFR and GMP.

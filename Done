@@ -1,0 +1,11 @@
+1) R: character -> mpfr   "3.14159265358979323846264" -> mpfr
+
+3) "Arith" and "Compare" methods currently ``lose dim + dimnames''
+   for "mpfrArray" (& "mpfrMatrix")
+
+  The solution is a bit tedious because the Ops do recycling pretty
+  generously for vectors,
+  but pretty stringently when one of the operands is a matrix.
+
+  If the other part is a matrix their dim() must be identical,
+  if just a vector, its length must be a divisor of  length(<matrix>)

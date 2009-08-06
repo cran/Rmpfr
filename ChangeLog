@@ -1,0 +1,117 @@
+2009-08-06  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-5 -- release-ready
+
+	* man/seqMpfr.Rd, ...: add all missing *Rd pages.
+
+	* R/mpfr.R (seqMpfr): remove FIXME, using new pmin(), pmax().
+
+	* R/Math.R (Math2): group methods - for round() and signif()
+
+	* src/convert.c (mpfr2i): new, for as(. "integer")
+
+2009-08-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (pmin, pmax): now seem to work
+
+	* R/as.R (mpfr): as(<char>, "mpfr") now uses mpfr()
+	(mpfr): now also works for 'raw' and 'logical'; adding as(*,.) methods
+	==>  x[.] <- NA should work
+
+	* R/array.R (cbind, rbind): correct behavior when length/dims do
+	not quite match.
+
+	* R/array.R (dim<-): make work for NULL.
+
+	* tests/matrix-ex.R: test these.
+
+	* src/convert.c (d2mpfr, etc): PROTECT(.) all coerceVector()s.
+
+2009-04-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/mpfr-class.Rd: mention sort(),.., duplicated(), ...
+
+2009-04-13  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/convert.c (d2mpfr1_list, str2mpfr1_list): allow 'prec' to be
+	a vector.
+
+	* R/as.R (mpfr): now support mpfr(<character>, prec)
+	* src/convert.c (str2mpfr1_list): implement character |-> mpfr
+
+	* src/utils.c (R_mpfr_set_default_prec, *_get_*):
+
+	* R/array.R (cbind, rbind): also work when there are "character"
+
+	* R/AllClasses.R (array_or_vector): only contain 'atomicVector'
+
+2009-03-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/Makevars.win: add this after suggestions from Uwe
+
+2009-02-06  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/Arith.R (Compare): add missing ', .Generic' to some methods.
+	* tests/matrix-ex.R: testing 'A >= 3' etc
+
+2009-02-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (cbind, rbind): new "..." methods for cbind(), rbind(),
+	* R/AllClasses.R:  using new "Mnumber" class
+	* man/bind-methods.Rd: docu
+
+2009-01-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (aperm): method.
+
+	* R/AllClasses.R: 'Dimnames', not 'DimNames'
+	* R/Arith.R: use .Arith.mpfr.num() macros etc, and make sure, these
+	are used also in the <mpfr> o <array> cases.
+
+	* tests/matrix-ex.R: test array / mpfr
+
+
+2009-01-27  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (.mpfrA.subset): if A[...] has length(dim(.))== 2,
+	ensure it becomes an "mpfrMatrix"
+
+2009-01-24  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (mpfrArray): make more (user friendly) like array()
+	([<-): render working also for  A[i,j,k] <- val.
+	(.mpfrA.subset): make A[,,1] working
+	(.mA.subAssign): separate auxiliary function for more than 1 method
+
+2009-01-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/Ops.c (Math_mpfr): activate (trunc,floor,ceiling)
+
+	* tests/arith-ex.R: and test them minimally
+
+2009-01-12  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-1 -- another "snapshot"
+
+	* R/array.R (t . mpfr): -->  [ 1 x n ] - matrix
+
+	* R/Arith.R (.dimCheck): add  <mpfr> o <mpfrArray>  methods,
+		further  <mpfr> o <array> ones, etc.
+	* tests/matrix-ex.R: testing them
+
+2008-12-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/Math.R: slightly re-write methods so they automagically work
+	for mpfrArray.
+
+	* R/array.R (.matmult.R): %*%, crossprod(), tcrossprod(), t(), ..
+	* tests/matrix-ex.R: new
+
+2008-12-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/AllClasses.R: add "mpfrArray" and "mpfrMatrix" classes.
+	* R/array.R (dim<-): from "mpfr" to "mpfrArray/Matrix"
+
+2008-12-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-0  -- "snapshot", not released.
