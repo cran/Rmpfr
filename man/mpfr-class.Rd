@@ -54,6 +54,7 @@
 \alias{Math2,mpfr-method}
 \alias{abs,mpfr-method}
 \alias{log,mpfr-method}
+\alias{factorial,mpfr-method}
 \alias{sign,mpfr-method}
 
 \alias{format,mpfr-method}
@@ -146,16 +147,50 @@
 
     \item{Logic}{\code{signature(e1 = "mpfr", e2 = "mpfr")}: ... }
 
-    \item{Summary}{\code{signature(x = "mpfr")}: ... }
+    \item{Summary}{\code{signature(x = "mpfr")}: The S4
+      \code{\link[methods:S4groupGeneric]{Summary}} group functions,
+      \code{\link{max}}, \code{\link{min}}, \code{\link{range}},
+      \code{\link{prod}}, \code{\link{sum}},
+      \code{\link{any}}, and \code{\link{all}}
+      are all defined for MPFR numbers.}
 
-    \item{Math}{\code{signature(x = "mpfr")}: ... }
+    \item{Math}{\code{signature(x = "mpfr")}: All the S4
+      \code{\link[methods:S4groupGeneric]{Math}} group functions are
+      defined, using multiple precision (MPFR) arithmetic, from
+      \code{\link{getGroupMembers}("Math")}, these are (in alphabetical order):
+
+      \code{\link{abs}}, \code{\link{sign}}, \code{\link{sqrt}},
+      \code{\link{ceiling}}, \code{\link{floor}}, \code{\link{trunc}},
+      \code{\link{cummax}}, \code{\link{cummin}}, \code{\link{cumprod}},
+      \code{\link{cumsum}}, \code{\link{exp}}, \code{\link{expm1}},
+      \code{\link{log}}, \code{\link{log10}}, \code{\link{log2}},
+      \code{\link{log1p}}, \code{\link{cos}}, \code{\link{cosh}},
+      \code{\link{sin}}, \code{\link{sinh}}, \code{\link{tan}},
+      \code{\link{tanh}}, \code{\link{acos}}, \code{\link{acosh}},
+      \code{\link{asin}}, \code{\link{asinh}}, \code{\link{atan}},
+      \code{\link{atanh}}, \code{\link{gamma}}, \code{\link{lgamma}},
+      \code{\link{digamma}}, and \code{\link{trigamma}}.
+
+      Currently, \code{digamma}, and \code{trigamma} are not provided by
+      the MPFR library, and hence the methods not implemented.
+      \cr
+      Further, the \code{cum*()} methods are \emph{not yet} implemented.}
+
+    \item{factorial}{\code{signature(x = "mpfr")}: this will
+      \code{\link{round}} the result when \code{x} is integer valued.}
+    %% FIXME: MPFR has   mpfr_fac_ui (mpfr_t ROP, unsigned long int OP, ..rnd)
 
     \item{Math2}{\code{signature(x = "mpfr")}: \code{\link{round}(x,
-    digits)} and \code{\link{signif}(x, digits)} methods.}
+	digits)} and \code{\link{signif}(x, digits)} methods.}
 
     \item{as.numeric}{\code{signature(x = "mpfr")}: ... }
     \item{[}{\code{signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")}: ... }
-    \item{format}{\code{signature(x = "mpfr")}: ... }
+    \item{format}{\code{signature(x = "mpfr")}, further arguments
+      \code{digits = NULL, scientific = NA}, etc:
+      returns \code{\link{character}} vector of same length as \code{x};
+      when \code{digits} is \code{NULL}, with \emph{enough} digits to
+      recreate \code{x} accurately.  For details, see
+      \code{\link{formatMpfr}}.}
     \item{is.finite}{\code{signature(x = "mpfr")}: ... }
     \item{is.infinite}{\code{signature(x = "mpfr")}: ... }
     \item{is.na}{\code{signature(x = "mpfr")}: ... }
@@ -186,7 +221,6 @@
 
     \item{t}{\code{signature(x = "mpfr")}: makes \code{x} into an \eqn{n
 	\times 1}{n x 1} \code{\linkS4class{mpfrMatrix}}.}
-
   }
 }
 \author{Martin Maechler}
@@ -195,7 +229,8 @@
   \code{"mpfr"} number vectors (and matrices, see the
   \code{\linkS4class{mpfrMatrix}} class doc),
   notably
-  \code{\link{sort}}, \code{\link{order}}, \code{\link{rank}}.
+  \code{\link{sort}}, \code{\link{order}}, \code{\link{quantile}},
+  \code{\link{rank}}.
 }
 
 \seealso{
@@ -207,5 +242,16 @@
 str(x <- mpfr(c(2:3, pi), prec = 30 * log2(10)))
 x^2
 x[1] / x[2] # 0.66666... ~ 30 digits
+
+## factorial() and lfactorial() would work automagically via gamma();
+## factorial() has method that rounds
+f200 <- factorial(mpfr(200, prec = 1500)) # need high prec.!
+f200
+as.numeric(log2(f200))# 1245.38 -- need precBits >~ 1246 for full precision
+
+## More extreme
+f.1e4 <- factorial(mpfr(10000, prec=1+lfactorial(10000)/ log(2)))
+getPrec(f.1e4) # 118459
+str(f.1e4)
 }
 \keyword{classes}

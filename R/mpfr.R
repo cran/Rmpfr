@@ -14,6 +14,17 @@ setMethod("is.nan", "mpfr",
 mpfr.is.0 <- function(x) .Call("R_mpfr_is_zero", x, PACKAGE="Rmpfr")
     ## sapply(x, function(.) .@exp == - .Machine$integer.max)
 
+mpfr.is.integer <- function(x)
+    .Call("R_mpfr_is_integer", x, PACKAGE="Rmpfr")
+
+is.whole <- function(x) {
+    if(is.integer(x) || is.logical(x)) rep.int(TRUE, length(x))
+    else if(is.numeric(x)) x == floor(x)
+    else if(is.complex(x)) x == round(x)
+    else if(is(x,"mpfr")) mpfr.is.integer(x)
+    else rep.int(FALSE, length(x))
+}
+
 mpfr_default_prec <- function(prec) {
     if(missing(prec) || is.null(prec))
 	.Call("R_mpfr_get_default_prec", PACKAGE="Rmpfr")
@@ -23,9 +34,11 @@ mpfr_default_prec <- function(prec) {
     }
 }
 
-print.mpfr1 <- function(x, digits = NULL, ...) {
+print.mpfr1 <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
     stopifnot(is(x, "mpfr1"), is.null(digits) || digits >= 2)
-    cat("'mpfr1' ", format(as(x, "mpfr"), digits=digits),"\n", sep="")
+    cat("'mpfr1' ",
+	format(as(x, "mpfr"), digits=digits, drop0trailing=drop0trailing),
+	"\n", sep="")
     invisible(x)
 }
 
@@ -47,7 +60,7 @@ if(.Platform$OS.type != "windows") {## No R_Outputfile (in C) on Windows
 .mpfr.debug <- function(i = NA)
     .Call("R_mpfr_set_debug", as.integer(i), PACKAGE="Rmpfr")
 
-print.mpfr <- function(x, digits = NULL, ...) {
+print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
     stopifnot(is(x, "mpfr"), is.null(digits) || digits >= 2)
     ## digits = NA --> the inherent precision of x will be used
     n <- length(x)
@@ -59,7 +72,8 @@ print.mpfr <- function(x, digits = NULL, ...) {
 	}
     cat(n, "'mpfr'", if(n == 1) "number" else "numbers", ch.prec, "\n")
     if(n >= 1)
-	print(format(x, digits=digits), ..., quote = FALSE)
+	print(format(x, digits=digits, drop0trailing=drop0trailing), ...,
+	      quote = FALSE)
     ## .Call("print_mpfr", x, as.integer(digits), PACKAGE="Rmpfr")
     invisible(x)
 }
@@ -67,27 +81,27 @@ setMethod(show, "mpfr", function(object) print.mpfr(object))
 
 
 ## "[" which also keeps names ... JMC says that names are not support(ed|able)
-## ---  for such objects..
+## ---	for such objects..
 setMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing"),
-          function(x,i,j, ..., drop) {
-              nA <- nargs()
+	  function(x,i,j, ..., drop) {
+	      nA <- nargs()
 	      if(nA == 2) { ## x[i] etc -- vector case -- to be fast, need C! --
 		  x@.Data <- structure(x@.Data[i], names=names(x)[i])
 		  x
 	      } else if(nA == 3 && !is.null(d <- dim(x))) { ## matrix indexing(!)
-                  ## not keeping dimnames though ...
-                  message("nargs() == 3  'mpfr' array indexing ... ")
-                  new("mpfr", structure(x@.Data[i,j,...,drop=drop], dim = d))
+		  ## not keeping dimnames though ...
+		  message("nargs() == 3	 'mpfr' array indexing ... ")
+		  new("mpfr", structure(x@.Data[i,j,...,drop=drop], dim = d))
 ## keeping dimnames: maybe try
-##                   D <- x@.Data; dim(D) <- d
-##                   if(!is.null(dn <- dimnames(x))) dimnames(D) <- dn
-##                   D <- D[i,,drop=drop]
-##                   new("mpfr", D)
+##		     D <- x@.Data; dim(D) <- d
+##		     if(!is.null(dn <- dimnames(x))) dimnames(D) <- dn
+##		     D <- D[i,,drop=drop]
+##		     new("mpfr", D)
 
-              }
-              else
-                  stop(sprintf("invalid 'mpfr' subsetting (nargs = %d)",nA))
-          })
+	      }
+	      else
+		  stop(sprintf("invalid 'mpfr' subsetting (nargs = %d)",nA))
+	  })
 
 ## "[<-" :
 setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
@@ -129,40 +143,40 @@ setMethod("pmin", "Mnumber",
 	      if(all(sapply(args, is.atomic)))
 		  return( base::pmin(..., na.rm = na.rm) )
 	      ## else: at least one is "mpfr(Matrix/Array)"
-              is.m <- sapply(args, is, "mpfr")
-              if(!any(is.m))
-                  stop("no \"mpfr\" argument -- wrong method chosen")
+	      is.m <- sapply(args, is, "mpfr")
+	      if(!any(is.m))
+		  stop("no \"mpfr\" argument -- wrong method chosen")
 
 	      N <- max(lengths <- sapply(args, length))
-              ## precision needed -- FIXME: should be *vector*
-              mPrec <- max(unlist(lapply(args[is.m], getPrec)),
-                           if(any(sapply(args[!is.m], is.double)))
-                           .Machine$double.digits)
-              ## to be the result :
-              r <- mpfr(rep.int(Inf, N), precBits = mPrec)
+	      ## precision needed -- FIXME: should be *vector*
+	      mPrec <- max(unlist(lapply(args[is.m], getPrec)),
+			   if(any(sapply(args[!is.m], is.double)))
+			   .Machine$double.digits)
+	      ## to be the result :
+	      r <- mpfr(rep.int(Inf, N), precBits = mPrec)
 
-              ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
-              has.na <- FALSE
-              for(i in seq_along(args)) {
-                  x <- args[[i]]
-                  if((n.i <- lengths[i]) != N)
-                      x <- x[rep(seq_len(n.i), length.out = N)]
-                  nas <- cbind(is.na(r), is.na(x))
-                  if(!is.m[i]) x <- mpfr(x, prec=mPrec)
-                  if(has.na || (has.na <- any(nas))) {
-                      r[nas[, 1L]] <- x[nas[, 1L]]
-                      x[nas[, 2L]] <- r[nas[, 2L]]
-                  }
-                  change <- r > x
-                  change <- change & !is.na(change)
-                  r[change] <- x[change]
-                  if (has.na && !na.rm)
-                      r[nas[, 1L] | nas[, 2L]] <- NA
-              }
+	      ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
+	      has.na <- FALSE
+	      for(i in seq_along(args)) {
+		  x <- args[[i]]
+		  if((n.i <- lengths[i]) != N)
+		      x <- x[rep(seq_len(n.i), length.out = N)]
+		  nas <- cbind(is.na(r), is.na(x))
+		  if(!is.m[i]) x <- mpfr(x, prec=mPrec)
+		  if(has.na || (has.na <- any(nas))) {
+		      r[nas[, 1L]] <- x[nas[, 1L]]
+		      x[nas[, 2L]] <- r[nas[, 2L]]
+		  }
+		  change <- r > x
+		  change <- change & !is.na(change)
+		  r[change] <- x[change]
+		  if (has.na && !na.rm)
+		      r[nas[, 1L] | nas[, 2L]] <- NA
+	      }
 
-              mostattributes(r) <- attributes(args[[1L]])
-              r
-          })
+	      mostattributes(r) <- attributes(args[[1L]])
+	      r
+	  })
 
 setMethod("pmax", "Mnumber",
 	  function(..., na.rm = FALSE) {
@@ -170,40 +184,40 @@ setMethod("pmax", "Mnumber",
 	      if(all(sapply(args, is.atomic)))
 		  return( base::pmax(..., na.rm = na.rm) )
 	      ## else: at least one is "mpfr(Matrix/Array)"
-              is.m <- sapply(args, is, "mpfr")
-              if(!any(is.m))
-                  stop("no \"mpfr\" argument -- wrong method chosen")
+	      is.m <- sapply(args, is, "mpfr")
+	      if(!any(is.m))
+		  stop("no \"mpfr\" argument -- wrong method chosen")
 
 	      N <- max(lengths <- sapply(args, length))
-              ## precision needed -- FIXME: should be *vector*
-              mPrec <- max(unlist(lapply(args[is.m], getPrec)),
-                           if(any(sapply(args[!is.m], is.double)))
-                           .Machine$double.digits)
-              ## to be the result :
-              r <- mpfr(rep.int(-Inf, N), precBits = mPrec)
+	      ## precision needed -- FIXME: should be *vector*
+	      mPrec <- max(unlist(lapply(args[is.m], getPrec)),
+			   if(any(sapply(args[!is.m], is.double)))
+			   .Machine$double.digits)
+	      ## to be the result :
+	      r <- mpfr(rep.int(-Inf, N), precBits = mPrec)
 
-              ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
-              has.na <- FALSE
-              for(i in seq_along(args)) {
-                  x <- args[[i]]
-                  if((n.i <- lengths[i]) != N)
-                      x <- x[rep(seq_len(n.i), length.out = N)]
-                  nas <- cbind(is.na(r), is.na(x))
-                  if(!is.m[i]) x <- mpfr(x, prec=mPrec)
-                  if(has.na || (has.na <- any(nas))) {
-                      r[nas[, 1L]] <- x[nas[, 1L]]
-                      x[nas[, 2L]] <- r[nas[, 2L]]
-                  }
-                  change <- r < x
-                  change <- change & !is.na(change)
-                  r[change] <- x[change]
-                  if (has.na && !na.rm)
-                      r[nas[, 1L] | nas[, 2L]] <- NA
-              }
+	      ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
+	      has.na <- FALSE
+	      for(i in seq_along(args)) {
+		  x <- args[[i]]
+		  if((n.i <- lengths[i]) != N)
+		      x <- x[rep(seq_len(n.i), length.out = N)]
+		  nas <- cbind(is.na(r), is.na(x))
+		  if(!is.m[i]) x <- mpfr(x, prec=mPrec)
+		  if(has.na || (has.na <- any(nas))) {
+		      r[nas[, 1L]] <- x[nas[, 1L]]
+		      x[nas[, 2L]] <- r[nas[, 2L]]
+		  }
+		  change <- r < x
+		  change <- change & !is.na(change)
+		  r[change] <- x[change]
+		  if (has.na && !na.rm)
+		      r[nas[, 1L] | nas[, 2L]] <- NA
+	      }
 
-              mostattributes(r) <- attributes(args[[1L]])
-              r
-          })
+	      mostattributes(r) <- attributes(args[[1L]])
+	      r
+	  })
 
 
 ### seq() :
@@ -213,55 +227,57 @@ setMethod("pmax", "Mnumber",
 ## ~/R/D/r-devel/R/src/library/base/R/dates.R
 
 seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
-                    length.out = NULL, along.with = NULL, ...)
+		    length.out = NULL, along.with = NULL, ...)
 {
 
     if(missing(from)) stop("'from' must be specified")
     if (!is(from, "mpfr")) from <- as(from, "mpfr")
     if(length(from) != 1) stop("'from' must be of length 1")
     if(!missing(to)) {
-        if (!is(to, "mpfr")) to <- as(to, "mpfr")
-        if (length(to) != 1) stop("'to' must be of length 1")
+	if (!is(to, "mpfr")) to <- as(to, "mpfr")
+	if (length(to) != 1) stop("'to' must be of length 1")
     }
     if (!missing(along.with)) {
-        length.out <- length(along.with)
+	length.out <- length(along.with)
     } else if (!is.null(length.out)) {
-        if (length(length.out) != 1) stop("'length.out' must be of length 1")
-        length.out <- ceiling(length.out)
+	if (length(length.out) != 1) stop("'length.out' must be of length 1")
+	length.out <- ceiling(length.out)
     }
 ##     status <- c(!missing(to), !missing(by), !is.null(length.out))
 ##     if(sum(status) != 2)
 ## ## stop("exactly two of 'to', 'by' and 'length.out' / 'along.with' must be specified")
-##         warning("not exactly two of 'to', 'by' and 'length.out' / 'along.with' have been specified")
+##	   warning("not exactly two of 'to', 'by' and 'length.out' / 'along.with' have been specified")
 
-    if(is.null(length.out) && missing(by))
-        by <- mpfr(1, from[[1]]@prec)
-
+    if(is.null(length.out)) {
+	del <- to - from
+	if(missing(by))
+	    by <- mpfr(sign(del), from[[1]]@prec)
+    }
     if (!is(by, "mpfr")) by <- as(by, "mpfr")
     if (length(by) != 1) stop("'by' must be of length 1")
 
     ## ---- This is  cut n paste  from seq.default() :
     ## ---- It should work, since "arithmetic works for mpfr :
     if(is.null(length.out)) {
-        del <- to - from
-        if(del == 0 && to == 0) return(to)
-        n <- del/by
-        if(!(length(n) && is.finite(n))) {
-            if(length(by) && by == 0 && length(del) && del == 0)
-                return(from)
-            stop("invalid (to - from)/by in seq(.)")
-        }
-        if(n < 0)
-            stop("wrong sign in 'by' argument")
-        if(n > .Machine$integer.max)
-            stop("'by' argument is much too small")
+	del <- to - from
+	if(del == 0 && to == 0) return(to)
+	n <- del/by
+	if(!(length(n) && is.finite(n))) {
+	    if(length(by) && by == 0 && length(del) && del == 0)
+		return(from)
+	    stop("invalid (to - from)/by in seq(.)")
+	}
+	if(n < 0)
+	    stop("wrong sign in 'by' argument")
+	if(n > .Machine$integer.max)
+	    stop("'by' argument is much too small")
 
-        dd <- abs(del)/max(abs(to), abs(from))
-        if (dd < 100*.Machine$double.eps) return(from)
-        n <- as.integer(n + 1e-7)
-        x <- from + (0:n) * by
-        ## correct for overshot because of fuzz
-        if(by > 0) pmin(x, to) else pmax(x, to)
+	dd <- abs(del)/max(abs(to), abs(from))
+	if (dd < 100*.Machine$double.eps) return(from)
+	n <- as.integer(n + 1e-7)
+	x <- from + (0:n) * by
+	## correct for overshot because of fuzz
+	if(by > 0) pmin(x, to) else pmax(x, to)
     }
     else if(!is.finite(length.out) || length.out < 0)
 	stop("length must be non-negative number")
@@ -289,25 +305,25 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 
 if(FALSE) ## fails: seq(1, length.out=3)
 setGeneric("seq", function(from, to, by, ...) standardGeneric("seq"),
-           useAsDefault = function(from, to, by, ...)
-           base::seq(from, to, by, ...))
+	   useAsDefault = function(from, to, by, ...)
+	   base::seq(from, to, by, ...))
 if(FALSE) ## fails: seq(1, length.out=3)
 setGeneric("seq", function(from, to, by, ...) standardGeneric("seq"),
-           useAsDefault =
-           function(from=1, to=1, by=((to-from)/(length.out-1)), ...)
-           base::seq(from, to, by, ...))
+	   useAsDefault =
+	   function(from=1, to=1, by=((to-from)/(length.out-1)), ...)
+	   base::seq(from, to, by, ...))
 
 if(FALSE) { ##-- but this also fails: afterwards  seq(1, length.out=3)
 
 setGeneric("seq", function (from, to, by, length.out, along.with, ...)
-           standardGeneric("seq"),
-           signature = c("from", "to", "by"),
-           useAsDefault = {
-               function(from=1, to=1, by=((to-from)/(length.out-1)),
-                        length.out=NULL, along.with=NULL, ...)
-                   base::seq(from, to, by,
-                             length.out=length.out, along.with=along.with, ...)
-           })
+	   standardGeneric("seq"),
+	   signature = c("from", "to", "by"),
+	   useAsDefault = {
+	       function(from=1, to=1, by=((to-from)/(length.out-1)),
+			length.out=NULL, along.with=NULL, ...)
+		   base::seq(from, to, by,
+			     length.out=length.out, along.with=along.with, ...)
+	   })
 
 
 setMethod("seq", c(from="mpfr", to="ANY", by = "ANY"), seqMpfr)
@@ -322,7 +338,7 @@ getPrec <- function(x) sapply(x, slot, "prec")
 
 ## TODO ?? <<<<<<<<<<<
 ## ====
-## 2) instead of  as(., "mpfr")  use  mpfr(., precBits = <smart>)
+## 2) instead of  as(., "mpfr")	 use  mpfr(., precBits = <smart>)
 
 ## For two "mpfr"s, use a  "smart" default tolerance :
 setMethod("all.equal", signature(target = "mpfr", current = "mpfr"),

@@ -130,6 +130,7 @@ SEXP const_asMpfr(SEXP I, SEXP prec);
 
 SEXP R_mpfr_is_finite(SEXP x);
 SEXP R_mpfr_is_infinite(SEXP x);
+SEXP R_mpfr_is_integer(SEXP x);
 SEXP R_mpfr_is_na(SEXP x);
 SEXP R_mpfr_is_zero(SEXP x);
 

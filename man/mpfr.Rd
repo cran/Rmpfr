@@ -54,4 +54,3 @@ mpfr("af21.01020300a0b0c", base=16)
 ##  68 bit prec.  44833.00393694653820642
 }
 \keyword{classes}
-

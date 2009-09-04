@@ -55,6 +55,34 @@
    package-load time, but would prefer a cleaner solution.
    ---> talk to Luke and John (and ??) about that
 
+10) [l]choose()       "should" be implemented {based on lgamma()}
+    (===>  ~/R/MM/Pkg-ex/Rmpfr/binom-coef.R )
+    possibly via a factorialMPFR() which automatically
+    uses full precision; see also end of man/mpfr-class.Rd
+
+    [a C level implementation, using MPFR-structs instead of R's "mpfr",
+     would be considerably faster, notably for the  prod(...) case {for
+     small k}.]
+
+11) format() method for "mpfrArray" (and hence "mpfrMatrix") which nicely
+    and correctly *jointly* formats and aligns  columns !
+    drop0trailing is not really sensible there
+
+11b) format(<mpfr>) --> .mpfr2str() -> C mpfr2str()  still suffers from a
+     memory bug, inspite of my efforts in src/convert.c
+     I think this is the MPFR library just allocating memory that's in use
+     by R, but it seems hard to prove and or fix that.
+
+12) crossprod(), tcrossprod() (and more?) methods for "mpfrMatrix".
+
+13) implement the  NOT_YET  in src/Ops.c
+
+14) Want to *change*  'precBits' of existing MPFR numbers;
+    MPFR has  mpfr_set_prec(X, PREC)  but that sets the value to NaN.
+    Manual:  "In case you want to keep the previous value stored in X, use
+               `mpfr_prec_round' instead."
+    -->  mpfr_prec_round(X, PREC, RND)
+
 
 50) For *complex* arithmetic, build interface to the  "MPC" library
    ---> http://www.multiprecision.org/mpc -- which is LGPL and itself

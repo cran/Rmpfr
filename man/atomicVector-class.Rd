@@ -4,7 +4,7 @@
 \alias{atomicVector-class}
 \title{Virtual Class "atomicVector" of Atomic Vectors}
 \description{
-  The \code{\link[methods]{class}} \code{"atomicVector"} is a
+  The \code{\link{class}} \code{"atomicVector"} is a
   \emph{virtual} class containing all atomic vector classes of base \R,
   as also implicitly defined via \code{\link{is.atomic}}.
 }

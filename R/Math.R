@@ -53,7 +53,7 @@ if(FALSE) ## here are the individual function
       "cummax" = 51, "cummin" = 52, "cumprod" = 53, "cumsum" = 54,
       ## These are *NOT* in R's  Math group, but 1-argument math functions
       ## available in the mpfr - library:
-      "erf" = 101, "erfc" = 102, "zeta" = 104, "Eint" = 106,
+      "erf" = 101, "erfc" = 102, "zeta" = 104, "Eint" = 106, "Li2" = 107,
       "j0" = 111, "j1" = 112, "y0" = 113, "y1" = 114)
 storage.mode(.Math.codes) <- "integer"
 
@@ -69,6 +69,14 @@ setMethod("abs", "mpfr",
 	  function(x) {
 	      for(i in seq_along(x)) x[[i]]@sign <- 1L
 	      x
+	  })
+
+## Note that  factorial() and lfactorial() automagically work through  [l]gamma()
+## but for the sake of "exact for integer"
+setMethod("factorial", "mpfr",
+	  function(x) {
+	      r <- gamma(x + 1)
+	      if(mpfr.is.integer(x)) round(r) else r
 	  })
 
 ## "log" is still special with its 'base' :
@@ -90,14 +98,17 @@ setMethod("Math", signature(x = "mpfr"),
 
 setMethod("Math2", signature(x = "mpfr"),
 	  function(x, digits) {
-	      digits <- as.integer(round(digits))
-	      if(is.na(digits)) return(x + digits)
 	      ## NOTA BENE: vectorized in  'x'
 	      if(any(ret.x <- !is.finite(x) | mpfr.is.0(x))) {
 		  if(any(ok <- !ret.x))
 		      x[ok] <- callGeneric(x[ok], digits=digits)
 		  return(x)
 	      }
+              if(!missing(digits)) {
+                  digits <- as.integer(round(digits))
+                  if(is.na(digits)) return(x + digits)
+              } ## else: default *depends* on the generic
+
 	      ## now: both x and digits are finite
 	      pow10 <- function(d) mpfr(rep.int(10., length(d)),
 					precBits = log2(10)*as.numeric(d))^ d
@@ -122,7 +133,7 @@ setMethod("Math2", signature(x = "mpfr"),
 	      sgn <- ifelse(neg.x, -1, +1)
 	      switch(.Generic,
 		     "round" = { ## following ~/R/D/r-devel/R/src/nmath/fround.c :
-			 if(digits == 0)
+			 if(missing(digits) || digits == 0)
 			     sgn * rint(x)
 			 else if(digits > 0) {
 			     p10 <- pow10(digits)
@@ -135,6 +146,7 @@ setMethod("Math2", signature(x = "mpfr"),
 			 }
 		     },
 		     "signif" = { ## following ~/R/D/r-devel/R/src/nmath/fprec.c :
+                         if(missing(digits)) digits <- 6L
 			 if(digits > max(getPrec(x)) * log10(2))
 			     return(x)
 			 if(digits < 1) digits <- 1L

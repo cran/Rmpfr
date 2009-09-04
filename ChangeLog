@@ -1,3 +1,44 @@
+2009-09-03  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/Math.R (factorial): method which rounds in integer case.
+	* man/mpfr-class.Rd: docu and examples.
+
+	* man/is.whole.Rd: new for new  is.whole()
+
+2009-09-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/special-fun.R (Li2): add Li2()
+
+	* man/mpfr-class.Rd: explicitly "enumerate" the 'Math' and
+	'Summary' group functions.
+
+2009-09-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-6
+
+	* R/Math.R (Math2, i.e., round, signif): allow missing digits
+	{ => default digits = 0 or 6, respectively}.
+
+	* R/mpfr.R (print, etc): use drop0trailing = TRUE per default.
+
+	* R/as.R (formatMpfr): renamed from .format.mpfr; finalize using
+	prettyNum(), add corresponding arguments and document:
+	* man/formatMpfr.Rd: new
+
+	* src/convert.c (mpfr2str): allocate the char 'ch' ourselves,
+	carefully using R_alloc() and S_realloc(); unfortunately, the MPFR
+	allocator *still* messes with our SEXPs.
+
+2009-08-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (seqMpfr): seqMpfr(3,1)  works (again?)
+
+2009-08-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/convert.c (mpfr2str): be over-PROTECT()ive, as Kurt
+	reports VECTOR_ELT() errors on some platforms, and I can
+	"randomly systematically" reproduce them with gctorture().
+
 2009-08-06  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.1-5 -- release-ready

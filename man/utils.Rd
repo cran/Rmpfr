@@ -2,6 +2,7 @@
 \title{MPFR Number Utilities}
 \alias{c.mpfr}
 \alias{mpfr.is.0}
+\alias{mpfr.is.integer}
 \alias{atan2,mpfr,ANY-method}
 \alias{atan2,ANY,mpfr-method}
 \alias{atan2,ANY,mpfrArray-method}
@@ -15,8 +16,13 @@
   same way as regular numbers \bold{IFF} the first argument \code{x} is
   of class \code{\linkS4class{mpfr}}.
 
-  \code{mpfr.is.0(0)} uses the MPFR library in the documented way to
+  \code{mpfr.is.0(.)} uses the MPFR library in the documented way to
   check if (a vector of) MPFR numbers are zero.
+
+  \code{mpfr.is.integer(x)} uses the MPFR library in the documented way to
+  check if (a vector of) MPFR numbers is integer \emph{valued}.  This is
+  equivalent to \code{x == round(x)}, but \emph{not} at all to
+  \code{is.integer(as(x, "numeric"))}.
 
   \code{hypot(x,y)} computes the hypothenuse length \eqn{z} in a rectangular
   triangle with \dQuote{leg} side lengths \eqn{x} and \eqn{y}, i.e.,
@@ -25,6 +31,7 @@
 }
 \usage{
 mpfr.is.0(x)
+mpfr.is.integer(x)
 \method{c}{mpfr}(...)
 
 hypot(x,y)
@@ -48,9 +55,20 @@ hypot(x,y)
   }
 }
 \value{
-  a logical vector of length \code{length(x)} with values \code{TRUE}
-  iff the corresponding \code{x[i]} is an MPFR representation of zero
-  (\code{0}).
+  \code{mpfr.is.0} returns a logical vector of length \code{length(x)}
+  with values \code{TRUE} iff the corresponding \code{x[i]} is an MPFR
+  representation of zero (\code{0}).
+  \cr Similarly, \code{mpfr.is.integer} returns a logical vector of
+  length \code{length(x)}.
+
+  The other functions return MPFR number (vectors), i.e., extending
+  class \code{\linkS4class{mpfr}}.
+}
+\seealso{
+  \code{\link{erf}} for special mathematical functions on MPFR;
+  The class description \code{\linkS4class{mpfr}} mentioning the
+  generic arithmetic and mathematical functions for which \code{"mpfr"}
+  methods are available.
 }
 \examples{
 (x <- c(Const("pi", 64), mpfr(-2:2, 64)))
@@ -59,6 +77,7 @@ str(x[mpfr.is.0(x)])# but it may not have been obvious..
 
 xy <- expand.grid(x = -2:2, y = -2:2) ; x <- xy[,"x"] ; y <- xy[,"y"]
 a2. <- atan2(y,x)
-stopifnot(all.equal(a2., atan2(as(y,"mpfr"), x)))
+stopifnot(all.equal(a2., atan2(as(y,"mpfr"), x)),
+          mpfr.is.integer(mpfr(2, 500) ^ (1:200)))
 }
 \keyword{arith}

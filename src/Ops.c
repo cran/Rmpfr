@@ -77,6 +77,7 @@ SEXP Math_mpfr(SEXP x, SEXP op)
 	case 104: mpfr_zeta(R_i, R_i, GMP_RNDN); break;
 
 	case 106: mpfr_eint(R_i, R_i, GMP_RNDN); break;
+	case 107: mpfr_li2 (R_i, R_i, GMP_RNDN); break;
 
 	case 111: mpfr_j0(R_i, R_i, GMP_RNDN); break;
 	case 112: mpfr_j1(R_i, R_i, GMP_RNDN); break;

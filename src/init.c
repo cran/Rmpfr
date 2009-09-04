@@ -47,6 +47,7 @@ static R_CallMethodDef CallEntries[] = {
 
     CALLDEF(R_mpfr_is_finite, 1),
     CALLDEF(R_mpfr_is_infinite, 1),
+    CALLDEF(R_mpfr_is_integer, 1),
     CALLDEF(R_mpfr_is_na, 1),
     CALLDEF(R_mpfr_is_zero, 1),
 
@@ -100,6 +101,7 @@ R_init_Rmpfr(DllInfo *dll)
 
     RREGDEF(R_mpfr_is_finite);
     RREGDEF(R_mpfr_is_infinite);
+    RREGDEF(R_mpfr_is_integer);
     RREGDEF(R_mpfr_is_na);
     RREGDEF(R_mpfr_is_zero);
 

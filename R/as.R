@@ -58,8 +58,11 @@ setAs("mpfr", "mpfr1", function(from) {
     .Call("mpfr2str", x, digits, PACKAGE="Rmpfr")
 }
 
-.format.mpfr <- function(x, digits = NULL,
-			 scientific = FALSE, decimal.mark = ".", ...)
+formatMpfr <-
+    function(x, digits = NULL, trim = FALSE, scientific = NA,
+             big.mark = "", big.interval = 3L,
+             small.mark = "", small.interval = 5L, decimal.mark = ".",
+	     zero.print = NULL, drop0trailing = FALSE, ...)
 {
     stopifnot(is.null(digits) ||
 	      (is.numeric(digits) && digits >= 0))
@@ -86,10 +89,13 @@ setAs("mpfr", "mpfr1", function(from) {
 	paste(substr   (str, 1, k),
 	      substring(str, k+1), sep = decimal.mark)
 
+    if(is.na(scientific))
+        scientific <- as.numeric(getOption("scipen"))
     ## This very much depends on the desired format.
     ## if(scientific) --> all get a final "e<exp>"; otherwise, we
     ## adopt the following simple scheme :
-    hasE <- if(scientific) TRUE else isNum & (Ex < -4 | Ex >= digits)
+    hasE <- { if(is.logical(scientific)) scientific else
+              isNum & (Ex < -4 + scientific | Ex >= digits) }
 
     if(any(hasE)) {
 	i. <- 1+hasMinus
@@ -120,11 +126,16 @@ setAs("mpfr", "mpfr1", function(from) {
 	if(any(iPos)) ## "xy.nnnn" :
 	    r[iPos] <- patch(r[iPos], (hasMinus + ex)[iPos])
     }
-    r
+    prettyNum(r, big.mark = big.mark, big.interval = big.interval,
+              small.mark = small.mark,
+              small.interval = small.interval,
+              decimal.mark = decimal.mark,
+              zero.print = zero.print, drop0trailing = drop0trailing,
+              preserve.width = if (trim) "individual" else "common")
 }
-setMethod("format", "mpfr", .format.mpfr)
+setMethod("format", "mpfr", formatMpfr)
 
-
-setAs("mpfr", "character", function(from) format(from, digits=NULL))
+setAs("mpfr", "character", function(from)
+      format(from, digits=NULL, drop0trailing = TRUE))
 
 setAs("character", "mpfr", function(from) mpfr(from))

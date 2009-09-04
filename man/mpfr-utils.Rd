@@ -14,17 +14,22 @@
 \usage{
 getPrec(x)
 mpfr_default_prec(prec)
-\method{print}{mpfrArray}(x, digits = NULL, ...)
+\method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE, \dots)
 toNum(from)
 }
 \arguments{
   \item{x, from}{an \R object of class \code{"\linkS4class{mpfr}"}, or
     \code{"\linkS4class{mpfrArray}"}, respectively.}
   \item{prec}{a positive integer, or missing.}
+  \item{drop0trailing}{logical indicating if trailing \code{"0"}s should
+    be omitted.}
   \item{digits, \dots}{further arguments to print methods.}
 }
 \details{
- ..
+  The \code{print} method is currentl built on the \code{\link{format}}
+  method for class \code{\linkS4class{mpfr}}.   This, currently does
+  \emph{not} format columns jointly which leads to suboptimally looking
+  output.  There are plans to change this.
 }
 \value{
   \code{getPrec(x)} returns a \code{\link{integer}} vector of the same
@@ -55,5 +60,11 @@ stopifnot(opr == (oprec <- mpfr_default_prec(70)),
           70  == mpfr_default_prec())
 ## and reset it:
 mpfr_default_prec(opr)
+
+## Printing of "MPFR" matrices is less nice than R's usual matrix printing:
+m <- outer(c(1, 3.14, -1024.5678), c(1, 1e-3, 10,100))
+m[3,3] <- round(m[3,3])
+m
+
 }
 \keyword{utilities}

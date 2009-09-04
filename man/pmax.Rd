@@ -46,8 +46,10 @@ pmin(\dots, na.rm = FALSE)
   }
 }
 \seealso{
-  The documentation of the \pkg{base} functions, \code{\link{pmin}} and \code{pmax};
-  also \code{\link[Extremes]{min}}, \code{\link{max}}; further,
+  The documentation of the \pkg{base} functions,
+  \code{\link[base:Extremes]{pmin}} and \code{pmax}; also
+  \code{\link{min}} and \code{max}; further,
+
   \code{\link{range}} (\emph{both} min and max).
 }
 \examples{

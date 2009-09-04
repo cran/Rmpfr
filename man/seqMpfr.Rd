@@ -38,5 +38,8 @@ seqMpfr(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 }
 \examples{
 seqMpfr(0, 1, by = mpfr(0.25, prec=88))
+
+seqMpfr(7, 3) # -> default prec.
+stopifnot(seqMpfr(7,3) == 7:3)
 }
 \keyword{manip}

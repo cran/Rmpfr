@@ -96,7 +96,11 @@ setAs("mpfrArray", "array", toNum)
 setAs("mpfrMatrix", "matrix", toNum)
 
 
-print.mpfrArray <- function(x, digits = NULL, ...) {
+print.mpfrArray <- function(x, digits = NULL, drop0trailing = FALSE, ...) {
+##                                                            -----
+## would like 'drop0... = TRUE', but that's only ok once we have a
+## format() allowing to "jointly format a column"
+
     stopifnot(is(x, "mpfrArray"), is.null(digits) || digits >= 2)
     ## digits = NA --> the inherent precision of x will be used
     n <- length(x)
@@ -112,8 +116,9 @@ print.mpfrArray <- function(x, digits = NULL, ...) {
         p0("(",paste(x@Dim, collapse=", "),")"),
         ch.prec, "\n")
     if(n >= 1) {
-        ## FIXME: probably really need a 'format' method for these
-        fx <- format(x, digits=digits)
+        ## FIXME: really need a 'format' method for mpfrArrays
+        ## -----  which properly alings columns !!
+        fx <- format(x, digits=digits, drop0trailing=drop0trailing)
         dim(fx) <- dim(x)
         dimnames(fx) <- dimnames(x)
 	print(fx, ..., quote = FALSE)

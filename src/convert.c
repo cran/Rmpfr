@@ -367,47 +367,74 @@ SEXP mpfr2str(SEXP x, SEXP digits) {
     SEXP val = PROTECT(allocVector(VECSXP, 4)),
 	nms, str, exp, fini, zero;
     int *i_exp, *is_fin, *is_0;
-
+    int B = 10; /* = base for output -- "TODO" make this an argument*/
+    double p_fact = log(B) / M_LN2;
+    char *ch = NULL;
     mpfr_t R_i;
 
     if(n_dig < 0)
 	error("'digits' must be NULL or integer >= 0");
 
-    SET_VECTOR_ELT(val, 0, str = allocVector(STRSXP, n));
-    SET_VECTOR_ELT(val, 1, exp = allocVector(INTSXP, n));
-    SET_VECTOR_ELT(val, 2, fini = allocVector(LGLSXP, n));
-    SET_VECTOR_ELT(val, 3, zero = allocVector(LGLSXP, n));
-    setAttrib(val, R_NamesSymbol, nms = allocVector(STRSXP, 4));
+    /* be "overprotective" for now ... */
+    SET_VECTOR_ELT(val, 0, str = PROTECT(allocVector(STRSXP, n)));
+    SET_VECTOR_ELT(val, 1, exp = PROTECT(allocVector(INTSXP, n)));
+    SET_VECTOR_ELT(val, 2, fini= PROTECT(allocVector(LGLSXP, n)));
+    SET_VECTOR_ELT(val, 3, zero= PROTECT(allocVector(LGLSXP, n)));
+    nms = PROTECT(allocVector(STRSXP, 4));
     SET_STRING_ELT(nms, 0, mkChar("str"));
     SET_STRING_ELT(nms, 1, mkChar("exp"));
     SET_STRING_ELT(nms, 2, mkChar("finite"));
     SET_STRING_ELT(nms, 3, mkChar("is.0"));
+    setAttrib(val, R_NamesSymbol, nms);
     i_exp = INTEGER(exp);
-    is_fin= INTEGER(fini);
-    is_0  = INTEGER(zero);
+    is_fin= LOGICAL(fini);
+    is_0  = LOGICAL(zero);
 
     mpfr_init(R_i); /* with default precision */
 
     for(i=0; i < n; i++) {
 	mp_exp_t exp = (mp_exp_t) 0;
 	mp_exp_t *exp_ptr = &exp;
-	char *ch;
+	int dig_needed, dig_n_max = -1;
 
 	R_asMPFR(VECTOR_ELT(D, i), R_i);
 
+/* Observing memory problems, e.g., see ../tests/00-bug.R.~3~
+ * Originally hoped it was solvable via  R_alloc() etc, but it seems the problem is
+ * deeper and I currently suspect a problem/bug in MPFR library's  mpfr_get_str(..) */
+#ifdef __Rmpfr_FIRST_TRY_FAILS__
+	ch = mpfr_get_str(NULL, exp_ptr, B,
+			  (size_t) n_dig, R_i, GMP_RNDN);
+#else
+	if(n_dig) {/* use it as desired precision */
+	    dig_needed = n_dig;
+	} else { /* n_dig = 0 --> string will use "enough" digits */
+	    dig_n_max = dig_needed = p_fact * (int)R_i->_mpfr_prec;
+	}
+	if (i == 0) /* first time */
+	    ch = (char *) R_alloc(dig_needed + 2, sizeof(char));
+	else if(!n_dig && dig_needed > dig_n_max) {
+	    ch = (char *) S_realloc(ch, dig_needed + 2, dig_n_max + 2,
+				    sizeof(char));
+	    dig_n_max = dig_needed;
+	}
+
 	/* char * mpfr_get_str (char *STR, mp_exp_t *EXPPTR, int B,
 	 *			size_t N, mpfr_t OP, mp_rnd_t RND) */
-	ch = mpfr_get_str(NULL, exp_ptr, /* B = */ 10,
-			  (size_t) n_dig, R_i, GMP_RNDN);
+	mpfr_get_str(ch, exp_ptr, B,
+		     (size_t) n_dig, R_i, GMP_RNDN);
+#endif
 	SET_STRING_ELT(str, i, mkChar(ch));
-	i_exp[i] = exp_ptr[0]; /* "FIXME": coerce to 'int' here; ok for non-0 */
+	i_exp[i] = (int) exp_ptr[0];
 	is_fin[i]= mpfr_number_p(R_i);
 	is_0 [i] = mpfr_zero_p(R_i);
+#ifdef __Rmpfr_FIRST_TRY_FAILS__
 	mpfr_free_str(ch);
+#endif
     }
 
     mpfr_clear (R_i);
     mpfr_free_cache();
-    UNPROTECT(1);
+    UNPROTECT(6);
     return val;
 }

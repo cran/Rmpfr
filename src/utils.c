@@ -82,6 +82,7 @@ SEXP _FNAME(SEXP x) {							\
 
 R_MPFR_Logic_Function(R_mpfr_is_finite,   mpfr_number_p)
 R_MPFR_Logic_Function(R_mpfr_is_infinite, mpfr_inf_p)
+R_MPFR_Logic_Function(R_mpfr_is_integer,  mpfr_integer_p)
 R_MPFR_Logic_Function(R_mpfr_is_na,       mpfr_nan_p)
 R_MPFR_Logic_Function(R_mpfr_is_zero,     mpfr_zero_p)
 

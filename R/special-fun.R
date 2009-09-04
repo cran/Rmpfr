@@ -80,6 +80,14 @@ Ei <- function(x) {
     x
 }
 
+## Li_2() the dilogarithm
+Li2 <- function(x) {
+    x <- as(x, "mpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["Li2"], PACKAGE="Rmpfr")
+    x
+}
+
+
 ### ------------- Bessel: ---------
 ## j0, j1, jn
 ## y0, y1, yn
