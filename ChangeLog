@@ -1,3 +1,16 @@
+2009-09-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (mpfrVersion): amend for funny version string on Debian
+	testings.
+
+	* DESCRIPTION (Version): 0.1-7
+
+	* R/mpfr.R (mpfrVersion): new utility
+	* src/utils.c (R_mpfr_get_version): C level
+	* man/utils.Rd: doc
+
+	* src/Ops.c (Math_mpfr): older MPFR libraries do not provide Li2().
+
 2009-09-03  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/Math.R (factorial): method which rounds in integer case.
@@ -14,7 +27,7 @@
 
 2009-09-01  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version): 0.1-6
+	* DESCRIPTION (Version): 0.1-6, CRAN-released on 2009-09-04
 
 	* R/Math.R (Math2, i.e., round, signif): allow missing digits
 	{ => default digits = 0 or 6, respectively}.

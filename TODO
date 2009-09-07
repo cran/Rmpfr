@@ -58,11 +58,13 @@
 10) [l]choose()       "should" be implemented {based on lgamma()}
     (===>  ~/R/MM/Pkg-ex/Rmpfr/binom-coef.R )
     possibly via a factorialMPFR() which automatically
-    uses full precision; see also end of man/mpfr-class.Rd
+    uses full precision for integer-valued argument, notably using MPFR's mpfr_fac_ui;
+    see also end of man/mpfr-class.Rd
 
     [a C level implementation, using MPFR-structs instead of R's "mpfr",
-     would be considerably faster, notably for the  prod(...) case {for
-     small k}.]
+     would be considerably faster, both for the  prod(...) case {for
+     small k} but possibly also using lgamma() and arithmetic the MPFR C
+     level rather than all via R objects].
 
 11) format() method for "mpfrArray" (and hence "mpfrMatrix") which nicely
     and correctly *jointly* formats and aligns  columns !

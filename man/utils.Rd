@@ -3,6 +3,7 @@
 \alias{c.mpfr}
 \alias{mpfr.is.0}
 \alias{mpfr.is.integer}
+\alias{mpfrVersion}
 \alias{atan2,mpfr,ANY-method}
 \alias{atan2,ANY,mpfr-method}
 \alias{atan2,ANY,mpfrArray-method}
@@ -12,6 +13,9 @@
 \alias{hypot}
 %
 \description{
+  \code{mpfrVersion()} returns the version of the MPFR library which
+  \pkg{Rmpfr} is currently linked to.
+
   \code{\link{c}(x,y,...)} can be used to combine MPFR numbers in the
   same way as regular numbers \bold{IFF} the first argument \code{x} is
   of class \code{\linkS4class{mpfr}}.
@@ -30,6 +34,7 @@
   in a numerically stable way.
 }
 \usage{
+mpfrVersion()
 mpfr.is.0(x)
 mpfr.is.integer(x)
 \method{c}{mpfr}(...)
@@ -61,6 +66,9 @@ hypot(x,y)
   \cr Similarly, \code{mpfr.is.integer} returns a logical vector of
   length \code{length(x)}.
 
+  \code{mpfrVersion} returns an object of S3 class
+  \code{"\link{numeric_version}"}, so it can be used in comparisons.
+
   The other functions return MPFR number (vectors), i.e., extending
   class \code{\linkS4class{mpfr}}.
 }
@@ -71,6 +79,8 @@ hypot(x,y)
   methods are available.
 }
 \examples{
+mpfrVersion()
+
 (x <- c(Const("pi", 64), mpfr(-2:2, 64)))
 mpfr.is.0(x)        # one of them is
 str(x[mpfr.is.0(x)])# but it may not have been obvious..

@@ -124,6 +124,7 @@ SEXP MPFR_as_R(mpfr_t r);
 SEXP R_mpfr_set_debug(SEXP I);
 SEXP R_mpfr_set_default_prec(SEXP prec);
 SEXP R_mpfr_get_default_prec(void);
+SEXP R_mpfr_get_version(void);
 
 
 SEXP const_asMpfr(SEXP I, SEXP prec);

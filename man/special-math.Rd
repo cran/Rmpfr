@@ -51,10 +51,13 @@ pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) }
 }
 \examples{
 curve(Ei,  0, 5, n=2001)
+
+if(mpfrVersion() >= "2.4.0") { ## Li2() is not available in older MPFR versions
 curve(Li2, 0, 5, n=2001)
 
 curve(Li2, -2, 13,   n=2000); abline(h=0,v=0, lty=3)
 curve(Li2, -200,400, n=2000); abline(h=0,v=0, lty=3)
+}
 
 curve(erf, -3,3, col = "red", ylim = c(-1,2))
 curve(erfc, add = TRUE, col = "blue")

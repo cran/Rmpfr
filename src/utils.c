@@ -10,6 +10,10 @@
 
 /*------------------------------------------------------------------------*/
 
+SEXP R_mpfr_get_version(void) {
+    return mkString(mpfr_get_version());
+}
+
 SEXP R_mpfr_set_debug(SEXP I) {
     /* Set or get the C-global debugging level : */
     if(LENGTH(I) < 1 || INTEGER(I)[0] == NA_INTEGER)
