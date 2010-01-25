@@ -8,15 +8,23 @@ pi. # nicely prints 80 digits [260 * log10(2) ~= 78.3 ~ 80]
 ## This is TRUE for 0 and -0 :
 Zero <- mpfr(c(0,1/-Inf), 20)
 stopifnot(mpfr.is.0(Zero))
-Zero
+Zero # the "-0" should print correctly
+stopifnot(sapply(Zero,slot,"sign") == c(1,-1),
+	  identical(format(Zero, digits=1), c("0.", "-0.")))
+
+## testing 'recycling'
+b <- c(20,120,80, 60)
+x <- mpfr(2^-(5:7), precBits = b);x
 
 d.spec <- c(0,NA,NaN,Inf,-Inf)
 (spec <- mpfr(d.spec, 3))
-stopifnot(identical(is.na(spec), is.na(d.spec)),
-          identical(is.finite(spec), is.finite(d.spec)),
-          identical(is.infinite(spec), is.infinite(d.spec)),
-          identical(format(spec),
-                    c("0.00", "NaN", "NaN", "Inf", "-Inf")))
+stopifnot(length(x) == 4, x[1] == x[4], getPrec(x) == b,
+	  identical(is.na(spec), is.na(d.spec)),
+	  identical(is.finite(spec), is.finite(d.spec)),
+	  identical(is.infinite(spec), is.infinite(d.spec)),
+	  identical(format(spec),
+		    c("0.0", "NaN", "NaN", "Inf", "-Inf")),
+	  mpfr(0.2, prec = 5:15, rnd.mode = "D") < 0.2)
 
 x <- c(-12, 1:3 * pi)
 sss <- mpfr(x, 100)
@@ -69,6 +77,13 @@ X. <- X.[!mpfr.is.0(X.)]
 stopifnot(all( X./X. == 1)) # TRUE
 
 u <- mpfr(as.raw(0:100))
-stopifnot(0:100 == u,
+z <- mpfr(1:12, 200)
+z[] <- 0
+stopifnot(0:100 == u, is(z,"mpfr"), mpfr.is.0(z),
 	  all.equal(u, mpfr(0:100, prec = 8), tol = 0),
 	  0:1 == mpfr(1:2 %% 2 == 0))
+z[3] <- Const("pi",200)
+## z has length 12 -- now extend it:
+z[15:17] <- 1/mpfr(10:12, 100)
+stopifnot(all.equal(z[1:4], c(0,0,pi,0), tol = 1e-15), validObject(z),
+	  all.equal(z[13:17], c(NaN,NaN, 1/(10:12)), tol = 1e-15))

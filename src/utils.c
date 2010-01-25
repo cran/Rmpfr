@@ -8,6 +8,75 @@
 #include "Rmpfr_utils.h"
 #include "Syms.h"
 
+#ifdef DEBUG_Rmpfr
+/* ONLY for debugging  !! */
+# ifndef WIN32
+#  include <Rinterface.h>
+# endif
+#define R_PRT(_X_) mpfr_out_str (R_Outputfile, 10, 0, _X_, GMP_RNDD)
+#endif
+
+int my_mpfr_beta (mpfr_t ROP, mpfr_t X, mpfr_t Y, mp_rnd_t RND);
+int my_mpfr_lbeta(mpfr_t ROP, mpfr_t X, mpfr_t Y, mp_rnd_t RND);
+
+/*------------------------------------------------------------------------*/
+int my_mpfr_beta (mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
+{
+    /* NOTA BENE: When called, R is typically *identical* to X
+     *            ==> can use  R  only at the very end! */
+    int ans;
+    mpfr_t s,t;
+    mp_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
+    if(p_X < p_Y) p_X = p_Y;
+    mpfr_init2(s, p_X);
+    mpfr_init2(t, p_X);
+    /* FIXME: check each 'ans' below, and return when not ok ... */
+    ans = mpfr_gamma(s, X, RND);
+    ans = mpfr_gamma(t, Y, RND);
+    ans = mpfr_mul(s, s, t, RND); /* s = gamma(X) * gamma(Y) */
+
+#ifdef DEBUG_Rmpfr
+    Rprintf("my_mpfr_beta(): t = gamma(Y)= "); R_PRT(t);
+    Rprintf("\n   s = G(X) * G(Y) = ");        R_PRT(s); Rprintf("\n");
+    Rprintf("\n   X = "); R_PRT(X);
+    Rprintf("\n   Y = "); R_PRT(Y);
+#endif
+    ans = mpfr_add(X, X, Y, RND);
+    ans = mpfr_gamma(Y, X, RND);  /* Y. = gamma(X + Y) */
+#ifdef DEBUG_Rmpfr
+    Rprintf("\n  X. = X + Y =  "); R_PRT(X);
+    Rprintf("\n  Y. = gamma(X.)= "); R_PRT(Y);
+    Rprintf("\n");
+#endif
+    ans = mpfr_div(R, s, Y, RND);
+    mpfr_clear (s);
+    mpfr_clear (t);
+    /* mpfr_free_cache() must be called in the caller !*/
+    return ans;
+}
+
+int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
+{
+    int ans;
+    mpfr_t s,t;
+    mp_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
+    if(p_X < p_Y) p_X = p_Y;
+    mpfr_init2(s, p_X);
+    mpfr_init2(t, p_X);
+    /* FIXME: check each 'ans' below, and return when not ok ... */
+    ans = mpfr_lngamma(s, X, RND);
+    ans = mpfr_lngamma(t, Y, RND);
+    ans = mpfr_add(s, s, t, RND); /* s = lgamma(X) + lgamma(Y) */
+    ans = mpfr_add(X, X, Y, RND);
+    ans = mpfr_lngamma(Y, X, RND);/* Y = lgamma(X + Y) */
+    ans = mpfr_sub(R, s, Y, RND);
+    mpfr_clear (s);
+    mpfr_clear (t);
+    /* mpfr_free_cache() must be called in the caller !*/
+    return ans;
+}
+
+
 /*------------------------------------------------------------------------*/
 
 SEXP R_mpfr_get_version(void) {
@@ -159,6 +228,9 @@ SEXP _FNAME(SEXP x, SEXP y) {					\
 
 R_MPFR_2_Numeric_Function(R_mpfr_atan2, mpfr_atan2)
 R_MPFR_2_Numeric_Function(R_mpfr_hypot, mpfr_hypot)
+
+R_MPFR_2_Numeric_Function(R_mpfr_beta,  my_mpfr_beta)
+R_MPFR_2_Numeric_Function(R_mpfr_lbeta, my_mpfr_lbeta)
 
 
 #define R_MPFR_2_Num_Long_Function(_FNAME, _MPFR_NAME)			\

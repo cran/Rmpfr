@@ -1,9 +1,110 @@
+2010-01-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.2-2
+
+	* src/convert.c (R_rnd2GMP): new; allow to specify
+	"rounding mode" from R. For now, for conversion to MPFR.
+	Change default to use (round to) [N]earest rather than [D]ownwards.
+
+
+2010-01-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.2-2
+
+	* R/as.R (formatMpfr): add 'showNeg0' argument, and fix printing of
+	zeros.
+
+	* R/mpfr.R ([): ensure out-of-range indexing returns valid "mpfr".
+
+	* tests/create.R: test the above.
+
+2010-01-20  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (.getPrec, getPrec): previous getPrec() renamed to
+	.getPrec(); the new getPrec() also works for simple R "numbers",
+	and is used in mpfr(), and the following :
+
+	* R/mpfr.R ([<-): for non-"mpfr" value, use at least the previous
+	precision, following a chat with Petr Savicky.
+
+	* src/convert.c (d2mpfr1_list): ensure x is recycled when prec
+	is longer than x.
+	(str2mpfr1_list): ditto.
+
+2010-01-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.2-1
+
+	* R/array.R (.matmult.R): "obvious" speed up, replacing the
+	innermost for() loop by a sum(); inspired by a patch from Petr.
+	*However* the real speedup would use a .Call(..) directly!
+
+2010-01-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (.mpfr.repl, [<-): change such that  x[] <- 1  works;
+	also z[i] <- v when i is larger than length(z).
+
+	* tests/create.R: test the above.
+
+2010-01-15  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (.matmult.R): tcrossprod changes along to the bug fix
+	in R (!).
+
+	* DESCRIPTION (Version): 0.2-0
+
+2010-01-14  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R ([<-): define for more signatures
+	(%*%, crossprod, tcrossprod): extend signatures to include more
+	pairs, and using "Mnumber" instead of just "array_or_vector".
+
+	* tests/matrix-ex.R: test part of that
+
+	* man/*-class.Rd: additions, notably as.vector() and
+	as(<mpfrMatrix>, "vector").
+
+2010-01-13  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-8
+
+	* R/Math.R (.mpfr.sign): fix to ensure sign(0) |-> 0.  Reported by
+	Petr Savicky.
+	* tests/arith-ex.R: test it.
+
+	* src/init.c, src/convert.c (d2mpfr): outcomment unused function
+
+2009-10-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R: add "mpfrArray" -> "matrix" coercion
+
+	* R/Arith.R (Arith): fix length check in ("mpfr", "array")
+
+	* R/Consts.R (Const): nicer error message when 'name' is invalid.
+
+2009-10-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/special-fun.R (beta, lbeta): new methods added
+
+	* src/utils.c (my_mpfr_beta, my_mpfr_lbeta): own C functions,
+	calling mpfr_*() ones, for beta() and lbeta().
+
+	* tests/special-fun-ex.R (B,lB): add tests for beta(), lbeta()
+
+2009-09-14  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/Makevars.win: -lmpfr *before* -lgmp  (does matter some places)
+
+2009-09-10  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (mpfrVersion): factor out .mpfrVersion()
+
 2009-09-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.1-7; released to CRAN
 
 	* R/mpfr.R (mpfrVersion): amend for funny version string on Debian
 	testings.
-
-	* DESCRIPTION (Version): 0.1-7
 
 	* R/mpfr.R (mpfrVersion): new utility
 	* src/utils.c (R_mpfr_get_version): C level

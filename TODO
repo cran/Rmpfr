@@ -27,11 +27,6 @@
   environment(`dimnames<-`) <- as.environment("package:Rmpfr")
   environment(which) <- as.environment("package:Rmpfr")
 
-
-4) format() should get more (optional) arguments; e.g. an option to
-    [ round() after decimal ], and one to drop trailing zeros,
-   see format.default
-
 5) I'd like seq() methods, but that seems currently impossible because of
    a "design infelicity" in base::seq.default  --- ???? E-mail to R-core ??
    --> R/mpfr.R
@@ -74,8 +69,7 @@
      memory bug, inspite of my efforts in src/convert.c
      I think this is the MPFR library just allocating memory that's in use
      by R, but it seems hard to prove and or fix that.
-
-12) crossprod(), tcrossprod() (and more?) methods for "mpfrMatrix".
+     [[ not sure now (2009-12); have not seen the bug anymore ... ]]
 
 13) implement the  NOT_YET  in src/Ops.c
 
@@ -85,6 +79,9 @@
                `mpfr_prec_round' instead."
     -->  mpfr_prec_round(X, PREC, RND)
 
+16) psigamma(x, n)  {and  digamma(), trigamma() aliases}
+
+    --> experiments in ~/R/MM/Pkg-ex/Rmpfr/psigamma.R )
 
 50) For *complex* arithmetic, build interface to the  "MPC" library
    ---> http://www.multiprecision.org/mpc -- which is LGPL and itself

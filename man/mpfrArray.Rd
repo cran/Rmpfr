@@ -7,12 +7,15 @@
   \code{\link{array}} function.
 }
 \usage{
-mpfrArray(x, precBits, dim = length(x), dimnames = NULL)
+mpfrArray(x, precBits, dim = length(x), dimnames = NULL,
+          rnd.mode = c("N","D","U","Z"))
 }
 \arguments{
   \item{x}{numeric(like) vector, typically of length \code{prod(dim)} or
     shorter in which case it is recycled.}
-  \item{precBits}{ ~~Describe \code{precBits} here~~ }
+  \item{precBits}{a number, the maximal precision to be used, in
+    \bold{\emph{bits}}; i.e., \code{53} corresponds to double precision.
+    Must be at least 2.}
   \item{dim}{the dimension of the array to be created, that is a
     vector of length one or more giving the maximal indices in
     each dimension.}
@@ -21,6 +24,9 @@ mpfrArray(x, precBits, dim = length(x), dimnames = NULL)
     either \code{NULL} or a character vector of the length given by
     \code{dim} for that dimension.}
   %% ?array has more, about named dimnames etc...
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see details of
+    \code{\link{mpfr}}.}
 }
 \value{
   an object of class \code{"\linkS4class{mpfrArray}"}, specifically

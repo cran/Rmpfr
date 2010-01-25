@@ -125,47 +125,99 @@ yn <- function(n, x) {
 
 ###-------- 2-argument cases -------
 
-## atan2()
-setMethod("atan2", signature(y = "mpfr", x = "mpfr"),
-	  function(y, x)
-	      new("mpfr", .Call("R_mpfr_atan2", y, x, PACKAGE="Rmpfr")))
+## We want to automatically construct the methods needed:
+## But atan2() as argument list and  signature  (y, x)
+## where  beta() has  (a,b)
 
-setMethod("atan2", signature(y = "mpfr", x = "ANY"),
-	  function(y, x) {
-	      new("mpfr",
-		  .Call("R_mpfr_atan2", y, as(x, "mpfr"), PACKAGE="Rmpfr"))
-	  })
-setMethod("atan2", signature(y = "ANY", x = "mpfr"),
-	  function(y, x) {
-	      new("mpfr",
-		  .Call("R_mpfr_atan2", as(y, "mpfr"), x, PACKAGE="Rmpfr"))
-	  })
+mpfrMath2setMeth.y.x <- function(fname, Csub) {
+    stopifnot(existsFunction(fname),
+	      is.character(fname), length(fname) == 1,
+	      is.character(Csub ), length(Csub ) == 1)
 
-setMethod("atan2", signature(y = "mpfrArray", x = "mpfrArray"),
-	  function(y, x) {
-	      if(dim(x) != dim(y))
-		  stop("array dimensions differ")
-	      x@.Data[] <- .Call("R_mpfr_atan2", y, x, PACKAGE="Rmpfr")
-	      x
-	  })
+    setMethod(fname, signature(y = "mpfr", x = "mpfr"),
+	      function(y, x)
+	      new("mpfr", .Call(Csub, y, x, PACKAGE="Rmpfr")))
+    setMethod(fname, signature(y = "mpfr", x = "ANY"),
+	      function(y, x)
+	      new("mpfr", .Call(Csub, y, as(x, "mpfr"), PACKAGE="Rmpfr")))
+    setMethod(fname, signature(y = "ANY", x = "mpfr"),
+	      function(y, x)
+	      new("mpfr", .Call(Csub, as(y, "mpfr"), x, PACKAGE="Rmpfr")))
 
-setMethod("atan2", signature(y = "mpfrArray", x = "ANY"),
-	  function(y, x) {
-	      if(length(y) %% length(x) != 0)
-		  stop("length of first argument (array) is not multiple of the second argument's one")
-	      y@.Data[] <- .Call("R_mpfr_atan2", y, as(x, "mpfr"),
-				 PACKAGE="Rmpfr")
-	      y
-	  })
 
-setMethod("atan2", signature(y = "ANY", x = "mpfrArray"),
-	  function(y, x) {
-	      if(length(x) %% length(y) != 0)
-		  stop("length of second argument (array) is not multiple of the first argument's one")
-	      x@.Data[] <- .Call("R_mpfr_atan2", as(y, "mpfr"), x,
-				 PACKAGE="Rmpfr")
-	      x
-	  })
+    setMethod(fname, signature(y = "mpfrArray", x = "mpfrArray"),
+              function(y, x) {
+                  if(dim(x) != dim(y))
+                      stop("array dimensions differ")
+                  x@.Data[] <- .Call(Csub, y, x, PACKAGE="Rmpfr")
+                  x
+              })
+    setMethod(fname, signature(y = "mpfrArray", x = "ANY"),
+              function(y, x) {
+                  if(length(y) %% length(x) != 0)
+                      stop("length of first argument (array) is not multiple of the second argument's one")
+                  y@.Data[] <- .Call(Csub, y, as(x, "mpfr"), PACKAGE="Rmpfr")
+                  y
+              })
+    setMethod(fname, signature(y = "ANY", x = "mpfrArray"),
+              function(y, x) {
+                  if(length(x) %% length(y) != 0)
+                      stop("length of second argument (array) is not multiple of the first argument's one")
+                  x@.Data[] <- .Call(Csub, as(y, "mpfr"), x, PACKAGE="Rmpfr")
+                  x
+              })
+
+} ## end{mpfrMath2setMeth.y.x}
+
+## atan2():
+mpfrMath2setMeth.y.x("atan2", "R_mpfr_atan2")
+
+mpfrMath2setMeth.a.b <- function(fname, Csub) {
+    stopifnot(existsFunction(fname),
+	      is.character(fname), length(fname) == 1,
+	      is.character(Csub ), length(Csub ) == 1)
+
+    setMethod(fname, signature(a = "mpfr", b = "mpfr"),
+	      function(a, b)
+	      new("mpfr", .Call(Csub, a, b, PACKAGE="Rmpfr")))
+    setMethod(fname, signature(a = "mpfr", b = "ANY"),
+	      function(a, b)
+	      new("mpfr", .Call(Csub, a, as(b, "mpfr"), PACKAGE="Rmpfr")))
+    setMethod(fname, signature(a = "ANY", b = "mpfr"),
+	      function(a, b)
+	      new("mpfr", .Call(Csub, as(a, "mpfr"), b, PACKAGE="Rmpfr")))
+
+
+    setMethod(fname, signature(a = "mpfrArray", b = "mpfrArray"),
+              function(a, b) {
+                  if(dim(b) != dim(a))
+                      stop("array dimensions differ")
+                  b@.Data[] <- .Call(Csub, a, b, PACKAGE="Rmpfr")
+                  b
+              })
+    setMethod(fname, signature(a = "mpfrArray", b = "ANY"),
+              function(a, b) {
+                  if(length(a) %% length(b) != 0)
+                      stop("length of first argument (array) is not multiple of the second argument's one")
+                  a@.Data[] <- .Call(Csub, a, as(b, "mpfr"), PACKAGE="Rmpfr")
+                  a
+              })
+    setMethod(fname, signature(a = "ANY", b = "mpfrArray"),
+              function(a, b) {
+                  if(length(b) %% length(a) != 0)
+                      stop("length of second argument (array) is not multiple of the first argument's one")
+                  b@.Data[] <- .Call(Csub, as(a, "mpfr"), b, PACKAGE="Rmpfr")
+                  b
+              })
+
+} ## end{mpfrMath2setMeth.a.b}
+
+mpfrMath2setMeth.a.b("beta",  "R_mpfr_beta")
+mpfrMath2setMeth.a.b("lbeta", "R_mpfr_lbeta")
+
+rm(mpfrMath2setMeth.y.x,
+   mpfrMath2setMeth.a.b)
+
 
 ## hypot()
 hypot <- function(x,y) {

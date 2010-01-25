@@ -13,9 +13,8 @@
 
 static R_CallMethodDef CallEntries[] = {
 
-    CALLDEF(d2mpfr, 2),
-    CALLDEF(d2mpfr1, 2),
-    CALLDEF(d2mpfr1_list, 2),
+    CALLDEF(d2mpfr1, 3),
+    CALLDEF(d2mpfr1_list, 3),
 #ifndef WIN32
     /* only works on "unix-alikes" */
     CALLDEF(print_mpfr, 2),
@@ -24,7 +23,7 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(mpfr2d, 1),
     CALLDEF(mpfr2i, 1),
     CALLDEF(mpfr2str, 2),
-    CALLDEF(str2mpfr1_list, 3),
+    CALLDEF(str2mpfr1_list, 4),
 
     CALLDEF(Math_mpfr, 2),
     CALLDEF(Arith_mpfr, 3),
@@ -56,6 +55,8 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(R_mpfr_yn, 2),
     CALLDEF(R_mpfr_atan2, 2),
     CALLDEF(R_mpfr_hypot, 2),
+    CALLDEF(R_mpfr_beta, 2),
+    CALLDEF(R_mpfr_lbeta, 2),
 
     {NULL, NULL, 0}
 };
@@ -71,7 +72,6 @@ R_init_Rmpfr(DllInfo *dll)
 
 #define RREGDEF(name)  R_RegisterCCallable("Rmpfr", #name, (DL_FUNC) name)
 
-    RREGDEF(d2mpfr);
     RREGDEF(d2mpfr1);
     RREGDEF(d2mpfr1_list);
 #ifndef WIN32
@@ -111,6 +111,8 @@ R_init_Rmpfr(DllInfo *dll)
     RREGDEF(R_mpfr_yn);
     RREGDEF(R_mpfr_atan2);
     RREGDEF(R_mpfr_hypot);
+    RREGDEF(R_mpfr_beta);
+    RREGDEF(R_mpfr_lbeta);
 
 
 /* Sync this with declarations in ./Syms.h : */

@@ -8,7 +8,9 @@ stopifnot(format(mpfr(1, 60) / mpfr(7, 160)) ==
 stopifnot( mpfr.is.0(x - x) ) # badly failed on 64-bit
 
 ## checking hexadecimal input :
-stopifnot(mpfr("0xFFFFFFFFFFFFFFFFFFFF", base=16) + 1 == 2^80)
+stopifnot(mpfr("0xFFFFFFFFFFFFFFFFFFFF", base=16) + 1 == 2^80,
+## sign(0) == 0:
+          identical(sign(as(-1:1, "mpfr")), -1:1 + 0))
 
 eps2 <- 2 * .Machine$double.eps
 eps8 <- 8 * .Machine$double.eps

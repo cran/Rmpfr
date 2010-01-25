@@ -10,10 +10,24 @@
   \code{cbind(...)} method where \code{...} contains objects of one of
   the member classes of \code{"Mnumber"}.
 }
+\section{Methods}{
+  \describe{
+    \item{\%*\%}{\code{signature(x = "mpfrMatrix", y = "Mnumber")}: ... }
+    \item{crossprod}{\code{signature(x = "mpfr", y = "Mnumber")}: ... }
+    \item{tcrossprod}{\code{signature(x = "Mnumber", y = "mpfr")}: ...}
+  }
+  etc.  These are documented with the classes \code{\linkS4class{mpfr}}
+  and or \code{\linkS4class{mpfrMatrix}}.
+}
 \seealso{
-  \code{\link{cbind-methods}}
+  the \code{\linkS4class{array_or_vector}} sub class;
+  \code{\link{cbind-methods}}.
 }
 \examples{
+## "Mnumber" encompasses (i.e., "extends") quite a few
+##  "vector / array - like" classes:
 showClass("Mnumber")
+stopifnot(extends("mpfrMatrix", "Mnumber"),
+          extends("array",      "Mnumber"))
 }
 \keyword{classes}

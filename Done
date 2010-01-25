@@ -9,3 +9,15 @@
 
   If the other part is a matrix their dim() must be identical,
   if just a vector, its length must be a divisor of  length(<matrix>)
+
+15) beta(.,.) and lbeta(.,.) .. using  my_mpfr_beta() in C.
+   Interestingly, the speedup is not dramatical
+    (50% for length 200; 300% for length 1)
+
+4) format() got more (optional) arguments, along the format.default()
+   example.
+   Note that an option to "round() after decimal" should not be needed,
+   rather  format(round(..), digits= ., drop0trailing=TRUE) does work.
+
+
+12) crossprod(), tcrossprod() (and more?) methods for "mpfrMatrix".

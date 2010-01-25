@@ -14,24 +14,47 @@
 \alias{Compare,mpfr,mpfrArray-method}
 \alias{Compare,numeric,mpfrArray-method}
 %
-\alias{coerce,mpfrArray,array-method}
-\alias{coerce,mpfrMatrix,matrix-method}
-%
 \alias{as.vector,mpfrArray,missing-method}
+\alias{coerce,mpfrArray,array-method}
+\alias{coerce,mpfrArray,matrix-method}
+\alias{coerce,mpfrMatrix,matrix-method}
+%% the following two from the same setAs(); the 2nd one is auto-produced
+%% *and* needed by codoc().  Behavior seems a bit bogous :
+\alias{coerce,mpfrArray,vector-method}
+\alias{coerce<-,mpfrArray,vector-method}
 %
 \alias{[<-,mpfrArray,ANY,ANY,ANY-method}
 \alias{[<-,mpfrArray,ANY,ANY,mpfr-method}
+\alias{[<-,mpfrArray,ANY,missing,ANY-method}
 \alias{[<-,mpfrArray,ANY,missing,mpfr-method}
+\alias{[<-,mpfrArray,missing,ANY,ANY-method}
 \alias{[<-,mpfrArray,missing,ANY,mpfr-method}
+\alias{[<-,mpfrArray,missing,missing,ANY-method}
+\alias{[<-,mpfrArray,missing,missing,mpfr-method}
 %
 \alias{[,mpfrArray,ANY,ANY,ANY-method}
 \alias{[,mpfrArray,ANY,missing,missing-method}
 
+\alias{\%*\%,Mnumber,mpfr-method}
+\alias{\%*\%,mpfrMatrix,mpfr-method}
 \alias{\%*\%,mpfrMatrix,mpfrMatrix-method}
-\alias{\%*\%,mpfrMatrix,array_or_vector-method}
-\alias{\%*\%,array_or_vector,mpfrMatrix-method}
+\alias{\%*\%,mpfr,Mnumber-method}
+\alias{\%*\%,mpfr,mpfr-method}
+\alias{\%*\%,mpfr,mpfrMatrix-method}
+\alias{crossprod,mpfr,missing-method}
+\alias{crossprod,mpfrMatrix,mpfr-method}
 \alias{crossprod,mpfrMatrix,mpfrMatrix-method}
+\alias{crossprod,mpfr,Mnumber-method}
+\alias{crossprod,mpfr,mpfr-method}
+\alias{crossprod,mpfr,mpfrMatrix-method}
+\alias{crossprod,Mnumber,mpfr-method}
+\alias{tcrossprod,mpfr,missing-method}
+\alias{tcrossprod,mpfrMatrix,mpfr-method}
 \alias{tcrossprod,mpfrMatrix,mpfrMatrix-method}
+\alias{tcrossprod,mpfr,Mnumber-method}
+\alias{tcrossprod,mpfr,mpfr-method}
+\alias{tcrossprod,mpfr,mpfrMatrix-method}
+\alias{tcrossprod,Mnumber,mpfr-method}
 
 \alias{dim,mpfrArray-method}
 \alias{dimnames<-,mpfrArray-method}
@@ -94,7 +117,43 @@ class \code{"\linkS4class{vector}"}, by class "mpfrArray", distance 4.
     \item{[}{\code{signature(x = "mpfrArray", i = "ANY", j = "missing", drop = "missing")}:
       \code{"mpfrArray"}s can be subset (\dQuote{indexed}) as regular \R
       \code{\link{array}}s.}
-    \item{coerce}{\code{signature(from = "mpfrArray", to = "array")}: ... }
+
+    \item{\%*\%}{\code{signature(x = "mpfr", y = "mpfrMatrix")}: Compute
+      the matrix/vector product \eqn{x y} when the dimensions
+      (\code{\link{dim}}) of \code{x} and \code{y} match.  If \code{x}
+      is not a matrix, it is treated as a 1-row or 1-column matrix (aka
+      \dQuote{row vector} or \dQuote{column vector}) depending on which
+      one makes sense, see the documentation of the \pkg{base}
+      function \code{\link[base:matmult]{\%*\%}}.}
+    \item{\%*\%}{\code{signature(x = "mpfr", y = "Mnumber")}: method
+      definition for cases with one \code{\linkS4class{mpfr}} and any
+      \dQuote{number-like} argument are to use MPFR arithmetic as well.}
+    \item{\%*\%}{\code{signature(x = "mpfrMatrix", y = "mpfrMatrix")},}
+    \item{\%*\%}{\code{signature(x = "mpfrMatrix", y = "mpfr")}, etc.
+      Further method definitions with identical semantic.}
+
+    \item{crossprod}{\code{signature(x = "mpfr", y = "missing")}:
+      Computes \eqn{x'x}, i.e., \code{t(x) \%*\% x}, typically more efficiently.}
+    \item{crossprod}{\code{signature(x = "mpfr", y = "mpfrMatrix")}:
+      Computes \eqn{x'y}, i.e., \code{t(x) \%*\% y}, typically more efficiently.}
+    \item{crossprod}{\code{signature(x = "mpfrMatrix", y = "mpfrMatrix")}: ... }
+    \item{crossprod}{\code{signature(x = "mpfrMatrix", y = "mpfr")}: ... }
+
+    \item{tcrossprod}{\code{signature(x = "mpfr", y = "missing")}:
+      Computes \eqn{xx'}, i.e., \code{x \%*\% t(x)}, typically more efficiently.}
+    \item{tcrossprod}{\code{signature(x = "mpfrMatrix", y = "mpfrMatrix")}:
+      Computes \eqn{xy'}, i.e., \code{x \%*\% t(y)}, typically more efficiently.}
+    \item{tcrossprod}{\code{signature(x = "mpfrMatrix", y = "mpfr")}: ... }
+    \item{tcrossprod}{\code{signature(x = "mpfr", y = "mpfrMatrix")}: ... }
+
+
+    \item{coerce}{\code{signature(from = "mpfrArray", to = "array")}:
+      coerces \code{from} to a \emph{numeric} array of the same dimension.}
+    \item{coerce}{\code{signature(from = "mpfrArray", to = "vector")}:
+      as for standard \code{\link{array}}s, this \dQuote{drops} the
+      \code{dim} (and \code{dimnames}), i.e., returns an
+      \code{\linkS4class{mpfr}} vector.}
+
     \item{Compare}{\code{signature(e1 = "mpfr", e2 = "mpfrArray")}: ... }
     \item{Compare}{\code{signature(e1 = "numeric", e2 = "mpfrArray")}: ... }
     \item{Compare}{\code{signature(e1 = "mpfrArray", e2 = "mpfr")}: ... }
@@ -125,9 +184,13 @@ showClass("mpfrMatrix")
 validObject(mm <- new("mpfrMatrix"))
 validObject(aa <- new("mpfrArray"))
 
-m6 <- new("mpfrMatrix", mpfr(1:6, 128), Dim = c(2L, 3L))
+v6 <- mpfr(1:6, 128)
+m6 <- new("mpfrMatrix", v6, Dim = c(2L, 3L))
 validObject(m6)
 m6
 which(m6 == 3, arr.ind = TRUE) # |-->  (1, 2)
+## Coercion back to "vector": Both of these work:
+stopifnot(identical(as(m6, "mpfr"), v6),
+          identical(as.vector(m6), v6)) # < but this is a "coincidence"
 }
 \keyword{classes}

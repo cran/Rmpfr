@@ -9,6 +9,7 @@
 }
 \usage{
 formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
+           showNeg0 = TRUE,
            big.mark = "", big.interval = 3L,
            small.mark = "", small.interval = 5L, decimal.mark = ".",
            zero.print = NULL, drop0trailing = FALSE, ...)
@@ -25,6 +26,9 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
     MPFR numbers should be encoded in scientific
     format, or an integer penalty (see \code{\link{options}("scipen")}).
     Missing values correspond to the current default penalty.}
+  \item{showNeg0}{logical indicating if \dQuote{\bold{neg}ative} zeros
+    should be shown with a \code{"-"}.  The default, \code{TRUE} is
+    intentially different from \code{\link{format}(<numeric>)}.}
   \item{big.mark, big.interval, small.mark,
     small.interval, decimal.mark, zero.print, drop0trailing}{%
     used for prettying decimal sequences, these are passed to
@@ -58,6 +62,11 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
  x3[4] <- 2^30
  x3[4] # automatically drops trailing zeros
  format(x3[1], dig = 41, small.mark = "'") # (41 - 1 = ) 40 digits after "."
+
+ (Zero <- mpfr(c(0,1/-Inf), 20)) # 0 and "-0"
+ xx <- c(Zero, 1:2, Const("pi", 120), -100*pi, -.00987)
+ format(xx, digits = 2)
+ format(xx, digits = 1, showNeg0 = FALSE)# "-0" no longer shown
 }
 \keyword{character}
 \keyword{print}

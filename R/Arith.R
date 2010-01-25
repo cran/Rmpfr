@@ -199,8 +199,8 @@ setMethod("Arith", signature(e1 = "mpfr", e2 = "array"),# "mpfr" incl "mpfrArray
 	  function(e1, e2) {
 	      if(e1Arr <- !is.null(dim(e1)))
 		  d1 <- .dimCheck(e1, e2)
-	      else if(length(e1) %% length(e2) != 0)
-		  stop("length of first argument (array) is not multiple of the second argument's one")
+	      else if(length(e2) %% length(e1) != 0)
+		  stop("length of second argument (array) is not multiple of the first argument's one")
 
 	      if(e1Arr) {
 		  e1@.Data[] <- .Arith.mpfr.num(e1, e2, .Generic)

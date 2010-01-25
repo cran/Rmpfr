@@ -34,9 +34,9 @@ mpfr_default_prec <- function(prec) {
     }
 }
 
+.mpfrVersion <- function() .Call("R_mpfr_get_version", PACKAGE="Rmpfr")
 mpfrVersion <- function()
-    numeric_version(sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*","\\1",
-                        .Call("R_mpfr_get_version", PACKAGE="Rmpfr")))
+    numeric_version(sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*","\\1", .mpfrVersion()))
 
 print.mpfr1 <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
     stopifnot(is(x, "mpfr1"), is.null(digits) || digits >= 2)
@@ -90,7 +90,10 @@ setMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")
 	  function(x,i,j, ..., drop) {
 	      nA <- nargs()
 	      if(nA == 2) { ## x[i] etc -- vector case -- to be fast, need C! --
-		  x@.Data <- structure(x@.Data[i], names=names(x)[i])
+		  xd <- structure(x@.Data[i], names=names(x)[i])
+		  if(any(iN <- unlist(lapply(xd, is.null))))# e.g. i > length(x)
+		      xd[iN] <- mpfr(NA, precBits = 2L)
+		  x@.Data <- xd
 		  x
 	      } else if(nA == 3 && !is.null(d <- dim(x))) { ## matrix indexing(!)
 		  ## not keeping dimnames though ...
@@ -108,19 +111,28 @@ setMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")
 	  })
 
 ## "[<-" :
-setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
-				value = "ANY"),
-	  function(x,i,value) { x[i] <- as(value, "mpfr"); x })
-
-setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
-				value = "mpfr"),
-	  function(x,i, ..., value) {
-	      if(length(list(...)))# should no longer happen:
-		  stop("extra replacement arguments",
-		       deparse(list(...))," not dealt with")
-	      x@.Data[i] <- value
-	      x })
-
+.mpfr.repl <- function(x, i, ..., value) {
+    if(length(list(...))) ## should no longer happen:
+        stop("extra replacement arguments",
+             deparse(list(...))," not dealt with")
+    n <- length(x@.Data)
+    x@.Data[i] <- value
+    if((nn <- length(x@.Data)) > n+1)
+	## must "fill" the newly created NULL entries
+	x@.Data[setdiff((n+1):(nn-1), i)] <- mpfr(NA, precBits = 2L)
+    x
+}
+setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", value = "mpfr"),
+		 .mpfr.repl)
+## for non-"mpfr", i.e. "ANY" 'value', coerce to mpfr with correct prec:
+setReplaceMethod("[", signature(x = "mpfr", i = "missing", j = "missing", value = "ANY"),
+	  function(x,i,value)
+		 .mpfr.repl(x, , value = mpfr(value, precBits =
+				 pmax(getPrec(value), .getPrec(x)))))
+setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", value = "ANY"),
+	  function(x,i,value)
+		 .mpfr.repl(x, i, value = mpfr(value, precBits =
+				  pmax(getPrec(value), .getPrec(x[i])))))
 
 
 ## I don't see how I could use setMethod("c", ...)
@@ -153,7 +165,7 @@ setMethod("pmin", "Mnumber",
 
 	      N <- max(lengths <- sapply(args, length))
 	      ## precision needed -- FIXME: should be *vector*
-	      mPrec <- max(unlist(lapply(args[is.m], getPrec)),
+	      mPrec <- max(unlist(lapply(args[is.m], .getPrec)),
 			   if(any(sapply(args[!is.m], is.double)))
 			   .Machine$double.digits)
 	      ## to be the result :
@@ -194,7 +206,7 @@ setMethod("pmax", "Mnumber",
 
 	      N <- max(lengths <- sapply(args, length))
 	      ## precision needed -- FIXME: should be *vector*
-	      mPrec <- max(unlist(lapply(args[is.m], getPrec)),
+	      mPrec <- max(unlist(lapply(args[is.m], .getPrec)),
 			   if(any(sapply(args[!is.m], is.double)))
 			   .Machine$double.digits)
 	      ## to be the result :
@@ -336,7 +348,27 @@ setMethod("seq", c(from="ANY", to="ANY", by = "mpfr"), seqMpfr)
 
 }#not yet
 
-getPrec <- function(x) sapply(x, slot, "prec")
+## the fast mpfr-only version:
+.getPrec <- function(x) unlist(lapply(x, slot, "prec"))
+## the user version
+getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
+    if(isTRUE(is.mpfr) || is(x,"mpfr")) sapply(x, slot, "prec")
+    else if(is.character(x)) ## number of digits --> number of bits
+	ceiling(log2(base) * nchar(gsub("[-.]", '', x)))
+    else if(is.logical(x))
+	2L # even 1 would suffice - but need 2 (in C ?)
+    else if(is.raw(x))
+	8L
+    else {
+	if(!doNumeric) stop("must specify 'precBits' for numeric 'x'")
+	## else
+	if(is.integer(x)) 32L
+	else if(is.double(x)) 53L
+	else stop(sprintf("cannot determine 'precBits' for x of type '%s'",
+			  typeof(x)))
+    }
+}
+
 
 ### all.equal()
 
@@ -348,8 +380,8 @@ getPrec <- function(x) sapply(x, slot, "prec")
 setMethod("all.equal", signature(target = "mpfr", current = "mpfr"),
 	  function (target, current,
 		    tolerance =
-		    2^-(0.5 * min(mean(getPrec(target)),
-				  mean(getPrec(current)))), ...)
+		    2^-(0.5 * min(mean(.getPrec(target)),
+				  mean(.getPrec(current)))), ...)
       {
 	  ## to use "our" mean() :
 	  environment(all.equal.numeric) <- environment()

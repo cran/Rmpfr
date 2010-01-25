@@ -11,16 +11,11 @@
 \section{Objects from the Class}{A virtual Class: No objects may be
   created from it.
 }
-\section{Methods}{
-  \describe{
-    \item{\%*\%}{\code{signature(x = "mpfrMatrix", y = "array_or_vector")}: ... }
-    \item{crossprod}{\code{signature(x = "mpfr", y = "array_or_vector")}: ... }
-    \item{tcrossprod}{\code{signature(x = "array_or_vector", y =
-	"mpfr")}: ...}
-  }
-  etc.  These are documented with the classes \code{\linkS4class{mpfr}}
-  and or \code{\linkS4class{mpfrMatrix}}.
-}
+% \section{Methods}{
+%   \describe{
+%     \item{...}{.....}
+%   }
+% }
 \details{
   Using \code{"array_or_vector"} instead of just \code{"vector"} in a
   signature makes an important difference: E.g., if we had
@@ -31,7 +26,7 @@
   \eqn{2\times3}{2 x 3} matrix.
 }
 %\author{Martin Maechler}
-% \examples{
-% showClass("array_or_vector")
-% }
+\examples{
+ showClass("array_or_vector")
+}
 \keyword{classes}

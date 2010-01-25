@@ -2,9 +2,12 @@
  * MPFR - Multiple Precision Floating-Point Reliable Library
  * ----   -        -         -              -
  */
+#include <Rmath.h>
+/* for imax2() */
 
 #include "Rmpfr_utils.h"
 #include "Syms.h"
+
 
 /*------------------------------------------------------------------------*/
 
@@ -105,7 +108,7 @@ SEXP MPFR_as_R(mpfr_t r) {
     return val;
 }
 
-SEXP d2mpfr1_(double x, int i_prec)
+SEXP d2mpfr1_(double x, int i_prec, mp_rnd_t rnd)
 {
     mpfr_t r;
     int nr_limbs = N_LIMBS(i_prec), i;
@@ -113,7 +116,7 @@ SEXP d2mpfr1_(double x, int i_prec)
     R_mpfr_MPFR_2R_init(val);
 
     mpfr_init2 (r, (mpfr_prec_t)i_prec);
-    mpfr_set_d (r, x, GMP_RNDD);
+    mpfr_set_d (r, x, rnd);
 
     R_mpfr_MPFR_2R_fill;
 
@@ -125,25 +128,48 @@ SEXP d2mpfr1_(double x, int i_prec)
     return val;
 }/* d2mpfr1_ */
 
-SEXP d2mpfr1(SEXP x, SEXP prec) {
-    if(LENGTH(x) != 1)
-	error("length(x) (=%d) is not 1", LENGTH(x));
-    return d2mpfr1_(asReal(x), asInteger(prec));
+/**
+ * Translate an "R rounding mode" into the correct MPFR one
+ *
+ * @param rnd_mode: an R character (string with nchar() == 1).
+ *
+ * @return one of the (currently 4) different  GMP_RND[DNUZ] modes.
+ */
+mp_rnd_t R_rnd2GMP(SEXP rnd_mode) {
+    const char* r_ch = CHAR(asChar(rnd_mode));
+    switch(r_ch[0]) {
+    case 'D': return GMP_RNDD;
+    case 'N': return GMP_RNDN;
+    case 'U': return GMP_RNDU;
+    case 'Z': return GMP_RNDZ;
+    default:
+	error(_("illegal rounding mode '%s'; must be one of {'D','N','U','Z'}"),
+	      r_ch);
+	/* Wall: */ return GMP_RNDN;
+    }
 }
 
-SEXP d2mpfr1_list(SEXP x, SEXP prec)
-{
-    int *iprec, n = LENGTH(x), np = LENGTH(prec), i, nprot = 1;
-    SEXP val = PROTECT(allocVector(VECSXP, n));
-    double *dx;
+SEXP d2mpfr1(SEXP x, SEXP prec, SEXP rnd_mode) {
+    if(LENGTH(x) != 1)
+	error("length(x) (=%d) is not 1", LENGTH(x));
+    return d2mpfr1_(asReal(x), asInteger(prec), R_rnd2GMP(rnd_mode));
+}
 
+SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
+{
+    int nx = LENGTH(x), np = LENGTH(prec), n = imax2(nx, np),
+	*iprec, i, nprot = 1;
+    SEXP val = PROTECT(allocVector(VECSXP, n));
+    mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
+    double *dx;
     if(!isReal(x))       { PROTECT(x    = coerceVector(x,   REALSXP)); nprot++; }
     if(!isInteger(prec)) { PROTECT(prec = coerceVector(prec, INTSXP)); nprot++; }
     dx = REAL(x);
     iprec = INTEGER(prec);
+
     for(i = 0; i < n; i++) {
 	/* FIXME: become more efficient by doing R_..._2R_init() only once*/
-	SET_VECTOR_ELT(val, i, d2mpfr1_(dx[i], iprec[i % np]));
+	SET_VECTOR_ELT(val, i, d2mpfr1_(dx[i % nx], iprec[i % np], rnd));
     }
 
     UNPROTECT(nprot);
@@ -163,12 +189,14 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec)
      have changed.
 */
 
-SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base)
+SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 {
-/* NB:  prec is "recycled"  within 'x' */
+/* NB: Both x and prec are "recycled" to the longer one if needed */
     int ibase = asInteger(base), *iprec,
-	n = LENGTH(x), np = LENGTH(prec), i, nprot = 1;
+	nx = LENGTH(x), np = LENGTH(prec), n = imax2(nx, np),
+	i, nprot = 1;
     SEXP val = PROTECT(allocVector(VECSXP, n));
+    mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
     mpfr_t r_i;
     mpfr_init(r_i);
 
@@ -180,7 +208,7 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base)
     for(i = 0; i < n; i++) {
 	int ierr;
 	mpfr_set_prec(r_i, (mpfr_prec_t) iprec[i % np]);
-	ierr = mpfr_set_str(r_i, CHAR(STRING_ELT(x, i)), ibase, GMP_RNDD);
+	ierr = mpfr_set_str(r_i, CHAR(STRING_ELT(x, i % nx)), ibase, rnd);
 	if(ierr)
 	    error("str2mpfr1_list(x, *): x[%d] cannot be made into MPFR",
 		  i+1);
@@ -197,26 +225,29 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base)
 #undef R_mpfr_MPFR_2R_fill
 
 
-/* This does not work: gives *empty* .Data slot [bug in NEW_OBJECT()? ] */
+#ifdef _not_used_
+/* This does *not* work: gives *empty* .Data slot [bug in NEW_OBJECT()? ] */
 SEXP d2mpfr(SEXP x, SEXP prec)
 {
-    int i_prec = asInteger(prec), n = LENGTH(x), i, nprot = 1;
+    int i_prec = asInteger(prec),
+	nx = LENGTH(x), np = LENGTH(prec), n = imax2(nx, np),
+	i, nprot = 1;
     SEXP val = PROTECT(NEW_OBJECT(MAKE_CLASS("mpfr"))),
 	lis = ALLOC_SLOT(val, Rmpfr_Data_Sym, VECSXP, n);
     double *dx;
 
     if(!isReal(x)) { PROTECT(x = coerceVector(x, REALSXP)); nprot++; }
     REprintf("d2mpfr(x, prec): length(x) = %d, prec = %d -> length(lis) = %d\n",
-	     n, i_prec, LENGTH(lis));
+	     nx, i_prec, LENGTH(lis));
     dx = REAL(x);
     for(i = 0; i < n; i++) {
-	SET_VECTOR_ELT(lis, i, duplicate(d2mpfr1_(dx[i], i_prec)));
+	SET_VECTOR_ELT(lis, i, duplicate(d2mpfr1_(dx [i % nx],
+						  i_prec [i % np])));
     }
-
     UNPROTECT(nprot);
     return val;
 }
-
+#endif
 
 /* The inverse of  MPFR_as_R() :
  * From an R  "mpfr1" object, (re)build an mpfr one: */

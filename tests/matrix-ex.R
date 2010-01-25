@@ -3,15 +3,18 @@ stopifnot(require("Rmpfr"))
 x <- mpfr(0:7, 64)/7
 mx <- x
 dim(mx) <- c(4,2)
-mx # "print"
-stopifnot(is(mx, "mpfrMatrix"), dim(mx) == c(4,2))
+(m. <- mx) # "print"
+m.[,2] <- Const("pi", 80)
+m.[,] <- exp(mpfr(1, 90))
+stopifnot(is(mx, "mpfrMatrix"), dim(mx) == c(4,2),
+          is(m., "mpfrMatrix"), dim(m.) == dim(mx))
 m.x <- matrix((0:7)/7, 4,2)
 
+u <- 10*(1:4)
 y <- 7 * mpfr(1:12, 80)
 my <- y
 dim(my) <- 3:4
 m.y <- matrix(7 * 1:12, 3,4)
-
 stopifnot(my[2,2] == 35,
           my[,1] == 7*(1:3))
 
@@ -19,19 +22,26 @@ stopifnot(my[2,2] == 35,
 noDN <- function(.) { dimnames(.) <- NULL ; . }
 allEQ <- function(x,y) all.equal(x,y, tol=1e-15)
 
-stopifnot(allEQ(m.x, noDN(as(mx, "matrix"))),
-          allEQ(m.y, noDN(as(my, "matrix"))),
-          allEQ(noDN(as(my %*% mx,"matrix")), m.y %*% m.x),
-          allEQ(noDN(as(crossprod(mx, t(my)),"matrix")), crossprod(m.x, t(m.y))),
-          allEQ(noDN(as(tcrossprod(my, t(mx)),"matrix")),
-                        tcrossprod(m.y, t(m.x))),
-          ##
-          identical(mx, t(t(mx))),
-          identical(my, t(t(my))),
-          ##
-          identical(noDN(as(my %*% 1:4,"matrix")),
-                         as(my,"matrix") %*% 1:4 )
-          )
+stopifnot(allEQ(m.x, noDN(.N(mx))),
+	  allEQ(m.y, noDN(.N(my))),
+	  allEQ(noDN(.N(my %*% mx)), m.y %*% m.x),
+	  allEQ(noDN(.N(crossprod(mx, t(my)))), crossprod(m.x, t(m.y))),
+	  allEQ(noDN(.N(tcrossprod(my, t(mx)))),
+			tcrossprod(m.y, t(m.x))),
+	  ##
+	  identical(mx, t(t(mx))),
+	  identical(my, t(t(my))),
+	  ## matrix o vector .. even  vector o vector
+	  identical(noDN(.N(my %*% 1:4)), m.y %*% 1:4 ),
+	  identical(noDN(.N(my %*% my[2,])), m.y %*% .N(my[2,])),
+	  identical( crossprod(1:3, my), 1:3 %*%   my),
+	  identical(tcrossprod(1:4, my), 1:4 %*% t(my)),
+	  identical(crossprod(y), t(y) %*% y),
+	  identical(tcrossprod(y), y %*% t(y)),
+	  identical(noDN(.N( crossprod(y))), crossprod(7 * 1:12)),
+	  identical(noDN(.N(tcrossprod(y))),tcrossprod(7 * 1:12)),
+	  identical(tcrossprod(1:3, u), noDN(.N(tcrossprod(1:3, as(u,"mpfr")))))
+	  )
 
 mx[3,1] <- Const("pi", 64)
 stopifnot(allEQ(sum(mx[,1]), pi + 4/7))
@@ -42,6 +52,11 @@ stopifnot(dim(m2) == c(2,2), sum(m2) == 2)
 Tmx <- array(TRUE, dim(mx), dimnames=dimnames(mx))
 stopifnot(identical(Tmx, mx == (mx - mpfr(0, 10))),
 	  identical(Tmx, mx - mpfr(1, 10) * mx == 0))
+## subassignment, many kinds
+mx[5] <- pi
+mx[6] <- Const("pi",100)
+stopifnot(validObject(mx), allEQ(mx[5], mx[6]),
+	  getPrec(mx) == c(rep(64,5), 100, 64,64))
 
 ## %*% with vectors on LHS, ...
 y <- t(2:4) # 1 x 3 matrix

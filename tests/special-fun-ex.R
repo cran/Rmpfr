@@ -54,9 +54,48 @@ stopifnot(all.equal(zeta( 0), -1/2,      tol = 2^-100)
 ### Exponential Integral Ei(.)
 curve(Ei, 0,5, n=5001)
 
-### Utilities  hypot(), atan2() :
+### Utilities  hypot(), atan2() : --- TODO !
 
-## TODO!
+## beta(), lbeta()
+## ---------------
+## The simplistic "slow" versions:
+B  <- function(a,b) { a <- as(a, "mpfr"); b <- as(b, "mpfr"); gamma(a)*gamma(b) / gamma(a+b) }
+lB <- function(a,b) { a <- as(a, "mpfr"); b <- as(b, "mpfr"); lgamma(a)+lgamma(b) - lgamma(a+b) }
+
+x <- 1:10 + 0
+(b10 <- mpfr(x, 128L))
+
+stopifnot(all.equal(	B(1,b10),  1/x),
+	  all.equal(	B(2,b10),  1/(x*(x+1))),
+	  all.equal( beta(1,b10),  1/x),
+	  all.equal( beta(2,b10),  1/(x*(x+1))),
+	  TRUE)
+
+for(a in c(0.1, 1, 1.5, 2, 20)) {
+    c10 <- b10 + 0.25
+    stopifnot(all.equal( B(a,b10), (bb <- beta(a,b10))),
+	      all.equal(lB(a,b10), (lb <- lbeta(a,b10))),
+	      all.equal(lb, log(bb)),
+	      all.equal( B(a,c10), (bb <- beta(a,c10))),
+	      all.equal(lB(a,c10), (lb <- lbeta(a,c10))),
+	      all.equal(lb, log(bb)),
+	      TRUE)
+}
+
+## However, the speedup is *not* much (50%) when applied to vectors:
+stopifnot(validObject(xx <- outer(b10, runif(20))),
+          dim(xx) == c(length(b10), 20),
+          validObject(vx <- as(xx, "mpfr")), class(vx) == "mpfr", is.null(dim(vx)))
+C1 <- replicate(10, system.time(bb <<- beta(vx, vx+2)))
+C2 <- replicate(10, system.time(b2 <<-    B(vx, vx+2)))
+summary(1000*C1[1,]) ##  80.3 {cmath-5, 2009}
+summary(1000*C2[1,]) ## 125.1 { " }
+stopifnot(all.equal(bb, b2))
+## and for a single number, the speedup is a factor 3:
+x1 <- vx[1]; x2 <- x1+2
+system.time(for(i in 1:100) bb <- beta(x1, x2))# .27
+system.time(for(i in 1:100) b2 <-    B(x1, x2))# .83
+
 
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

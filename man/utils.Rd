@@ -26,7 +26,8 @@
   \code{mpfr.is.integer(x)} uses the MPFR library in the documented way to
   check if (a vector of) MPFR numbers is integer \emph{valued}.  This is
   equivalent to \code{x == round(x)}, but \emph{not} at all to
-  \code{is.integer(as(x, "numeric"))}.
+  \code{is.integer(as(x, "numeric"))}.\cr
+  You should typically rather use \code{\link{is.whole}(x)} instead.
 
   \code{hypot(x,y)} computes the hypothenuse length \eqn{z} in a rectangular
   triangle with \dQuote{leg} side lengths \eqn{x} and \eqn{y}, i.e.,

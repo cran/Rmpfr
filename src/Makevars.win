@@ -7,8 +7,8 @@
 # lines below suggested by Uwe Ligges
 
 PKG_CPPFLAGS=-I$(LIB_MPFR)/include
-PKG_LIBS=-L$(LIB_MPFR)/lib -lgmp -lmpfr
+PKG_LIBS=-L$(LIB_MPFR)/lib -lmpfr -lgmp
 ## or rather ?
 # PKG_CPPFLAGS=-I$(LIB_MPFR)/include -I$(LIB_GMP)/include
-# PKG_LIBS=-L$(LIB_GMP)/lib -lgmp -L$(LIB_MPFR)/lib -lmpfr
+# PKG_LIBS=-L$(LIB_MPFR)/lib -lmpfr -L$(LIB_GMP)/lib -lgmp 
 

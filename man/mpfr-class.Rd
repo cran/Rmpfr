@@ -6,11 +6,26 @@
 \alias{mpfr1-class}
 %
 \alias{[,mpfr,ANY,missing,missing-method}
+\alias{[<-,mpfr,missing,missing,ANY-method}
 \alias{[<-,mpfr,ANY,missing,ANY-method}
 \alias{[<-,mpfr,ANY,missing,mpfr-method}
 % FIXME: many of these are just \alias{}ed, but *NOT* documented:
 \alias{as.numeric,mpfr-method}
+\alias{as.vector,mpfrArray-method}
 \alias{as.integer,mpfr-method}
+\alias{beta,ANY,mpfr-method}
+\alias{beta,ANY,mpfrArray-method}
+\alias{beta,mpfr,ANY-method}
+\alias{beta,mpfrArray,ANY-method}
+\alias{beta,mpfrArray,mpfrArray-method}
+\alias{beta,mpfr,mpfr-method}
+\alias{lbeta,ANY,mpfr-method}
+\alias{lbeta,ANY,mpfrArray-method}
+\alias{lbeta,mpfr,ANY-method}
+\alias{lbeta,mpfrArray,ANY-method}
+\alias{lbeta,mpfrArray,mpfrArray-method}
+\alias{lbeta,mpfr,mpfr-method}
+%
 \alias{coerce,mpfr,character-method}
 \alias{coerce,mpfr,numeric-method}
 \alias{coerce,mpfr,integer-method}
@@ -125,6 +140,13 @@
   \describe{
     \item{abs}{\code{signature(x = "mpfr")}: ... }
 
+    \item{beta}{\code{signature(a = "mpfr", b = "ANY")},}
+    \item{lbeta}{\code{signature(a = "ANY", b = "mpfrArray")},}
+    \item{beta}{\code{signature(a = "mpfr", b = "mpfr")}, \dots, etc:
+      Compute the beta function \eqn{B(a,b)}, using high precision,
+      building on internal \code{\link{gamma}} or \code{\link{lgamma}}.
+      See the help for \R's base function \code{\link[base]{beta}} for
+      more.}
     \item{dim<-}{\code{signature(x = "mpfr")}: Setting a dimension
       \code{\link{dim}} on an \code{"mpfr"} object makes it into an object
       of class \code{"\linkS4class{mpfrArray}"} or (more specifically)
@@ -184,6 +206,12 @@
 	digits)} and \code{\link{signif}(x, digits)} methods.}
 
     \item{as.numeric}{\code{signature(x = "mpfr")}: ... }
+
+    \item{as.vector}{\code{signature(x = "mpfrArray")}: as for standard
+      \code{\link{array}}s, this \dQuote{drops} the \code{dim} (and
+      \code{dimnames}), i.e., transforms \code{x} into an \sQuote{MPFR}
+      number vector, i.e., class \code{\linkS4class{mpfr}}.}
+
     \item{[}{\code{signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")}: ... }
     \item{format}{\code{signature(x = "mpfr")}, further arguments
       \code{digits = NULL, scientific = NA}, etc:

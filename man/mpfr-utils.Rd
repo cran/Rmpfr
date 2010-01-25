@@ -12,7 +12,7 @@
   typically not called by the user.  In some case the may come handy.
 }
 \usage{
-getPrec(x)
+getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA)
 mpfr_default_prec(prec)
 \method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE, \dots)
 toNum(from)
@@ -20,6 +20,14 @@ toNum(from)
 \arguments{
   \item{x, from}{an \R object of class \code{"\linkS4class{mpfr}"}, or
     \code{"\linkS4class{mpfrArray}"}, respectively.}
+  \item{base}{(only when \code{x} is \code{\link{character}}) the base
+    with respect to which \code{x[i]} represent numbers; \code{base}
+    \eqn{b} must fulfill \eqn{2 \le b \le 36}{2 <= b <= 36}.}
+  \item{doNumeric}{logical indicating \code{\link{integer}} or
+    \code{\link{double}} typed \code{x} should be accepted and a default
+    precision be returned.  Should typically be kept at default \code{TRUE}.}
+  \item{is.mpfr}{logical indicating if \code{\link{class}(x)} is already
+    known to be \code{"mpfr"}; typically should be kept at default, \code{NA}.}
   \item{prec}{a positive integer, or missing.}
   \item{drop0trailing}{logical indicating if trailing \code{"0"}s should
     be omitted.}
