@@ -1,4 +1,5 @@
-2) NOTA BENE:  Have  "mpfrMatrix", dim(.) <- ..; t(), %*%, crossprod()...
+2)
+ - Now have working  "mpfrMatrix", dim(.) <- ..; t(), %*%, crossprod()...
 
  -  <mpfr> %*% <mpfr>    should work like with numeric vectors
  -  <mpfr> %*% t(<mpfr>)  ditto
@@ -50,39 +51,24 @@
    package-load time, but would prefer a cleaner solution.
    ---> talk to Luke and John (and ??) about that
 
-10) [l]choose()       "should" be implemented {based on lgamma()}
-    (===>  ~/R/MM/Pkg-ex/Rmpfr/binom-coef.R )
-    possibly via a factorialMPFR() which automatically
-    uses full precision for integer-valued argument, notably using MPFR's mpfr_fac_ui;
-    see also end of man/mpfr-class.Rd
-
-    [a C level implementation, using MPFR-structs instead of R's "mpfr",
-     would be considerably faster, both for the  prod(...) case {for
-     small k} but possibly also using lgamma() and arithmetic the MPFR C
-     level rather than all via R objects].
-
 11) format() method for "mpfrArray" (and hence "mpfrMatrix") which nicely
     and correctly *jointly* formats and aligns  columns !
     drop0trailing is not really sensible there
 
-11b) format(<mpfr>) --> .mpfr2str() -> C mpfr2str()  still suffers from a
-     memory bug, inspite of my efforts in src/convert.c
-     I think this is the MPFR library just allocating memory that's in use
-     by R, but it seems hard to prove and or fix that.
-     [[ not sure now (2009-12); have not seen the bug anymore ... ]]
-
 13) implement the  NOT_YET  in src/Ops.c
 
-14) Want to *change*  'precBits' of existing MPFR numbers;
-    MPFR has  mpfr_set_prec(X, PREC)  but that sets the value to NaN.
-    Manual:  "In case you want to keep the previous value stored in X, use
-               `mpfr_prec_round' instead."
-    -->  mpfr_prec_round(X, PREC, RND)
-
 16) psigamma(x, n)  {and  digamma(), trigamma() aliases}
-
     --> experiments in ~/R/MM/Pkg-ex/Rmpfr/psigamma.R )
+    Note that since, MPFR 3.0.0, there is a digamma(); .. which we now interface to
+
 
 50) For *complex* arithmetic, build interface to the  "MPC" library
    ---> http://www.multiprecision.org/mpc -- which is LGPL and itself
    builds on MPFR and GMP.
+   Ubuntu now has 'libmpc-dev' (!)  {but there's no '*-doc' package yet;
+   	      	  	       	     on nb-mm, I've installed from source
+				     --> Info comes along}
+  One idea: Since the names are so much in parallel, try
+      to take each src/*.c file and mechanically  s/mpfr/mpc/  producing a
+      mpc version of that;
+      then "the same" for the R interface code.

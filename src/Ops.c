@@ -17,14 +17,33 @@
 SEXP Math_mpfr(SEXP x, SEXP op)
 {
     SEXP D = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));/* an R list() of length */
+    mp_prec_t current_prec = mpfr_get_default_prec();
     int n = length(D), i_op = asInteger(op), i;
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
-    mpfr_t R_i;
-    mpfr_init(R_i); /* with default precision */
+    mpfr_t R_i, cum;
+    Rboolean is_cum = (51 <= i_op && i_op <= 54);
 
+    mpfr_init(R_i); /* with default precision */
+    if(is_cum) { // cummax, cumsum, ...
+	mpfr_init(cum);
+	switch(i_op) {
+	case 51: /* cummax */  mpfr_set_inf(cum, -1);/* := -Inf */; break;
+	case 52: /* cummin */  mpfr_set_inf(cum, +1);/* := +Inf */; break;
+	case 53: /* cumprod */ mpfr_set_d(cum, 1., GMP_RNDZ);/* := 1 */; break;
+	case 54: /* cumsum */  mpfr_set_d(cum, 0., GMP_RNDZ);/* := 0 */; break;
+	}
+    }
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(D, i), R_i);
+	if(is_cum) { /* hence using cum */
+	    mp_prec_t i_prec = mpfr_get_prec(R_i);
+	    if(current_prec < i_prec) /* increase precision */ {
+		current_prec = i_prec;
+		mpfr_prec_round(cum, i_prec, GMP_RNDN);
+	    }
+	}
+
 
 #define NOT_YET error("Math op. %d not yet implemented", i_op)
 	switch(i_op) {
@@ -62,13 +81,19 @@ SEXP Math_mpfr(SEXP x, SEXP op)
 	case 40: /* lgamma */ { int sgn[1];
 		mpfr_lgamma(R_i, sgn, R_i, GMP_RNDN); break; }
 	case 41: /* gamma */ mpfr_gamma(R_i, R_i, GMP_RNDN); break;
-	case 42: /* digamma */ NOT_YET; break;
+	case 42: /* digamma */
+#if (MPFR_VERSION < MPFR_VERSION_NUM(3,0,0))
+	    error("digamma() not implemented in oldish MPFR library version '%s'",
+			MPFR_VERSION_STRING);
+#else
+	    mpfr_digamma(R_i, R_i, GMP_RNDN); break;
+#endif
 	case 43: /* trigamma */ NOT_YET; break;
 
-	case 51: /* cummax */ NOT_YET; break;
-	case 52: /* cummin */ NOT_YET; break;
-	case 53: /* cumprod */ NOT_YET; break;
-	case 54: /* cumsum */ NOT_YET; break;
+	case 51: /* cummax */ mpfr_max(cum, cum, R_i, GMP_RNDN); break;
+	case 52: /* cummin */ mpfr_min(cum, cum, R_i, GMP_RNDN); break;
+	case 53: /* cumprod*/ mpfr_mul(cum, cum, R_i, GMP_RNDN); break;
+	case 54: /* cumsum */ mpfr_add(cum, cum, R_i, GMP_RNDN); break;
 
 /*---   more functions from the  mpfr - library but not in R "Math" : ---*/
 	case 101: mpfr_erf (R_i, R_i, GMP_RNDN); break;
@@ -77,25 +102,37 @@ SEXP Math_mpfr(SEXP x, SEXP op)
 	case 104: mpfr_zeta(R_i, R_i, GMP_RNDN); break;
 
 	case 106: mpfr_eint(R_i, R_i, GMP_RNDN); break;
+	case 107:
 #if (MPFR_VERSION < MPFR_VERSION_NUM(2,4,0))
-	case 107: error("Li2() not implemented in oldish MPFR library version '%s'",
-			MPFR_VERSION_STRING);
+	    error("Li2() not implemented in oldish MPFR library version '%s'",
+		  MPFR_VERSION_STRING);
 #else
-	case 107: mpfr_li2 (R_i, R_i, GMP_RNDN); break;
+	    mpfr_li2 (R_i, R_i, GMP_RNDN); break;
 #endif
 	case 111: mpfr_j0(R_i, R_i, GMP_RNDN); break;
 	case 112: mpfr_j1(R_i, R_i, GMP_RNDN); break;
 	case 113: mpfr_y0(R_i, R_i, GMP_RNDN); break;
 	case 114: mpfr_y1(R_i, R_i, GMP_RNDN); break;
-
+	case 120:
+#if (MPFR_VERSION < MPFR_VERSION_NUM(3,0,0))
+	    error("Ai() not implemented in oldish MPFR library version '%s'",
+			MPFR_VERSION_STRING);
+#else
+	    mpfr_ai(R_i, R_i, GMP_RNDN); break;
+#endif
 
 	default:
 	    error("invalid op code (%d) in Math_mpfr", i_op);
-	}
-	SET_VECTOR_ELT(val, i, MPFR_as_R(R_i));
+	} // end{switch()}
+
+	if(is_cum)
+	    SET_VECTOR_ELT(val, i, MPFR_as_R(cum));
+	else
+	    SET_VECTOR_ELT(val, i, MPFR_as_R(R_i));
     }
 
     mpfr_clear (R_i);
+    if(is_cum) mpfr_clear(cum);
     mpfr_free_cache();
     UNPROTECT(2);
     return val;

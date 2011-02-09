@@ -135,6 +135,7 @@ SEXP d2mpfr1_(double x, int i_prec, mp_rnd_t rnd)
  *
  * @return one of the (currently 4) different  GMP_RND[DNUZ] modes.
  */
+// FIXME: add the new (mpfr 3.0.0) rounding mode
 mp_rnd_t R_rnd2GMP(SEXP rnd_mode) {
     const char* r_ch = CHAR(asChar(rnd_mode));
     switch(r_ch[0]) {

@@ -199,8 +199,10 @@
       Further, the \code{cum*()} methods are \emph{not yet} implemented.}
 
     \item{factorial}{\code{signature(x = "mpfr")}: this will
-      \code{\link{round}} the result when \code{x} is integer valued.}
-    %% FIXME: MPFR has   mpfr_fac_ui (mpfr_t ROP, unsigned long int OP, ..rnd)
+      \code{\link{round}} the result when \code{x} is integer valued.
+      Note however that \code{\link{factorialMpfr}(n)} for integer
+      \code{n} is slightly more efficient, using the MPFR function
+      \samp{mpfr_fac_ui}.}
 
     \item{Math2}{\code{signature(x = "mpfr")}: \code{\link{round}(x,
 	digits)} and \code{\link{signif}(x, digits)} methods.}
@@ -264,6 +266,14 @@
 \seealso{
   The \code{"\linkS4class{mpfrMatrix}"} class, which extends the
   \code{"mpfr"} one.
+
+  \code{\link{roundMpfr}} to \emph{change} precision of an \code{"mpfr"}
+  object; \code{\link{is.whole}()} etc.
+
+  Special mathematical functions such as some Bessel ones, e.g., \code{\link{jn}};
+  further, \code{\link{zeta}(.)} \eqn{(= \zeta(.))}, \code{Ei()} etc.
+  \code{\link{Bernoulli}} numbers and the Pochhammer function
+  \code{\link{pochMpfr}}.
 }
 \examples{
 ## 30 digit precision
@@ -271,15 +281,12 @@ str(x <- mpfr(c(2:3, pi), prec = 30 * log2(10)))
 x^2
 x[1] / x[2] # 0.66666... ~ 30 digits
 
-## factorial() and lfactorial() would work automagically via gamma();
-## factorial() has method that rounds
+## factorial() & lfactorial would work automagically via [l]gamma(),
+## but factorial() additionally has an "mpfr" method which rounds
 f200 <- factorial(mpfr(200, prec = 1500)) # need high prec.!
 f200
 as.numeric(log2(f200))# 1245.38 -- need precBits >~ 1246 for full precision
 
-## More extreme
-f.1e4 <- factorial(mpfr(10000, prec=1+lfactorial(10000)/ log(2)))
-getPrec(f.1e4) # 118459
-str(f.1e4)
+##--> see  factorialMpfr() for more such computations.
 }
 \keyword{classes}

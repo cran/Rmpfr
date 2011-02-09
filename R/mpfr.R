@@ -122,14 +122,17 @@ setMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")
 	x@.Data[setdiff((n+1):(nn-1), i)] <- mpfr(NA, precBits = 2L)
     x
 }
-setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", value = "mpfr"),
+setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
+				value = "mpfr"),
 		 .mpfr.repl)
 ## for non-"mpfr", i.e. "ANY" 'value', coerce to mpfr with correct prec:
-setReplaceMethod("[", signature(x = "mpfr", i = "missing", j = "missing", value = "ANY"),
+setReplaceMethod("[", signature(x = "mpfr", i = "missing", j = "missing",
+				value = "ANY"),
 	  function(x,i,value)
 		 .mpfr.repl(x, , value = mpfr(value, precBits =
 				 pmax(getPrec(value), .getPrec(x)))))
-setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", value = "ANY"),
+setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
+				value = "ANY"),
 	  function(x,i,value)
 		 .mpfr.repl(x, i, value = mpfr(value, precBits =
 				  pmax(getPrec(value), .getPrec(x[i])))))
@@ -245,10 +248,17 @@ setMethod("pmax", "Mnumber",
 seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 		    length.out = NULL, along.with = NULL, ...)
 {
+    if(h.from <- !missing(from)) {
+	lf <- length(from)
+	if(lf != 1) stop("'from' must be of length 1")
+    }
+    if ((One <- nargs() == 1L) && h.from) {
+	if(is.numeric(from) || is(from,"mpfr")) {
+	    to <- from; from <- mpfr(1, getPrec(from))
+	} else stop("'from' is neither numeric nor \"mpfr\"")
+    }
+    ## else if (!is(from, "mpfr")) from <- as(from, "mpfr")
 
-    if(missing(from)) stop("'from' must be specified")
-    if (!is(from, "mpfr")) from <- as(from, "mpfr")
-    if(length(from) != 1) stop("'from' must be of length 1")
     if(!missing(to)) {
 	if (!is(to, "mpfr")) to <- as(to, "mpfr")
 	if (length(to) != 1) stop("'to' must be of length 1")
@@ -265,9 +275,13 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 ##	   warning("not exactly two of 'to', 'by' and 'length.out' / 'along.with' have been specified")
 
     if(is.null(length.out)) {
+	if(!is(to,   "mpfr")) to   <- as(to,   "mpfr")
+	if(!is(from, "mpfr")) from <- as(from, "mpfr")# need it again
 	del <- to - from
-	if(missing(by))
+	if(del == 0 && to == 0) return(to)
+	if(missing(by)) {
 	    by <- mpfr(sign(del), from[[1]]@prec)
+	}
     }
     if (!is(by, "mpfr")) by <- as(by, "mpfr")
     if (length(by) != 1) stop("'by' must be of length 1")
@@ -275,8 +289,6 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
     ## ---- This is  cut n paste  from seq.default() :
     ## ---- It should work, since "arithmetic works for mpfr :
     if(is.null(length.out)) {
-	del <- to - from
-	if(del == 0 && to == 0) return(to)
 	n <- del/by
 	if(!(length(n) && is.finite(n))) {
 	    if(length(by) && by == 0 && length(del) && del == 0)
@@ -298,38 +310,44 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
     else if(!is.finite(length.out) || length.out < 0)
 	stop("length must be non-negative number")
     else if(length.out == 0)
-	from[FALSE] # of same precision
+	as(from,"mpfr")[FALSE] # of same precision
     ## else if (One) 1:length.out
     else if(missing(by)) {
 	# if(from == to || length.out < 2) by <- 1
+        length.out <- as.integer(length.out)
 	if(missing(to))
-	    to <- from + length.out - 1
+	    to <- as(from,"mpfr") + length.out - 1
 	if(missing(from))
 	    from <- to - length.out + 1
 	if(length.out > 2)
 	    if(from == to)
-		rep.int(from, length.out)
-	    else as.vector(c(from, from + (1:(length.out - 2)) * by, to))
-	else as.vector(c(from, to))[1:length.out]
+		rep.int(as(from,"mpfr"), length.out)
+	    else { f <- as(from,"mpfr")
+		   as.vector(c(f, f + (1:(length.out - 2)) * by, to)) }
+	else as.vector(c(as(from,"mpfr"), to))[seq_len(length.out)]
     }
     else if(missing(to))
-	from + (0:(length.out - 1)) * by
+	as(from,"mpfr") + (0:(as.integer(length.out) - 1L)) * by
     else if(missing(from))
-	to - ((length.out - 1):0) * by
+	to - ((as.integer(length.out) - 1L):0) * by
     else stop("too many arguments")
 }
 
-if(FALSE) ## fails: seq(1, length.out=3)
+if(FALSE) { ##-- --- I don't see *any* way  to define  seq() {S4} methods
+    ## 1. Currently  need a  setGeneric() :
+    ## ---- just calling setMethod("seq",...) as below fails directly {signature problem}
+
+    ## 2. Trying three different variations --- all of them render the
+    ##    *default method invalid :
+    ###   --->    seq(1, length.out=3)  # afterwards fails with   " missing 'by' "
 setGeneric("seq", function(from, to, by, ...) standardGeneric("seq"),
 	   useAsDefault = function(from, to, by, ...)
 	   base::seq(from, to, by, ...))
-if(FALSE) ## fails: seq(1, length.out=3)
+
 setGeneric("seq", function(from, to, by, ...) standardGeneric("seq"),
 	   useAsDefault =
 	   function(from=1, to=1, by=((to-from)/(length.out-1)), ...)
 	   base::seq(from, to, by, ...))
-
-if(FALSE) { ##-- but this also fails: afterwards  seq(1, length.out=3)
 
 setGeneric("seq", function (from, to, by, length.out, along.with, ...)
 	   standardGeneric("seq"),
@@ -341,17 +359,21 @@ setGeneric("seq", function (from, to, by, length.out, along.with, ...)
 			     length.out=length.out, along.with=along.with, ...)
 	   })
 
-
 setMethod("seq", c(from="mpfr", to="ANY", by = "ANY"), seqMpfr)
 setMethod("seq", c(from="ANY", to="mpfr", by = "ANY"), seqMpfr)
 setMethod("seq", c(from="ANY", to="ANY", by = "mpfr"), seqMpfr)
 
-}#not yet
+}##--not yet-- defining seq() methods -- as it fails
 
-## the fast mpfr-only version:
-.getPrec <- function(x) unlist(lapply(x, slot, "prec"))
+## the fast mpfr-only version - should not return NULL
+.getPrec <- function(x) {
+    if(length(x)) unlist(lapply(x, slot, "prec"))
+    else mpfr_default_prec()
+}
 ## the user version
 getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
+    ## if(!length(x)) ## NULL (from sapply(.) below) is not ok
+    ##     return(mpfr_default_prec())
     if(isTRUE(is.mpfr) || is(x,"mpfr")) sapply(x, slot, "prec")
     else if(is.character(x)) ## number of digits --> number of bits
 	ceiling(log2(base) * nchar(gsub("[-.]", '', x)))

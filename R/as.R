@@ -1,8 +1,6 @@
 #### All  coercion methods for the  "Rmpfr" classes
 
 
-
-## was  toMpfr <-
 mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
 {
     if(is.character(x))
@@ -15,13 +13,19 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
     rnd.mode <- toupper(rnd.mode)
     rnd.mode <- match.arg(rnd.mode)
 
-    if(is.numeric(x) || is.logical(x) || is.raw(x)) {
-	new("mpfr", .Call("d2mpfr1_list", x, precBits, rnd.mode, PACKAGE="Rmpfr"))
-    } else if(is.character(x)) {
-	new("mpfr", .Call("str2mpfr1_list", x, precBits,
-			  base, rnd.mode, PACKAGE="Rmpfr"))
+    ml <-
+	if(is.numeric(x) || is.logical(x) || is.raw(x))
+	    .Call("d2mpfr1_list", x, precBits, rnd.mode, PACKAGE="Rmpfr")
+	else if(is.character(x))
+	    .Call("str2mpfr1_list",x, precBits, base, rnd.mode,PACKAGE="Rmpfr")
+	else stop("invalid 'x'. Must be numeric (logical, raw) or character")
+    if(is.array(x)) {
+	dim <- dim(x) ; dn <- dimnames(x)
+	new(if(length(dim) == 2) "mpfrMatrix" else "mpfrArray",
+	    ml, Dim = dim,
+	    Dimnames = if(is.null(dn)) vector("list", length(dim)) else dn)
     }
-    else stop("invalid 'x'. Must be numeric (logical, raw) or character")
+    else new("mpfr", ml)
 }
 
 setAs("numeric", "mpfr1", ## use default precision of 128 bits
@@ -106,7 +110,7 @@ formatMpfr <-
     ## if(scientific) --> all get a final "e<exp>"; otherwise, we
     ## adopt the following simple scheme :
     hasE <- { if(is.logical(scientific)) scientific else
-	      isNum & (Ex < -4 + scientific | Ex >= digits) }
+	      isNum & (Ex < -4 + scientific | Ex > digits) }
 
     if(any(hasE)) {
 	i. <- 1L + hasMinus
@@ -125,6 +129,10 @@ formatMpfr <-
 
 	nZeros <- function(n) ## e.g.  nZeros(2:0) gives  c("00","0", "")
 	    sapply(n, function(k) paste(rep.int("0", k), collapse = ""))
+	if(any(eq <- (Ex == digits))) {
+	    r[eq] <- paste(r[eq], "0", sep="")
+	    Ex[eq] <- Ex[eq] + 1L
+	}
 	if(any(iNeg)) { ## "0.00..." : be careful with minus sign
 	    if(any(isMin <- hasMinus[iNeg])) {
 		rr <- r[iNeg]

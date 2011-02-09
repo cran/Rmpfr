@@ -3,8 +3,8 @@
 erf <- function(x) {
     if(is.numeric(x)) 2 * pnorm(x * sqrt(2)) - 1
     else if(is(x, "mpfr")) { # maybe also mpfrMatrix
-        ##new("mpfr", .Call("Math_mpfr", x, .Math.codes["erf"], PACKAGE="Rmpfr"))
-        x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["erf"], PACKAGE="Rmpfr")
+        ##new("mpfr", .Call("Math_mpfr", x, .Math.codes[["erf"]], PACKAGE="Rmpfr"))
+        x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["erf"]], PACKAGE="Rmpfr")
         x
     }
     else stop("invalid class(x): ", class(x))
@@ -46,7 +46,7 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 erfc <- function(x) {
     if(is.numeric(x)) 2 * pnorm(x * sqrt(2), lower = FALSE)
     else if(is(x, "mpfr")) {
-        x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["erfc"], PACKAGE="Rmpfr")
+        x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["erfc"]], PACKAGE="Rmpfr")
         x
     }
     else stop("invalid class(x): ", class(x))
@@ -58,7 +58,7 @@ erfc <- function(x) {
 ## zeta()
 zeta <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["zeta"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["zeta"]], PACKAGE="Rmpfr")
     x
 }
 
@@ -76,14 +76,14 @@ Bernoulli <- function(k, precBits = 128) {
 ## eint() "Exponential integral"
 Ei <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["Eint"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["Eint"]], PACKAGE="Rmpfr")
     x
 }
 
 ## Li_2() the dilogarithm
 Li2 <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["Li2"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["Li2"]], PACKAGE="Rmpfr")
     x
 }
 
@@ -93,35 +93,42 @@ Li2 <- function(x) {
 ## y0, y1, yn
 j0 <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["j0"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["j0"]], PACKAGE="Rmpfr")
     x
 }
 j1 <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["j1"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["j1"]], PACKAGE="Rmpfr")
     x
 }
 y0 <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["y0"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["y0"]], PACKAGE="Rmpfr")
     x
 }
 y1 <- function(x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["y1"], PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["y1"]], PACKAGE="Rmpfr")
+    x
+}
+
+Ai <- function(x) {
+    x <- as(x, "mpfr")
+    x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["Ai"]], PACKAGE="Rmpfr")
     x
 }
 
 jn <- function(n, x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("R_mpfr_jn", x, as.integer(n), PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("R_mpfr_jn", x, n, PACKAGE="Rmpfr")
     x
 }
 yn <- function(n, x) {
     x <- as(x, "mpfr")
-    x@.Data[] <- .Call("R_mpfr_yn", x, as.integer(n), PACKAGE="Rmpfr")
+    x@.Data[] <- .Call("R_mpfr_yn", x, n, PACKAGE="Rmpfr")
     x
 }
+
 
 ###-------- 2-argument cases -------
 

@@ -8,10 +8,11 @@
 }
 \usage{
 mpfr(x, precBits, base = 10, rnd.mode = c("N","D","U","Z"))
-Const(name = c("pi", "gamma", "catalan"), prec = 120L)
+Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
 }
 \arguments{
-  \item{x}{a \code{\link{numeric}} or \code{\link{character}} vector.}
+  \item{x}{a \code{\link{numeric}} or \code{\link{character}} vector or
+    \code{\link{array}}.}
   \item{precBits, prec}{a number, the maximal precision to be used, in
     \bold{\emph{bits}}; i.e. \code{53} corresponds to double precision.
     Must be at least 2.}
@@ -25,8 +26,9 @@ Const(name = c("pi", "gamma", "catalan"), prec = 120L)
     \code{"catalan"} Catalan's constant.}
 }
 \value{
-  an object of (S4) class \code{\linkS4class{mpfr}} which the user
-  should just as a normal numeric vector.
+  an object of (S4) class \code{\linkS4class{mpfr}},
+  \code{\linkS4class{mpfrMatrix}}, or \code{\linkS4class{mpfrArray}}
+  which the user should just as a normal numeric vector or array.
 }
 \details{
   MPFR supports four rounding modes,

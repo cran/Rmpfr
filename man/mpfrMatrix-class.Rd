@@ -76,9 +76,12 @@
   \code{new("mpfrMatrix", ...)} or \code{new("mpfrArray", ...)}, or also
   by \code{dim(x) <- dd} or \code{t(x)} where \code{x} is a an
   \code{\linkS4class{mpfr}} \dQuote{number vector}.
+
+  A (slightly more) alternative to \code{dim(x) <- dd} is
+  \code{\link{mpfr2array}(x, dd, dimnames)}.
 }
 \section{Slots}{
-	 \describe{
+  \describe{
     \item{\code{.Data}:}{as for the \code{\linkS4class{mpfr}} class, a
       \code{"list"} of  \code{\linkS4class{mpfr1}} numbers.}
     \item{\code{Dim}:}{of class \code{"integer"}, specifying the array

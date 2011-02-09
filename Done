@@ -10,6 +10,21 @@
   If the other part is a matrix their dim() must be identical,
   if just a vector, its length must be a divisor of  length(<matrix>)
 
+10b) a factorialMPFR() which automatically uses full precision for
+    integer-valued argument, notably using MPFR's mpfr_fac_ui; see also end
+    of man/mpfr-class.Rd
+
+
+
+14) Want to *change*  'precBits' of existing MPFR numbers;
+    MPFR has  mpfr_set_prec(X, PREC)  but that sets the value to NaN.
+    Manual:  "In case you want to keep the previous value stored in X, use
+               `mpfr_prec_round' instead."
+
+   --> fulfilled via  roundMpfr(x, precBits)
+
+
+
 15) beta(.,.) and lbeta(.,.) .. using  my_mpfr_beta() in C.
    Interestingly, the speedup is not dramatical
     (50% for length 200; 300% for length 1)
@@ -21,3 +36,13 @@
 
 
 12) crossprod(), tcrossprod() (and more?) methods for "mpfrMatrix".
+
+10) chooseMpfr(a,n) is now implemented --- *NOT* based on gamma(),
+    but rather n.
+
+11b) No longer --- problem were missing  mpfr_clear() statements in src/utils.c :
+    format(<mpfr>) --> .mpfr2str() -> C mpfr2str()  still suffers from a
+    memory bug, inspite of my efforts in src/convert.c
+    I think this is the MPFR library just allocating memory that's in use
+    by R, but it seems hard to prove and or fix that.
+

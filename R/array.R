@@ -5,16 +5,23 @@ setMethod("dimnames", "mpfrArray", function(x) x@Dimnames)
 
 ## 2 basic methods to construct "mpfr - arrays" ( mpfrArray | mpfrMatrix ) :
 
+##' "mpfr" --> "mpfrArray"  --- basically  dim(<mpfr>) <- dd
+mpfr2array <- function(x, dim, dimnames=NULL) {
+    stopifnot(is(x,"mpfr"))
+    if(is.numeric(dim) && all(dim == (iv <- as.integer(dim)))) {
+	cl <- if(length(iv) == 2) "mpfrMatrix" else "mpfrArray"
+	if(is.null(dimnames))
+	     new(cl, x, Dim = iv)
+	else new(cl, x, Dim = iv, Dimnames = dimnames)
+    }
+    else if(is.null(dim))
+	as.vector(x)
+    else
+	stop("invalid dimension specified")
+}
 setMethod("dim<-", signature(x = "mpfr", value = "ANY"),
-	  function(x, value) {
-	      if(is.numeric(value) && all(value == (iv <- as.integer(value))))
-		  new(if(length(iv) == 2) "mpfrMatrix" else "mpfrArray",
-		      x, Dim = iv)
-	      else if(is.null(value))
-		  as.vector(x)
-	      else
-		  stop("invalid 'value' ( = RHS = right hand side)")
-	  })
+	  function(x, value) mpfr2array(x, value))
+
 
 mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
                       rnd.mode = c('N','D','U','Z'))
@@ -36,11 +43,7 @@ mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
 		   else dimnames)
 }
 
-setAs("array", "mpfr", function(from)
-      mpfrArray(from, 128L,
-		dim = dim(from),
-		dimnames = dimnames(from)))
-
+setAs("array", "mpfr", function(from) mpfr(from, 128L))
 
 setMethod("dimnames<-", signature(x = "mpfrArray", value = "ANY"),
 	  function(x, value) {

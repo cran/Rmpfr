@@ -54,7 +54,8 @@ if(FALSE) ## here are the individual function
       ## These are *NOT* in R's  Math group, but 1-argument math functions
       ## available in the mpfr - library:
       "erf" = 101, "erfc" = 102, "zeta" = 104, "Eint" = 106, "Li2" = 107,
-      "j0" = 111, "j1" = 112, "y0" = 113, "y1" = 114)
+      "j0" = 111, "j1" = 112, "y0" = 113, "y1" = 114,
+      "Ai" = 120) # Airy function (new in mpfr 3.0.0)
 storage.mode(.Math.codes) <- "integer"
 
 if(FALSE)
@@ -83,22 +84,88 @@ setMethod("abs", "mpfr",
 setMethod("factorial", "mpfr",
 	  function(x) {
 	      r <- gamma(x + 1)
-	      if(mpfr.is.integer(x)) round(r) else r
+	      isi <- mpfr.is.integer(x)
+	      r[isi] <- round(r[isi])
+	      r
 	  })
+## The "real" thing is to use  the MPFR-internal function:
+factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2)))) {
+    stopifnot(n >= 0)
+    new("mpfr", .Call("R_mpfr_fac", n, precBits, PACKAGE="Rmpfr"))
+}
+
+##' Pochhammer rising factorial = Pochhammer(a,n) {1 of 2 definitions!}
+##' we use the *rising* factorial for Pochhamer(a,n), i.e.,
+##' the definition that the GSL and Mathematica use as well.
+##' We want to do this well for *integer* n, only the general case is using
+##' P(a,x) := Gamma(a+x)/Gamma(x)
+pochMpfr <- function(a, n) {
+    stopifnot(n >= 0)
+    if(!is(a, "mpfr")) ## use a high enough default precision (and recycle ..)
+        a <- mpfr(a, precBits = pmax(1,n)*getPrec(a))
+    else if((ln <- length(n)) != 1 && ln != length(a))
+	a <- a + 0*n
+    a@.Data[] <- .Call("R_mpfr_poch", a, n, PACKAGE="Rmpfr")
+    a
+}
+
+##' Binomial Coefficient choose(a,n)
+##' We want to do this well for *integer* n
+chooseMpfr <- function(a, n) {
+    stopifnot(n >= 0)
+    if(!is(a, "mpfr")) { ## use high enough default precision
+        lc <- lchoose(a,n)
+        precB <- ceiling(max(lc[is.finite(lc)])/log(2))
+        ## add n bits for the n multiplications (and recycle {a,n} to same length)
+        a <- mpfr(a, precBits = n + max(2, precB))
+    } else if((ln <- length(n)) != 1 && ln != length(a))
+	a <- a + 0*n
+    a@.Data[] <- .Call("R_mpfr_choose", a, n, PACKAGE="Rmpfr")
+    a
+}
+
+chooseMpfr.all <- function(n) { ## return   chooseMpfr(n, 1:n)  "but smartly"
+    if(!is.numeric(n) || (n <- as.integer(n)) < 1)
+	stop("n must be integer >= 1")
+    if(n == 1) return(mpfr(1, 32))
+    ## else : n >= 2
+    n2 <- n %/% 2
+    prec <- ceiling(lchoose(n,n2)/log(2)) # number of bits needed in result
+    precBits <- max(2, n2 +  prec) # need more for cumprod(), and division
+    n2. <- mpfr(n2, precBits)
+    r <- cumprod(seqMpfr(mpfr(n, precBits), n+1-n2., length.out=n2)) /
+        cumprod(seqMpfr(1, n2., length.out=n2))
+    r <- roundMpfr(r, max(2,prec))
+    c(r[c(seq_len(n2-1+(n%%2)), n2:1)], 1)
+}
+
+
+##' Rounding to binary bits, not decimal digits. Closer to the number
+##' representation, this also allows to increase or decrease a number's precBits
+##' @title Rounding to binary bits, "mpfr-internally"
+##' @param x an mpfr number (vector)
+##' @param precBits integer specifying the desired precision in bits.
+##' @return an mpfr number as \code{x} but with the new 'precBits' precision
+##' @author Martin Maechler
+roundMpfr <- function(x, precBits) {
+    stopifnot(is(x, "mpfr"))
+    x@.Data[] <- .Call("R_mpfr_round", x, precBits, PACKAGE="Rmpfr")
+    x
+}
 
 ## "log" is still special with its 'base' :
 setMethod("log", signature(x = "mpfr"),
 	  function(x, base) {
 	      if(!missing(base) && base != exp(1))
 		  stop("base != exp(1) is not yet implemented")
-	      x@.Data[] <- .Call("Math_mpfr", x, .Math.codes["log"],
+	      x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[["log"]],
 				 PACKAGE="Rmpfr")
 	      x
 	  })
 
 setMethod("Math", signature(x = "mpfr"),
 	  function(x) {
-	      x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[.Generic],
+	      x@.Data[] <- .Call("Math_mpfr", x, .Math.codes[[.Generic]],
 			   PACKAGE="Rmpfr")
 	      x
 	  })
@@ -118,7 +185,7 @@ setMethod("Math2", signature(x = "mpfr"),
 
 	      ## now: both x and digits are finite
 	      pow10 <- function(d) mpfr(rep.int(10., length(d)),
-					precBits = log2(10)*as.numeric(d))^ d
+					precBits = ceiling(log2(10)*as.numeric(d)))^ d
 	      rint <- function(x) { ## have x >= 0 here
 		  sml.x <- (x < .Machine$integer.max)
 		  r <- x

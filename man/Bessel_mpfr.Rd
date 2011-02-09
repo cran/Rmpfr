@@ -1,5 +1,7 @@
-\name{bessel_n}
+\name{Bessel_mpfr}
 \title{Bessel functions of Integer Order in multiple precisions}
+\alias{Bessel_mpfr}
+\alias{Ai}
 \alias{j0}
 \alias{j1}
 \alias{jn}
@@ -11,6 +13,7 @@
   algorithms from the MPFR library.
 }
 \usage{
+Ai(x)
 j0(x)
 j1(x)
 jn(n, x)
@@ -24,7 +27,9 @@ yn(n, x)
 }
 \value{
   Computes multiple precision versions of the Bessel functions of
-  \emph{integer} order, \eqn{J_n(x)}{J[n](x)} and \eqn{Y_n(x)}{Y[n](x)}.
+  \emph{integer} order, \eqn{J_n(x)}{J[n](x)} and \eqn{Y_n(x)}{Y[n](x)},
+  and---when using MPFR library 3.0.0 or newer---also of the Airy function
+  \eqn{Ai(x)}.
 }
 \seealso{\code{\link{besselJ}}, and \code{\link{besselY}} compute the
   same bessel functions but for arbitrary \emph{real} order and only

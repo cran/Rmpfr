@@ -1,4 +1,4 @@
-Const <- function(name = c("pi", "gamma", "catalan"), prec = 120L)
+Const <- function(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
 {
     stopifnot(is.numeric(prec))
     if(is.na(i <- pmatch(name, eval(formals()$name))))

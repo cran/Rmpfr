@@ -1,7 +1,7 @@
 \name{mpfr-utils}
-\Rdversion{1.1}
 \alias{getPrec}
 \alias{mpfr_default_prec}
+\alias{mpfr2array}
 \alias{print.mpfrArray}
 \alias{toNum}
 \title{
@@ -16,6 +16,7 @@ getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA)
 mpfr_default_prec(prec)
 \method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE, \dots)
 toNum(from)
+mpfr2array(x, dim, dimnames = NULL)
 }
 \arguments{
   \item{x, from}{an \R object of class \code{"\linkS4class{mpfr}"}, or
@@ -32,10 +33,12 @@ toNum(from)
   \item{drop0trailing}{logical indicating if trailing \code{"0"}s should
     be omitted.}
   \item{digits, \dots}{further arguments to print methods.}
+  \item{dim, dimnames}{for \code{"\linkS4class{mpfrArray}"}
+    construction.}
 }
 \details{
-  The \code{print} method is currentl built on the \code{\link{format}}
-  method for class \code{\linkS4class{mpfr}}.   This, currently does
+  The \code{print} method is currently built on the \code{\link{format}}
+  method for class \code{\linkS4class{mpfr}}.  This, currently does
   \emph{not} format columns jointly which leads to suboptimally looking
   output.  There are plans to change this.
 }
@@ -56,6 +59,9 @@ toNum(from)
   \code{"\linkS4class{mpfrArray}"} or \code{"\linkS4class{mpfrMatrix}"},
   respectively.  It should be equivalent to \code{as(m, "array")} or
   \code{... "matrix"}.
+
+  \code{mpfr2array()} a slightly more flexible alternative to
+  \code{dim(.) <- dd}.
 }
 \seealso{
   Start using \code{\link{mpfr}(..)}, and compute with these numbers.
@@ -73,6 +79,9 @@ mpfr_default_prec(opr)
 m <- outer(c(1, 3.14, -1024.5678), c(1, 1e-3, 10,100))
 m[3,3] <- round(m[3,3])
 m
+mpfr(m, 50)
 
+mpfr2array(Bernoulli(1:6, 60), c(2,3),
+           dimnames = list(LETTERS[1:2], letters[1:3]))
 }
 \keyword{utilities}

@@ -19,6 +19,11 @@
 int my_mpfr_beta (mpfr_t ROP, mpfr_t X, mpfr_t Y, mp_rnd_t RND);
 int my_mpfr_lbeta(mpfr_t ROP, mpfr_t X, mpfr_t Y, mp_rnd_t RND);
 
+int my_mpfr_choose(mpfr_t ROP, long n,    mpfr_t X, mp_rnd_t RND);
+int my_mpfr_poch  (mpfr_t ROP, long n,    mpfr_t X, mp_rnd_t RND);
+int my_mpfr_round (mpfr_t ROP, long prec, mpfr_t X, mp_rnd_t RND);
+/* argument order above must match the one of mpfr_jn() etc .. */
+
 /*------------------------------------------------------------------------*/
 int my_mpfr_beta (mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
 {
@@ -76,6 +81,73 @@ int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
     return ans;
 }
 
+/** Binomial Coefficient --
+ * all initialization and cleanup is called in the caller
+ */
+int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
+{
+    int ans;
+    long i;
+    mpfr_t r, x;
+    mp_prec_t p_X = mpfr_get_prec(X);
+
+    mpfr_init2(x, p_X); mpfr_set(x, X, RND);
+    mpfr_init2(r, p_X); mpfr_set(r, X, RND);
+    for(i=1; i < n; ) {
+	mpfr_sub_si(x, x, 1L, RND); // x = X - i
+	mpfr_mul   (r, r, x, RND); // r := r * x = X(X-1)..(X-i)
+	mpfr_div_si(r, r, ++i, RND);
+	// r := r / (i+1) =  X(X-1)..(X-i) / (1*2..*(i+1))
+#ifdef DEBUG_Rmpfr
+	Rprintf("my_mpfr_choose(): X (= X_0 - %d)= ", i); R_PRT(x);
+	Rprintf("\n --> r ="); R_PRT(r); Rprintf("\n");
+#endif
+    }
+    ans = mpfr_set(R, r, RND);
+    mpfr_clear (x);
+    mpfr_clear (r);
+    return ans;
+}
+
+/** Pochhammer Symbol -- *rising* factorial   x * (x+1) * ... (x+n-1)
+ * all initialization and cleanup is called in the caller
+ */
+int my_mpfr_poch (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
+{
+    int ans;
+    long i;
+    mpfr_t r, x;
+    mp_prec_t p_X = mpfr_get_prec(X);
+
+    mpfr_init2(x, p_X); mpfr_set(x, X, RND);
+    mpfr_init2(r, p_X); mpfr_set(r, X, RND);
+    for(i=1; i < n; i++) {
+	mpfr_add_si(x, x, 1L, RND); // x = X + i
+	mpfr_mul(r, r, x, RND); // r := r * x = X(X+1)..(X+i)
+#ifdef DEBUG_Rmpfr
+	Rprintf("my_mpfr_poch(): X (= X_0 + %d)= ", i); R_PRT(x);
+	Rprintf("\n --> r ="); R_PRT(r); Rprintf("\n");
+#endif
+    }
+    ans = mpfr_set(R, r, RND);
+    mpfr_clear (x);
+    mpfr_clear (r);
+    return ans;
+}
+
+/** round to (binary) bits, not (decimal) digits
+ */
+int my_mpfr_round (mpfr_t R, long prec, mpfr_t X, mp_rnd_t RND)
+{
+    int ans;
+    if(prec < MPFR_PREC_MIN)
+	error("prec = %d < %d  is too small", prec, MPFR_PREC_MIN);
+    if(prec > MPFR_PREC_MAX)
+	error("prec = %d > %d  is too large", prec, MPFR_PREC_MAX);
+    mpfr_set(R, X, RND);
+    ans = mpfr_prec_round(R, (mp_prec_t) prec, RND);
+    return ans;
+}
 
 /*------------------------------------------------------------------------*/
 
@@ -126,6 +198,7 @@ SEXP const_asMpfr(SEXP I, SEXP prec)
     case 1: mpfr_const_pi     (r, GMP_RNDN); break;
     case 2: mpfr_const_euler  (r, GMP_RNDN); break;
     case 3: mpfr_const_catalan(r, GMP_RNDN); break;
+    case 4: mpfr_const_log2   (r, GMP_RNDN); break;
     default:
 	error("invalid integer code {const_asMpfr()}"); /* -Wall */
     }
@@ -159,7 +232,34 @@ R_MPFR_Logic_Function(R_mpfr_is_integer,  mpfr_integer_p)
 R_MPFR_Logic_Function(R_mpfr_is_na,       mpfr_nan_p)
 R_MPFR_Logic_Function(R_mpfr_is_zero,     mpfr_zero_p)
 
+SEXP R_mpfr_fac (SEXP n_, SEXP prec)
+{
+    int n = length(n_), i, *nn;
+    SEXP n_t, val = PROTECT(allocVector(VECSXP, n)); int nprot = 1;
+    mpfr_t r_i;
+    if(TYPEOF(n_) != INTSXP) {
+	PROTECT(n_t = coerceVector(n_, INTSXP)); nprot++;/* or bail out*/
+	nn = INTEGER(n_t);
+    } else {
+	nn = INTEGER(n_);
+    }
+    mpfr_init2(r_i, (mp_prec_t) asInteger(prec));
+    for(i=0; i < n; i++) {
+	// never happens when called from R:
+	if(nn[i] < 0) error("R_mpfr_fac(%d): negative n.", nn[i]);
+	mpfr_fac_ui(r_i, nn[i], GMP_RNDN);
+	SET_VECTOR_ELT(val, i, MPFR_as_R(r_i));
+    }
+
+    mpfr_clear(r_i);
+    mpfr_free_cache();
+    UNPROTECT(nprot);
+    return val;
+}
+
 #ifdef __NOT_ANY_MORE__
+//       ------------ as we deal with these "as if Math() group"
+// via Math_mpfr() in ./Ops.c
 
 #define R_MPFR_1_Numeric_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x) {							\
@@ -190,6 +290,8 @@ R_MPFR_1_Numeric_Function(R_mpfr_j0, mpfr_j0)
 R_MPFR_1_Numeric_Function(R_mpfr_j1, mpfr_j1)
 R_MPFR_1_Numeric_Function(R_mpfr_y0, mpfr_y0)
 R_MPFR_1_Numeric_Function(R_mpfr_y1, mpfr_y1)
+
+R_MPFR_1_Numeric_Function(R_mpfr_ai, mpfr_ai)
 
 #endif
 /* __NOT_ANY_MORE__ */
@@ -235,15 +337,20 @@ R_MPFR_2_Numeric_Function(R_mpfr_lbeta, my_mpfr_lbeta)
 
 #define R_MPFR_2_Num_Long_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x, SEXP y) {						\
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));			\
-    int *yy = INTEGER(y);						\
-    int nx = length(xD), ny = length(y), i,				\
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;		\
-    SEXP val = PROTECT(allocVector(VECSXP, n));				\
+    SEXP xD, yt, val;							\
+    int *yy, n, nx, ny = length(y), i, nprot = 0, mismatch = 0;		\
     mpfr_t x_i;								\
 									\
-    if(TYPEOF(y) != INTSXP)						\
-	error("MPFR_2_Num_Long...(d,mpfr): 'y' is not \"integer\"");	\
+    if(TYPEOF(y) != INTSXP) {						\
+	PROTECT(yt = coerceVector(y, INTSXP)); nprot++;/* or bail out*/ \
+	yy = INTEGER(yt);						\
+    } else {								\
+	yy = INTEGER(y);						\
+    }									\
+    PROTECT(xD = GET_SLOT(x, Rmpfr_Data_Sym));	nprot++;		\
+    nx = length(xD);							\
+    n = (nx * ny == 0) ? 0 : imax2(nx, ny);				\
+    PROTECT(val = allocVector(VECSXP, n)); 	nprot++;		\
     mpfr_init(x_i); /* with default precision */			\
 									\
     if (nx == ny || nx == 1 || ny == 1) mismatch = 0;			\
@@ -261,10 +368,13 @@ SEXP _FNAME(SEXP x, SEXP y) {						\
     MISMATCH_WARN;							\
     mpfr_clear (x_i);							\
     mpfr_free_cache();							\
-    UNPROTECT(2);							\
+    UNPROTECT(nprot);							\
     return val;								\
 }
 
 R_MPFR_2_Num_Long_Function(R_mpfr_jn, mpfr_jn)
 R_MPFR_2_Num_Long_Function(R_mpfr_yn, mpfr_yn)
+R_MPFR_2_Num_Long_Function(R_mpfr_choose, my_mpfr_choose)
+R_MPFR_2_Num_Long_Function(R_mpfr_poch, my_mpfr_poch)
+R_MPFR_2_Num_Long_Function(R_mpfr_round, my_mpfr_round)
 

@@ -1,7 +1,8 @@
 
-R version 2.9.2 Patched (2009-08-31 r49504)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.12.0 Patched (2010-12-01 r53725)
+Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -17,22 +18,17 @@ Type 'q()' to quit R.
 
 > stopifnot(require("Rmpfr"))
 Loading required package: Rmpfr
-Loading C code of R package 'Rmpfr': GMP using 32 bits per limb
+Loading C code of R package 'Rmpfr': GMP using 64 bits per limb
 
 Attaching package: 'Rmpfr'
 
+The following object(s) are masked from 'package:stats':
 
-	The following object(s) are masked from package:stats :
+    pnorm
 
-	 pnorm 
+The following object(s) are masked from 'package:base':
 
-
-	The following object(s) are masked from package:base :
-
-	 cbind,
-	 pmax,
-	 pmin,
-	 rbind 
+    cbind, pmax, pmin, rbind
 
 > 
 > ### Try to look at the internal bit-representation of the limbs
@@ -181,7 +177,7 @@ c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636,
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.763 0.04 0.824 0 0 
+Time elapsed:  0.543 0.05 0.628 0 0 
 > 
 > if(!interactive()) warnings()
 NULL

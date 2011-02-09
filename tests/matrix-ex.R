@@ -7,16 +7,21 @@ dim(mx) <- c(4,2)
 m.[,2] <- Const("pi", 80)
 m.[,] <- exp(mpfr(1, 90))
 stopifnot(is(mx, "mpfrMatrix"), dim(mx) == c(4,2),
-          is(m., "mpfrMatrix"), dim(m.) == dim(mx))
-m.x <- matrix((0:7)/7, 4,2)
+          is(m., "mpfrMatrix"), dim(m.) == dim(mx),
+          getPrec(m.) == 90)
 
+xx <- (0:7)/7
+m.x <- matrix(xx, 4,2)
+m2 <- mpfr(xx, 64); dim(m2) <- dim(m.x)
+##
 u <- 10*(1:4)
 y <- 7 * mpfr(1:12, 80)
 my <- y
 dim(my) <- 3:4
 m.y <- matrix(7 * 1:12, 3,4)
-stopifnot(my[2,2] == 35,
-          my[,1] == 7*(1:3))
+stopifnot(all.equal(m2, mpfr(m.x, 64), tol=0), # not identical(..)
+	  my[2,2] == 35,
+	  my[,1] == 7*(1:3))
 
 .N <- function(x) { if(!is.null(dim(x))) as(x,"array") else as(x,"numeric") }
 noDN <- function(.) { dimnames(.) <- NULL ; . }
