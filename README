@@ -1,7 +1,7 @@
 The package Rmpfr interfaces R to the C Library
 
-    MPFR, the Multiple Precision Floatiing-Point Reliably
-    -----------------------------------------------------
+    MPFR, the "Multiple Precision Floating-Point Reliably" library
+    --------------------------------------------------------------
 
 That is Free Software, available under the LGPL license.
 See http://mpfr.org/

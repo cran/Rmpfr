@@ -98,6 +98,9 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode);
 SEXP print_mpfr (SEXP x, SEXP digits);
 SEXP print_mpfr1(SEXP x, SEXP digits);
 
+SEXP Rmpfr_minus(SEXP x);
+SEXP Rmpfr_abs(SEXP x);
+SEXP Math_mpfr(SEXP x, SEXP op);
 SEXP Math_mpfr(SEXP x, SEXP op);
 SEXP Arith_mpfr(SEXP x, SEXP y, SEXP op);
 SEXP Arith_mpfr_i(SEXP x, SEXP y, SEXP op);

@@ -1,4 +1,5 @@
 \name{mpfr-utils}
+\alias{getD}
 \alias{getPrec}
 \alias{mpfr_default_prec}
 \alias{mpfr2array}
@@ -13,10 +14,11 @@
 }
 \usage{
 getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA)
+getD(x)
 mpfr_default_prec(prec)
 \method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE, \dots)
 toNum(from)
-mpfr2array(x, dim, dimnames = NULL)
+mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 }
 \arguments{
   \item{x, from}{an \R object of class \code{"\linkS4class{mpfr}"}, or
@@ -35,6 +37,9 @@ mpfr2array(x, dim, dimnames = NULL)
   \item{digits, \dots}{further arguments to print methods.}
   \item{dim, dimnames}{for \code{"\linkS4class{mpfrArray}"}
     construction.}
+  \item{check}{logical indicating if the mpfrArray construction should
+    happen with internal safety check.  Previously, the implicit default
+    used to be true.}
 }
 \details{
   The \code{print} method is currently built on the \code{\link{format}}
@@ -45,6 +50,9 @@ mpfr2array(x, dim, dimnames = NULL)
 \value{
   \code{getPrec(x)} returns a \code{\link{integer}} vector of the same
   length as \code{x},
+
+  \code{getD(x)} is intended to be a fast version of \code{x@.Data},
+  and should not be used outside of lower level functions.
 
   \code{mpfr_default_prec()} returns the current MPFR default precision,
   an \code{\link{integer}}.  This is currently % ??

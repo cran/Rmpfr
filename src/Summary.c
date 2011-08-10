@@ -21,9 +21,8 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 {
 /* FIXME: use  enum type for the op codes */
 
-    SEXP D = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));/* an R list() of length */
     mp_prec_t current_prec = mpfr_get_default_prec();
-    int n = length(D), i_op = asInteger(op),
+    int n = length(x), i_op = asInteger(op),
 	return_list = (i_op <= 5),
 	remove_na = asLogical(na_rm), n_valid = 0, i;
 
@@ -54,7 +53,6 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
     case 7: /* all */ val = ScalarLogical(TRUE);  break;
 
     default:
-	UNPROTECT(1);
 	error("invalid op code (%d) in Summary_mpfr", i_op);
     }
 
@@ -62,8 +60,8 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 	ans = LOGICAL(val);
 
     for(i=0; i < n; i++) {
-	SEXP Di = VECTOR_ELT(D, i);
-	R_asMPFR(Di, R_i);
+	SEXP xi = VECTOR_ELT(x, i);
+	R_asMPFR(xi, R_i);
 
 	if(mpfr_nan_p(R_i)) { /* handling does not depend on i_op */
 /* 	    REprintf("Summary_mpfr(), i=%d :  R_i is NaN\n", i); */
@@ -77,11 +75,11 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 		case 2: /* min */
 		case 4: /* prod */
 		case 5: /* sum */
-		    SET_VECTOR_ELT(val, 0, Di);
+		    SET_VECTOR_ELT(val, 0, xi);
 		    break;
 		case 3: /* range */
-		    SET_VECTOR_ELT(val, 0, Di);
-		    SET_VECTOR_ELT(val, 1, Di);
+		    SET_VECTOR_ELT(val, 0, xi);
+		    SET_VECTOR_ELT(val, 1, xi);
 		    break;
 		    /*---------------------------------------------*/
 		case 6: /* any */
@@ -94,7 +92,7 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 	    }
 	    if(i_op <= 5) { /* return()  *unless* for  any()/all() : */
 		mpfr_free_cache();
-		UNPROTECT(2);
+		UNPROTECT(1);
 		return val;
 	    }
 	}
@@ -153,6 +151,6 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
     }
 
     mpfr_free_cache();
-    UNPROTECT(return_list ? 2 : 1);
+    if(return_list) UNPROTECT(1);
     return val;
 } /* Summary_mpfr() */

@@ -38,10 +38,14 @@ setMethod("Logic", signature(e1 = "mpfr", e2 = "mpfr"),
 
 ###-- 2) ----------- Arith --------------------------------------------------
 
-.mpfr.negative <- function(x) {
-    for(i in seq_along(x)) x[[i]]@sign <- -x[[i]]@sign
-    x
+## R version, no longer used:
+.mpfr.negative.R <- function(x) {
+    xD <- getDataPart(x)# << currently [2011] *faster* than  x@Data
+    for(i in seq_along(x))
+	slot(xD[[i]], "sign", check=FALSE) <- - xD[[i]]@sign
+    setDataPart(x, xD, check=FALSE) ## faster than  x@Data <- xD
 }
+.mpfr.negative <- function(x) .Call(Rmpfr_minus, x)
 
 setMethod("Arith",signature(e1 = "mpfr", e2="missing"),
 	  function(e1,e2) {
@@ -60,30 +64,25 @@ storage.mode(.Arith.codes) <- "integer"
 
 setMethod("Arith", signature(e1 = "mpfr", e2 = "mpfr"),
 	  function(e1, e2) {
-	      new("mpfr", .Call("Arith_mpfr", e1, e2, .Arith.codes[.Generic],
-				PACKAGE="Rmpfr"))
+	      new("mpfr", .Call(Arith_mpfr, e1, e2, .Arith.codes[.Generic]))
 	  })
 
 setMethod("Arith", signature(e1 = "mpfr", e2 = "integer"),
 	  function(e1, e2) {
-	      new("mpfr", .Call("Arith_mpfr_i", e1, e2, .Arith.codes[.Generic],
-				PACKAGE="Rmpfr"))
+	      new("mpfr", .Call(Arith_mpfr_i, e1, e2, .Arith.codes[.Generic]))
 	  })
 setMethod("Arith", signature(e1 = "integer", e2 = "mpfr"),
 	  function(e1, e2) {
-	      new("mpfr", .Call("Arith_i_mpfr", e1, e2, .Arith.codes[.Generic],
-				PACKAGE="Rmpfr"))
+	      new("mpfr", .Call(Arith_i_mpfr, e1, e2, .Arith.codes[.Generic]))
 	  })
 
 setMethod("Arith", signature(e1 = "mpfr", e2 = "numeric"),# not "integer"
 	  function(e1, e2) {
-	      new("mpfr", .Call("Arith_mpfr_d", e1, e2, .Arith.codes[.Generic],
-				PACKAGE="Rmpfr"))
+	      new("mpfr", .Call(Arith_mpfr_d, e1, e2, .Arith.codes[.Generic]))
 	  })
 setMethod("Arith", signature(e1 = "numeric", e2 = "mpfr"),# not "integer
 	  function(e1, e2) {
-	      new("mpfr", .Call("Arith_d_mpfr", e1, e2, .Arith.codes[.Generic],
-				PACKAGE="Rmpfr"))
+	      new("mpfr", .Call(Arith_d_mpfr, e1, e2, .Arith.codes[.Generic]))
 	  })
 
 
@@ -98,34 +97,29 @@ storage.mode(.Compare.codes) <- "integer"
 
 setMethod("Compare", signature(e1 = "mpfr", e2 = "mpfr"),
 	  function(e1, e2) {
-	      .Call("Compare_mpfr", e1, e2, .Compare.codes[.Generic],
-		    PACKAGE="Rmpfr")
+	      .Call(Compare_mpfr, e1, e2, .Compare.codes[.Generic])
 	  })
 
 setMethod("Compare", signature(e1 = "mpfr", e2 = "integer"),
 	  function(e1, e2) {
-	      .Call("Compare_mpfr_i", e1, e2, .Compare.codes[.Generic],
-		    PACKAGE="Rmpfr")
+	      .Call(Compare_mpfr_i, e1, e2, .Compare.codes[.Generic])
 	  })
 
 setMethod("Compare", signature(e1 = "mpfr", e2 =  "numeric"),# not "integer"
 	  function(e1, e2) {
-	      .Call("Compare_mpfr_d", e1, e2, .Compare.codes[.Generic],
-		    PACKAGE="Rmpfr")
+	      .Call(Compare_mpfr_d, e1, e2, .Compare.codes[.Generic])
 	  })
 
 setMethod("Compare", signature(e1 = "integer", e2 = "mpfr"),
 	  function(e1, e2) {
-	      .Call("Compare_mpfr_i", e2, e1,
-		    .Compare.codesRev[.Generic],
-		    PACKAGE="Rmpfr")
+	      .Call(Compare_mpfr_i, e2, e1,
+		    .Compare.codesRev[.Generic])
 	  })
 
 setMethod("Compare", signature(e1 = "numeric", e2 = "mpfr"),
 	  function(e1, e2) {
-	      .Call("Compare_mpfr_d", e2, e1,
-		    .Compare.codesRev[.Generic],
-		    PACKAGE="Rmpfr")
+	      .Call(Compare_mpfr_d, e2, e1,
+		    .Compare.codesRev[.Generic])
 	  })
 
 ### -------------- mpfrArray ------------------------
@@ -144,8 +138,7 @@ setMethod("Arith", signature(e1 = "mpfrArray", e2 = "mpfrArray"),
 	  function(e1, e2) {
 	      .dimCheck(e1, e2)
 	      ## else: result has identical dimension:
-	      e1@.Data[] <- .Call("Arith_mpfr", e1, e2, .Arith.codes[.Generic],
-				  PACKAGE="Rmpfr")
+	      e1@.Data[] <- .Call(Arith_mpfr, e1, e2, .Arith.codes[.Generic])
 	      e1
 	  })
 
@@ -154,27 +147,26 @@ setMethod("Arith", signature(e1 = "mpfrArray", e2 = "mpfr"),
 	      if(length(e1) %% length(e2) != 0)
 		  stop("length of first argument (array) is not multiple of the second argument's one")
 	      ## else: result has dimension from array:
-	      e1@.Data[] <- .Call("Arith_mpfr", e1, e2, .Arith.codes[.Generic],
-				  PACKAGE="Rmpfr")
+	      e1@.Data[] <- .Call(Arith_mpfr, e1, e2, .Arith.codes[.Generic])
 	      e1
 	  })
 
 ## "macro-like	encapsulation
 .Arith.num.mpfr <- function(x,y, FUN)
     .Call(if(is.integer(x)) "Arith_i_mpfr" else "Arith_d_mpfr",
-	  x,y, .Arith.codes[FUN], PACKAGE="Rmpfr")
+	  x,y, .Arith.codes[FUN])
 
 .Arith.mpfr.num <- function(x,y, FUN)
     .Call(if(is.integer(y)) "Arith_mpfr_i" else "Arith_mpfr_d",
-	  x, y, .Arith.codes[FUN], PACKAGE="Rmpfr")
+	  x, y, .Arith.codes[FUN])
 
 .Compare.num.mpfr <- function(x,y, FUN)
     .Call(if(is.integer(x)) "Compare_mpfr_i" else "Compare_mpfr_d",
-	  y, x, .Compare.codesRev[FUN], PACKAGE="Rmpfr")
+	  y, x, .Compare.codesRev[FUN])
 
 .Compare.mpfr.num <- function(x,y, FUN)
     .Call(if(is.integer(y)) "Compare_mpfr_i" else "Compare_mpfr_d",
-	  x, y, .Compare.codes[FUN], PACKAGE="Rmpfr")
+	  x, y, .Compare.codes[FUN])
 
 setMethod("Arith", signature(e1 = "array", e2 = "mpfr"),# incl "mpfrArray"
 	  function(e1, e2) {
@@ -235,8 +227,7 @@ setMethod("Arith", signature(e1 = "mpfr", e2 = "mpfrArray"),
 	  function(e1, e2) {
 	      if(length(e2) %% length(e1) != 0)
 		  stop("length of second argument (array) is not multiple of the first argument's one")
-	      e2@.Data[] <- .Call("Arith_mpfr", e1, e2, .Arith.codes[.Generic],
-				  PACKAGE="Rmpfr")
+	      e2@.Data[] <- .Call(Arith_mpfr, e1, e2, .Arith.codes[.Generic])
 	      e2
 	  })
 
@@ -249,8 +240,7 @@ setMethod("Compare", signature(e1 = "mpfrArray", e2 = "mpfr"),
 		      stop("length of first argument (array) is not multiple of the second argument's one")
 	      } else .dimCheck(e1, e2)
 
-	      structure(.Call("Compare_mpfr", e1, e2, .Compare.codes[.Generic],
-			      PACKAGE="Rmpfr"),
+	      structure(.Call(Compare_mpfr, e1, e2, .Compare.codes[.Generic]),
 			dim = dim(e1),
 			dimnames = dimnames(e1))
 	  })
@@ -262,8 +252,7 @@ setMethod("Compare", signature(e1 = "mpfr", e2 = "mpfrArray"),
 		      stop("length of second argument (array) is not multiple of the first argument's one")
 	      } else .dimCheck(e1, e2)
 
-	      structure(.Call("Compare_mpfr", e1, e2, .Compare.codes[.Generic],
-			      PACKAGE="Rmpfr"),
+	      structure(.Call(Compare_mpfr, e1, e2, .Compare.codes[.Generic]),
 			dim = dim(e2),
 			dimnames = dimnames(e2))
 	  })

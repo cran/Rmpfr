@@ -6,13 +6,21 @@ setMethod("dimnames", "mpfrArray", function(x) x@Dimnames)
 ## 2 basic methods to construct "mpfr - arrays" ( mpfrArray | mpfrMatrix ) :
 
 ##' "mpfr" --> "mpfrArray"  --- basically  dim(<mpfr>) <- dd
-mpfr2array <- function(x, dim, dimnames=NULL) {
-    stopifnot(is(x,"mpfr"))
+mpfr2array <- function(x, dim, dimnames=NULL, check=FALSE) {
+    if(check) stopifnot(is(x,"mpfr"))
     if(is.numeric(dim) && all(dim == (iv <- as.integer(dim)))) {
-	cl <- if(length(iv) == 2) "mpfrMatrix" else "mpfrArray"
-	if(is.null(dimnames))
-	     new(cl, x, Dim = iv)
-	else new(cl, x, Dim = iv, Dimnames = dimnames)
+	if(check) {
+	    cl <- if(length(iv) == 2) "mpfrMatrix" else "mpfrArray"
+	    if(is.null(dimnames))
+		new(cl, x, Dim = iv)
+	    else new(cl, x, Dim = iv, Dimnames = dimnames)
+	} else { ## faster, non-checking
+	    r <- setDataPart(new(if(length(iv) == 2) "mpfrMatrix" else "mpfrArray"),
+			     x, check=FALSE)
+	    r@Dim <- iv
+	    if(!is.null(dimnames)) r@Dimnames <- dimnames
+	    r
+	}
     }
     else if(is.null(dim))
 	as.vector(x)
@@ -30,7 +38,7 @@ mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
     rnd.mode <- toupper(rnd.mode)
     rnd.mode <- match.arg(rnd.mode)
 
-    ml <- .Call("d2mpfr1_list", x, precBits, rnd.mode, PACKAGE="Rmpfr")
+    ml <- .Call(d2mpfr1_list, x, precBits, rnd.mode)
     vl <- prod(dim)
     if (length(x) != vl) {
         if (vl > .Machine$integer.max)
@@ -59,17 +67,17 @@ setMethod("t", "mpfrMatrix",
 	      d <- x@Dim; n <- d[1]; m <- d[2]
 	      ## These are the indices to get the transpose of m {n x m} :
 	      ## ind.t <- function(n,m)rep.int(1:n, rep(m,n)) + n*(0:(m-1))
-	      x@.Data <- x@.Data[rep.int(1:n, rep(m,n)) + n*(0:(m-1))]
 	      x@Dim <- c(m,n)
 	      x@Dimnames <- x@Dimnames[2:1]
-	      x
+	      ## faster than { x@.Data <- x@.Data[rep.int(1:n, rep(m,n)) + n*(0:(m-1))] ; x } :
+	      setDataPart(x, getD(x)[rep.int(1:n, rep(m,n)) + n*(0:(m-1))], check=FALSE)
 	  })
 setMethod("t", "mpfr",
 	  function(x) { # t(<n-vector>) |-->  {1 x n} matrix
 	      r <- new("mpfrMatrix")
 	      r@Dim <- c(1L, length(x))
-	      r@.Data <- x@.Data
-	      r
+              ## faster than  { r@.Data <- x@.Data ; r } :
+	      setDataPart(r, getD(x), check=FALSE)
 	  })
 
 setMethod("aperm", signature(a="mpfrArray"),
@@ -82,8 +90,8 @@ setMethod("aperm", signature(a="mpfrArray"),
 	      a@Dim <- d[perm]
 	      a@Dimnames <- a@Dimnames[perm]
 	      ii <- c(aperm(array(1:prod(d), dim=d), perm=perm, resize=FALSE))
-	      a@.Data <- a@.Data[ ii ]
-	      a
+              ## faster than  { a@.Data <- a@.Data[ ii ] ; a } :
+	      setDataPart(a, getD(a)[ ii ], check=FALSE)
 	  })
 
 
@@ -93,7 +101,7 @@ setMethod("as.vector", "mpfrArray", function(x) as(x, "mpfr"))
 setAs("mpfrArray", "vector", function(from) as(from, "mpfr"))
 
 toNum <- function(from) {
-    structure(.Call("mpfr2d", from, PACKAGE="Rmpfr"),
+    structure(.Call(mpfr2d, from),
 	      dim = dim(from),
 	      dimnames = dimnames(from))
 }
@@ -118,7 +126,7 @@ print.mpfrArray <- function(x, digits = NULL, drop0trailing = FALSE, ...) {
     n <- length(x)
     ch.prec <-
 	if(n >= 1) {
-	    rpr <- range(sapply(x, slot, "prec"))
+	    rpr <- range(.getPrec(x))
 	    paste("of precision ", rpr[1],
 		   if(rpr[1] != rpr[2]) paste("..",rpr[2]), " bits")
 	}
@@ -331,7 +339,7 @@ setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
     if(getOption("verbose"))
         message(sprintf("nargs() == %d  mpfrArray indexing ... ", nA))
 
-    r <- x@.Data
+    r <- getD(x)
     if(nA == 2) ## A[i]
         return(new("mpfr", r[i]))
     ## else: nA != 2 : nA > 2 -
@@ -350,8 +358,7 @@ setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
 	    ## low-level "coercion" from mpfrArray to *Matrix :
 	    attr(x,"class") <- getClass("mpfrMatrix")@className
         attributes(r) <- NULL
-        x@.Data <- r
-        x
+        setDataPart(x, r, check=FALSE)
     }
 }
 
@@ -368,7 +375,7 @@ setMethod("[", signature(x = "mpfrArray", i = "ANY", j = "missing",
 .mA.subAssign <- function(x,i,j,..., value, n.a, isMpfr)
 {
     ## n.a :=== nargs() -- in the calling "[<-" method --
-    r <- x@.Data
+    r <- getD(x)
     if(n.a >= 4) {
 	## A[i,j]  /  A[i,]  /	A[,j]	but not A[i]
 	## A[i,j,k] <- v : n.a == 5
@@ -379,25 +386,24 @@ setMethod("[", signature(x = "mpfrArray", i = "ANY", j = "missing",
 			 pmax(getPrec(value),
 			      .getPrec(if(n.a == 4) r[i,j] else r[i,j, ...]))
 			 )
-	vD <- value@.Data
+	vD <- getD(value)
 	if(n.a == 4) {
 	    r[i,j] <- vD
 	} else { ## n.a >= 5
 	    r[i, j, ...] <- vD
 	}
 	attributes(r) <- NULL
-	x@.Data <- r
     }
     else if(n.a == 3) { ##  A [ i ] <- v
 	if(!isMpfr)
 	    value <- mpfr(value, precBits = pmax(getPrec(value), .getPrec(r[i])))
-	x@.Data[i] <- value
 
+	r[i] <- value
     } else { ## n.a <= 2
 	stop(sprintf("nargs() == %d  mpfrArray[i,j] <- value  IMPOSSIBLE?",
 		     n.a))
     }
-    x
+    setDataPart(x, r, check=FALSE)
 }## .mA.subAssign
 
 ## "[<-" :
@@ -451,9 +457,8 @@ setMethod("cbind", "Mnumber",
 	      ## the number of rows of the result :
 	      NR <- max(lengths <- sapply(args, L))
 	      NC <- sum(widths	<- sapply(args, W))
-	      r <- new("mpfrMatrix")
+	      r <- setDataPart(new("mpfrMatrix"), vector("list", NR*NC))
 	      r@Dim <- as.integer(c(NR, NC))
-	      r@.Data <- vector("list", NR*NC)
 	      if(deparse.level >= 1 && !is.null(nms <- names(widths)))
 		  r@Dimnames[[2]] <- nms
 	      j <- 0
@@ -462,7 +467,7 @@ setMethod("cbind", "Mnumber",
 		  w <- widths[ia]
 		  a <- args[[ia]]
 		  if(is(a,"mpfr")) {
-		      prec <- max(prec, sapply(a@.Data, slot, "prec"))
+		      prec <- max(prec, .getPrec(a))
 		  } else { ## not "mpfr"
 		      a <- mpfr(a, prec)
 		  }
@@ -508,9 +513,8 @@ setMethod("rbind", "Mnumber",
 	      NR <- sum(lengths <- sapply(args, L))
 	      NC <- max(widths	<- sapply(args, W))
 
-	      r <- new("mpfrMatrix")
+	      r <- setDataPart(new("mpfrMatrix"), vector("list", NR*NC))
 	      r@Dim <- as.integer(c(NR, NC))
-	      r@.Data <- vector("list", NR*NC)
 	      if(deparse.level >= 1 && !is.null(nms <- names(widths)))
 		  r@Dimnames[[1]] <- nms
 	      i <- 0
@@ -519,7 +523,7 @@ setMethod("rbind", "Mnumber",
 		  le <- lengths[ia]
 		  a <- args[[ia]]
 		  if(is(a,"mpfr")) {
-		      prec <- max(prec, sapply(a@.Data, slot, "prec"))
+		      prec <- max(prec, .getPrec(a))
 		  } else { ## not "mpfr"
 		      a <- mpfr(a, prec)
 		  }

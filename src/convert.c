@@ -344,16 +344,14 @@ SEXP print_mpfr(SEXP x, SEXP digits)
 
 /* Convert R "mpfr" object (list of "mpfr1")  to R "double" vector : */
 SEXP mpfr2d(SEXP x) {
-    SEXP D = GET_SLOT(x, Rmpfr_Data_Sym);/* an R list() of length */
-    int n = length(D), i;
+    int n = length(x), i;
     SEXP val = PROTECT(allocVector(REALSXP, n));
     double *r = REAL(val);
     mpfr_t R_i;
-
     mpfr_init(R_i); /* with default precision */
 
     for(i=0; i < n; i++) {
-	R_asMPFR(VECTOR_ELT(D, i), R_i);
+	R_asMPFR(VECTOR_ELT(x, i), R_i);
 	r[i] = mpfr_get_d(R_i, GMP_RNDD);
     }
 
@@ -365,15 +363,14 @@ SEXP mpfr2d(SEXP x) {
 
 /* Convert R "mpfr" object (list of "mpfr1")  to R "integer" vector : */
 SEXP mpfr2i(SEXP x) {
-    SEXP D = GET_SLOT(x, Rmpfr_Data_Sym);/* an R list() of length */
-    int n = length(D), i;
+    int n = length(x), i;
     SEXP val = PROTECT(allocVector(INTSXP, n));
     int *r = INTEGER(val);
     mpfr_t R_i;
     mpfr_init(R_i); /* with default precision */
 
     for(i=0; i < n; i++) {
-	R_asMPFR(VECTOR_ELT(D, i), R_i);
+	R_asMPFR(VECTOR_ELT(x, i), R_i);
 	if(!mpfr_fits_sint_p(R_i, GMP_RNDD)) {
 	    warning("NAs introduced by coercion from \"mpfr\" [%d]", i+1);
 	    r[i] = NA_INTEGER;
@@ -393,8 +390,7 @@ SEXP mpfr2i(SEXP x) {
  * using precision 'prec' which can be NA/NULL in which case
  * "full precision" (as long as necessary) is used : */
 SEXP mpfr2str(SEXP x, SEXP digits) {
-    SEXP D = GET_SLOT(x, Rmpfr_Data_Sym);/* an R list() of length */
-    int n = length(D), i;
+    int n = length(x), i;
     int n_dig = isNull(digits) ? 0 : asInteger(digits);
     SEXP val = PROTECT(allocVector(VECSXP, 4)),
 	nms, str, exp, fini, zero;
@@ -429,7 +425,7 @@ SEXP mpfr2str(SEXP x, SEXP digits) {
 	mp_exp_t *exp_ptr = &exp;
 	int dig_needed, dig_n_max = -1;
 
-	R_asMPFR(VECTOR_ELT(D, i), R_i);
+	R_asMPFR(VECTOR_ELT(x, i), R_i);
 
 /* Observing memory problems, e.g., see ../tests/00-bug.R.~3~
  * Originally hoped it was solvable via  R_alloc() etc, but it seems the problem is

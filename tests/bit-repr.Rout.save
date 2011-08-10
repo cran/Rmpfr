@@ -1,6 +1,6 @@
 
-R version 2.12.0 Patched (2010-12-01 r53725)
-Copyright (C) 2010 The R Foundation for Statistical Computing
+R version 2.13.1 Patched (2011-08-09 r56685)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -24,7 +24,7 @@ Attaching package: 'Rmpfr'
 
 The following object(s) are masked from 'package:stats':
 
-    pnorm
+    pnorm, print.integrate
 
 The following object(s) are masked from 'package:base':
 
@@ -35,11 +35,11 @@ The following object(s) are masked from 'package:base':
 > 
 > .limbs <- function(x) {
 +     stopifnot(is(x, "mpfr"))
-+     lapply(x, slot, "d") # not sapply() each can have different prec. & #{limbs}
++     lapply(x@.Data, slot, "d") # not sapply() each can have different prec. & #{limbs}
 + }
 > .expo <- function(x) {
 +     stopifnot(is(x, "mpfr"))
-+     sapply(x, slot, "exp")
++     sapply(x@.Data, slot, "exp")
 + }
 > 
 > Bits <- function(x) {
@@ -177,7 +177,7 @@ c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636,
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.543 0.05 0.628 0 0 
+Time elapsed:  1.571 0.072 1.719 0 0 
 > 
 > if(!interactive()) warnings()
 NULL

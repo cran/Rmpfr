@@ -4,11 +4,11 @@ stopifnot(require("Rmpfr"))
 
 .limbs <- function(x) {
     stopifnot(is(x, "mpfr"))
-    lapply(x, slot, "d") # not sapply() each can have different prec. & #{limbs}
+    lapply(x@.Data, slot, "d") # not sapply() each can have different prec. & #{limbs}
 }
 .expo <- function(x) {
     stopifnot(is(x, "mpfr"))
-    sapply(x, slot, "exp")
+    sapply(x@.Data, slot, "exp")
 }
 
 Bits <- function(x) {

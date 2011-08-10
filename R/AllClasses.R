@@ -25,7 +25,8 @@ setClass("mpfr1", ## a single Multi-precision float number
 setClass("mpfr", ## a *vector* of "mpfr1", i.e., multi-precision float numbers
 	 contains = "list", ## of "mpfr1" entries:
 	 validity = function(object) {
-	     if(all(sapply(object, class) == "mpfr1"))
+	     ## should be fast ( ==> not using	is(., "mpfr1") ) :
+	     if(all(vapply(object@.Data, class, "") == "mpfr1"))
 		 return(TRUE)
 	     ## else
 		 "Not all components are of class 'mpfr1'"
@@ -41,8 +42,8 @@ setClass("mpfrArray", ## mpfr + "dim" + dimnames
 		 "Dimension does not match length()"
 	     else if(length(DN <- object@Dimnames) != length(D))
 		 "Dimnames must have same length as 'Dim'"
-	     else if(any(hasN <- !sapply(DN, is.null)) &&
-		     any((lDN <- sapply(DN[hasN], length)) != D[hasN]))
+	     else if(any(hasN <- !vapply(DN, is.null, NA)) &&
+		     any((lDN <- vapply(DN[hasN], length, 1L)) != D[hasN]))
 		 "length of some 'Dimnames' do not match 'Dim'"
 	     else
 		 TRUE

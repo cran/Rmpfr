@@ -9,7 +9,8 @@ pi. # nicely prints 80 digits [260 * log10(2) ~= 78.3 ~ 80]
 Zero <- mpfr(c(0,1/-Inf), 20)
 stopifnot(mpfr.is.0(Zero))
 Zero # the "-0" should print correctly
-stopifnot(sapply(Zero,slot,"sign") == c(1,-1),
+stopifnot(.getSign(Zero) == c(1,-1),
+          sign(Zero) == 0,
 	  identical(format(Zero, digits=1), c("0.", "-0.")))
 
 ## testing 'recycling'

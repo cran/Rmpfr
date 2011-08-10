@@ -5,13 +5,15 @@
   Computes the Bernoulli numbers in the desired (binary) precision.
   The computation happens via the \code{\link{zeta}} function and the
   formula
-  \deqn{B_k = -k \zeta(1 - k).}
+  \deqn{B_k = -k \zeta(1 - k),}
+  and hence the only non-zero odd Bernoulli number is \eqn{B_1 = +1/2}.
+  (Another tradition defines it, equally sensibly, as \eqn{-1/2}.)
 }
 \usage{
 Bernoulli(k, precBits = 128)
 }
 \arguments{
-  \item{k}{positive integer vector}
+  \item{k}{non-negative integer vector}
   \item{precBits}{the precision in \emph{bits} desired.}
 }
 \value{
@@ -24,8 +26,16 @@ Bernoulli(k, precBits = 128)
 \seealso{\code{\link{zeta}} is used to compute them.
 }
 \examples{
-Bernoulli(1:10)
-plot(as.numeric(Bernoulli(1:15)), type = "h")
+Bernoulli(0:10)
+plot(as.numeric(Bernoulli(0:15)), type = "h")
+
+curve(-x*zeta(1-x), -.2, 15.03, n=300,
+      main = expression(-x \%.\% zeta(1-x)))
+legend("top", paste(c("even","odd  "), "Bernoulli numbers"),
+       pch=c(1,3), col=2, pt.cex=2, inset=1/64)
+abline(h=0,v=0, lty=3, col="gray")
+k <- 0:15; k[1] <- 1e-4
+points(k, -k*zeta(1-k), col=2, cex=2, pch=1+2*(k\%\%2))
 
 ## They pretty much explode for larger k :
 k2 <- 2*(1:120)

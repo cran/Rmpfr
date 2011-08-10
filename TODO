@@ -4,6 +4,8 @@
  -  <mpfr> %*% <mpfr>    should work like with numeric vectors
  -  <mpfr> %*% t(<mpfr>)  ditto
 
+  Note that matrix multiplication seems too slow --> ./Savicky-matrix-mult_tst.R
+
  -  <mpfr>[i] & <mpfrMatrix>[i]  work
     but   <mpfrMatrix> [i,j]  not yet
 

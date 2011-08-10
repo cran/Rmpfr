@@ -15,9 +15,9 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
 
     ml <-
 	if(is.numeric(x) || is.logical(x) || is.raw(x))
-	    .Call("d2mpfr1_list", x, precBits, rnd.mode, PACKAGE="Rmpfr")
+	    .Call(d2mpfr1_list, x, precBits, rnd.mode)
 	else if(is.character(x))
-	    .Call("str2mpfr1_list",x, precBits, base, rnd.mode,PACKAGE="Rmpfr")
+	    .Call(str2mpfr1_list,x, precBits, base, rnd.mode)
 	else stop("invalid 'x'. Must be numeric (logical, raw) or character")
     if(is.array(x)) {
 	dim <- dim(x) ; dn <- dimnames(x)
@@ -29,8 +29,7 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
 }
 
 setAs("numeric", "mpfr1", ## use default precision of 128 bits
-      function(from) .Call("d2mpfr1", from, 128L, "N",# <- round to [N]earest
-                           PACKAGE="Rmpfr"))
+      function(from) .Call(d2mpfr1, from, 128L, "N"))# <- round to [N]earest
 setAs("numeric", "mpfr", function(from) mpfr(from, 128L))
 setAs("integer", "mpfr", function(from) mpfr(from,  32L))
 setAs("raw",     "mpfr", function(from) mpfr(from,   8L))
@@ -38,10 +37,10 @@ setAs("logical", "mpfr", function(from) mpfr(from,   2L))
 ## TODO?  base=16 for "0x" or "0X" prefix -- but base must have length 1 ..
 setAs("character", "mpfr", function(from) mpfr(from))
 
-setAs("mpfr", "numeric", function(from) .Call("mpfr2d", from, PACKAGE="Rmpfr"))
-setAs("mpfr", "integer", function(from) .Call("mpfr2i", from, PACKAGE="Rmpfr"))
-setMethod("as.numeric", "mpfr", function(x) .Call("mpfr2d", x, PACKAGE="Rmpfr"))
-setMethod("as.integer", "mpfr", function(x) .Call("mpfr2i", x, PACKAGE="Rmpfr"))
+setAs("mpfr", "numeric", function(from) .Call(mpfr2d, from))
+setAs("mpfr", "integer", function(from) .Call(mpfr2i, from))
+setMethod("as.numeric", "mpfr", function(x) .Call(mpfr2d, x))
+setMethod("as.integer", "mpfr", function(x) .Call(mpfr2i, x))
 
 setAs("mpfr1", "numeric",  ## just for user-de-confusion :
       function(from) {
@@ -59,7 +58,7 @@ setAs("mpfr", "mpfr1", function(from) {
     stopifnot(is.null(digits) ||
 	      (is.numeric(digits) && digits >= 1))
     ##	digits = NULL : use as many digits "as needed"
-    .Call("mpfr2str", x, digits, PACKAGE="Rmpfr")
+    .Call(mpfr2str, x, digits)
 }
 
 formatMpfr <-

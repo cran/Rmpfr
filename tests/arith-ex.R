@@ -5,7 +5,8 @@ stopifnot(format(mpfr(1, 60) / mpfr(7, 160)) ==
           "0.14285714285714285714285714285714285714285714285712")
 
 (x <- mpfr(0:7, 100) / 7)
-stopifnot( mpfr.is.0(x - x) ) # badly failed on 64-bit
+stopifnot( mpfr.is.0(x - x), # badly failed on 64-bit
+	  identical(-x, 0-x))# testing "- x"
 
 ## checking hexadecimal input :
 stopifnot(mpfr("0xFFFFFFFFFFFFFFFFFFFF", base=16) + 1 == 2^80,

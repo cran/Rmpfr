@@ -5,6 +5,7 @@
 \alias{mpfr-class}
 \alias{mpfr1-class}
 %
+\alias{[[,mpfr-method}
 \alias{[,mpfr,ANY,missing,missing-method}
 \alias{[<-,mpfr,missing,missing,ANY-method}
 \alias{[<-,mpfr,ANY,missing,ANY-method}
@@ -214,7 +215,10 @@
       \code{dimnames}), i.e., transforms \code{x} into an \sQuote{MPFR}
       number vector, i.e., class \code{\linkS4class{mpfr}}.}
 
-    \item{[}{\code{signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")}: ... }
+    \item{[[}{\code{signature(x = "mpfr", i = "ANY")}, and}
+    \item{[}{\code{signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing")}:
+      subsetting aka \dQuote{indexing} happens as for numeric vectors.}
+
     \item{format}{\code{signature(x = "mpfr")}, further arguments
       \code{digits = NULL, scientific = NA}, etc:
       returns \code{\link{character}} vector of same length as \code{x};
@@ -280,6 +284,15 @@
 str(x <- mpfr(c(2:3, pi), prec = 30 * log2(10)))
 x^2
 x[1] / x[2] # 0.66666... ~ 30 digits
+
+## indexing - as with numeric vectors
+stopifnot(identical(x[2], x[[2]]),
+	  ## indexing "outside" gives NA (well: "mpfr-NaN" for now):
+	  is.na(x[5]),
+	  ## whereas "[[" cannot index outside:
+	  is(try(x[[5]]), "try-error"),
+	  ## and only select *one* element:
+	  is(try(x[[2:3]]), "try-error"))
 
 ## factorial() & lfactorial would work automagically via [l]gamma(),
 ## but factorial() additionally has an "mpfr" method which rounds

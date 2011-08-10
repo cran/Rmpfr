@@ -5,6 +5,7 @@ Const <- function(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
         stop("'name' must be one of ",
              paste(paste("'",eval(formals()$name),"'",sep=""),
                    collapse=", "))
-    new("mpfr", list(.Call("const_asMpfr", i, prec, PACKAGE="Rmpfr")))
+    new("mpfr", list(.Call(const_asMpfr, i, prec)))
 }
-## fails here; must happen *after* dyn.load ... : Pi <- Const("pi")
+## fails here; must happen *after* dyn.load, i.e. in
+## ./zzz.R : Pi <- Const("pi")

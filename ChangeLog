@@ -1,3 +1,40 @@
+2011-08-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-2,  now with a
+	* NAMESPACE:
+
+2011-07-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/Ops.c (Rmpfr_minus, Rmpfr_abs): new C versions,
+	called in
+	* R/Arith.R
+	* R/Math.R
+
+2011-07-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (mpfr2array): speedup, not using new(cl, ...) for
+	check=FALSE (= new default).
+
+2011-07-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R ([[): finished adding a '[[' method which returns one
+	"mpfr" number (instead of a "mpfr1" one).  Needed a bit of changes,
+	notably in .getPrec() etc.
+
+2011-05-12  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.3-0 -- "finished" integrateR(); using vapply()
+
+2011-04-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/special-fun.R (Bernoulli): B(0) = 1  now also works.
+
+2011-03-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/integrate-Romberg.R (integrateR): new pure Rfunction for Romberg
+	integration; works with "mpfr".
+	* man/integrateR.Rd: docu & examples.
+
 2011-01-18  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/Math.R (roundMpfr): "round" to precBits (bits!) also to

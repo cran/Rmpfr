@@ -12,7 +12,7 @@ storage.mode(.Summary.codes) <- "integer"
 setMethod("Summary", "mpfr",
 	  function(x, ..., na.rm=FALSE) {
 	      iop <- .Summary.codes[.Generic]
-	      r <- .Call("Summary_mpfr", c(x, ...), na.rm, iop, PACKAGE="Rmpfr")
+	      r <- .Call(Summary_mpfr, c(x, ...), na.rm, iop)
 	      if(iop <= 5)
 		  new("mpfr", r)
 	      else ## any, all :
