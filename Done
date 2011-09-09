@@ -46,3 +46,12 @@
     I think this is the MPFR library just allocating memory that's in use
     by R, but it seems hard to prove and or fix that.
 
+
+17a) as(1, "mpfr") & TRUE : no longer gives infinite recursion error
+
+20) integrateR( ... rel.tol, verbose= TRUE) :
+    the precision of the output should be increased a bit,
+    (still depending  on rel.tol !)
+
+22) apply(<mpfrArray>, .) --> S4 method
+

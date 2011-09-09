@@ -44,7 +44,7 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 
 
 erfc <- function(x) {
-    if(is.numeric(x)) 2 * pnorm(x * sqrt(2), lower = FALSE)
+    if(is.numeric(x)) 2 * pnorm(x * sqrt(2), lower.tail = FALSE)
     else if(is(x, "mpfr")) {
         x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erfc"]])
         x

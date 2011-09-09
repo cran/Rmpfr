@@ -21,7 +21,7 @@ stopifnot(all.equal(as.numeric(x+ 1L),
           all.equal(as.numeric(x * 2L),
                     as.numeric(x + x), tol = 0))
 
-all.EQ <- function(x,y, tolerance = 2^-98, ...)
+all.EQ <- function(x,y, tolerance = 2^-98, ...) # very small tol. for MPFR
     all.equal(x, y, tolerance=tolerance, ...)
 
 u <- mpfr(0:17, 128)/17
@@ -67,3 +67,8 @@ checkPmin(x, nx)
 
 stopifnot(all.equal( round(x, 10),  round(nx, 10)),
           all.equal(signif(x, 10), signif(nx, 10)))
+
+## L & x ,  x & L  failed in Rmpfr 0.2* and 0.4-2
+stopifnot(identical(L <- x > 0.5, L & x),
+	  identical(L, x & L),
+	  identical(x > 0, x | L))

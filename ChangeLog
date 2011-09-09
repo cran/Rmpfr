@@ -1,3 +1,23 @@
+2011-09-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/array.R (applyMpfr): -> apply() method for "mfprArray"
+	(mpfr2array): fix for the case of  dim(<mpfrArray>) <- <newDim>
+	(colSums, etc): also add simple methods for colSums, rowMeans, etc.
+
+	* man/mpfrArray.Rd: add apply() examples
+
+2011-08-23  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/unirootR.R (unirootR): R-only version of uniroot(), carefully ensuring
+	* man/unirootR.Rd: that as.numeric(.) is used only in some cases;
+	thanks to John Nash's very recent R code in his 'rootoned' package.
+
+2011-08-11  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/Arith.R: add "Logic" methods (mpfr, numeric), avoiding
+	inf.recursion.
+	* tests/arith-ex.R: now checks that.
+
 2011-08-09  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.4-2,  now with a

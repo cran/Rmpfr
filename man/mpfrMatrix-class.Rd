@@ -14,6 +14,11 @@
 \alias{Compare,mpfr,mpfrArray-method}
 \alias{Compare,numeric,mpfrArray-method}
 %
+\alias{apply,mpfrArray-method}
+\alias{colSums,mpfrArray-method}
+\alias{colMeans,mpfrArray-method}
+\alias{rowSums,mpfrArray-method}
+\alias{rowMeans,mpfrArray-method}
 \alias{as.vector,mpfrArray,missing-method}
 \alias{coerce,mpfrArray,array-method}
 \alias{coerce,mpfrArray,matrix-method}
@@ -176,11 +181,9 @@ class \code{"\linkS4class{vector}"}, by class "mpfrArray", distance 4.
   }
 }
 \author{Martin Maechler}
-% \note{ ~~further notes~~ }
-% \seealso{
-% 	~~objects to See Also as \code{\link{~~fun~~}}, ~~~
-% 	or \code{\linkS4class{CLASSNAME}} for links to other classes
-% }
+\seealso{
+ \code{\link{mpfrArray}}, also for more examples.
+}
 \examples{
 showClass("mpfrMatrix")
 

@@ -3,12 +3,12 @@
 %              ----- for the package-vignette, don't use JSS logo, etc
 %
 \author{Martin M\"achler \\ ETH Zurich}
-\title{Arbitrary Accurate Computation with \R: \\ The \pkg{Rmpfr} Package}
+\title{Arbitrarily Accurate Computation with \R: \\ The \pkg{Rmpfr} Package}
 % \def\mythanks{a version of this paper, for \pkg{nacopula} 0.4\_4, has been published
 %     in JSS, \url{http://www.jstatsoft.org/v39/i09}.}
 %% for pretty printing and a nice hypersummary also set:
 \Plainauthor{Martin M\"achler} %% comma-separated
-\Plaintitle{Arbitrary Accurate Computation with R---The Rmpfr Package}
+\Plaintitle{Arbitrarily Accurate Computation with R---The Rmpfr Package}
 % \Shorttitle{}
 %
 %\VignetteIndexEntry{Rmpfr}
@@ -207,10 +207,10 @@ The package \pkg{Rmpfr} interfaces \R\ to the C (GNU) library
 \begin{quote}
   MPFR, acronym for
   ``\emph{\textbf{M}ultiple \textbf{P}recision \textbf{F}loating-Point \textbf{R}eliably}''%
-  \nocite{FousseHLPZ:2007}.
+  \nocite{FouLHLPZ:2007}.
 \end{quote}
 
-MPFR is Free Software, available under the LGPL license\nocite{FousseHLPZ-MPFR:2011},
+MPFR is Free Software, available under the LGPL license, %\nocite{FousseHLPZ-MPFR:2011},
 see \url{http://mpfr.org/}, and
 MPFR itself is built on and requires the
 GNU Multiple Precision arithmetic library (GMP), see
@@ -224,7 +224,7 @@ it is sufficient (for \emph{both} libraries) to simply issue
 \begin{verbatim}
    sudo apt-get install libmpfr-dev
 \end{verbatim}
-The standard reference to MPFR is \cite{FouLHLPZ-2007}.
+The standard reference to MPFR is \cite{FousseHLPZ-MPFR:2011}.
 
 
 \section{Arithmetic with mpfr-numbers}
@@ -295,7 +295,7 @@ relevant ...
 
 ...
 
-\section{``All'' mathematical functions, arbitrary precise}
+\section{``All'' mathematical functions, arbitrarily precise}
 
 %% see ../../man/mfpr-class.Rd
 %%  but also ....
@@ -320,8 +320,8 @@ getGroupMembers("Math")
 
 where currently , \code{digamma}, and \code{trigamma} are not provided by
 the MPFR library, and hence the methods not implemented yet.
-\\
-Further, the \code{cum*()} methods are \emph{not yet} implemented.
+
+%% cumsum(), cumprod() now work!
 
 \code{factorial()} has a \texttt{"mpfr"} method; and in addition,
 \code{factorialMpfr()} computes ${n!}$ efficiently in arbitrary precision,
@@ -329,12 +329,42 @@ using the MPFR-internal implementation.
 This is mathematically (but not numerically) the same as
 $\Gamma(n+1) = $\code{gamma(n+1)}.
 
+Similarly to \code{factorialMpfr()}, but more generally useful,the functions
+\code{chooseMpfr(a,n)} and \code{pochMpfr(a,n)} compute (generalized!) binomial
+coefficients $\binom{a}{n}$ and
+``the'' Pochhammer symbol or ``rising factorial''
+\begin{eqnarray*}
+  a^{(n)} &:=&  a(a+1)(a+2)\cdots(a+n-1) \\
+          &=& \frac{(a+n-1)!}{(a-1)!} = \frac{\Gamma(a+n)}{\Gamma(a)}.
+\end{eqnarray*}
+Note that with this definition,
+\[ \binom{a}{n} \equiv \frac{a^{(n)}}{n!}.
+\]
 
-\section{Arbitrary precise matrices and arrays}
 
-... ...
+\section{Arbitrarily precise matrices and arrays}
 
-... ...
+%%% FIXME --> ~/R/Meetings-Kurse-etc/2011-Warwick/1_MM_/Poster/MM-poster.tex
+
+The classes \code{"mpfrMatrix"} and \code{"mpfrArray"}
+correspond to the classical numerical \R \code{"matrix"} and \code{"array"} objects,
+which basically are arrays or vectors of numbers with a dimension
+\code{dim}, possibly named by \code{dimnames}.
+As there, they can be constructed by \code{dim(.) <- ..} setting, e.g.,
+<<Matrix-ex>>=
+head(x <- mpfr(0:7, 64)/7) ; mx <-  x
+dim(mx) <- c(4,2)
+@
+and we can index and multiply such matrices, e.g.,
+<<crossprod>>=
+mx[ 1:3, ] + c(1,10,100)
+crossprod(mx)
+@
+and also \code{apply} functions,
+<<apply-mat>>=
+apply(7 * mx, 2, sum)
+@
+
 
 \section{Special mathematical functions}
 

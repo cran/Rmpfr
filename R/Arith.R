@@ -6,12 +6,15 @@
 ### NB:	 Look at /usr/local/app/R/R_local/src/Brobdingnag/R/brob.R
 ###					      -----------
 
-if(FALSE) ## here are the individual functions
-getGroupMembers("Ops")
-if(FALSE)
-str(list(Arith	 = getGroupMembers("Arith"),
-	 Compare = getGroupMembers("Compare"),
-	 Logic	 = getGroupMembers("Logic")), vec.len = 20)
+if(FALSE) {
+ print(getGroupMembers("Ops"))#  "Arith"   "Compare" "Logic"
+ .Ops.list <- sapply(getGroupMembers("Ops"),
+                     getGroupMembers, simplify=FALSE)
+ str(.Ops.list, vec.len = 20)
+ ## $ Arith  : chr [1:7] "+" "-" "*" "^" "%%" "%/%" "/"
+ ## $ Compare: chr [1:6] "==" ">" "<" "!=" "<=" ">="
+ ## $ Logic  : chr [1:2] "&" "|"
+}
 
 ## Using "vector" and "array" seperately, rather than "ANY"
 ## ===> shorter distance in method dispatch calculation :
@@ -31,10 +34,15 @@ setMethod("Ops", signature(e1 = "array", e2 = "mpfr"),
 			    .Generic)))
 
 
-## FIXME: this is too cheap: also need	<mpfr, numeric>	 <array, mpfrArray> etc
 setMethod("Logic", signature(e1 = "mpfr", e2 = "mpfr"),
 	  function(e1, e2) callGeneric(as(e1, "numeric"),
 				       as(e2, "numeric")))
+setMethod("Logic", signature(e1 = "mpfr", e2 = "numeric"),
+	  function(e1, e2) callGeneric(as(e1, "numeric"), e2))
+setMethod("Logic", signature(e1 = "numeric", e2 = "mpfr"),
+	  function(e1, e2) callGeneric(e1, as(e2, "numeric")))
+## FIXME?: probably also need	 <array, mpfrArray> etc
+
 
 ###-- 2) ----------- Arith --------------------------------------------------
 

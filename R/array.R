@@ -7,18 +7,25 @@ setMethod("dimnames", "mpfrArray", function(x) x@Dimnames)
 
 ##' "mpfr" --> "mpfrArray"  --- basically  dim(<mpfr>) <- dd
 mpfr2array <- function(x, dim, dimnames=NULL, check=FALSE) {
-    if(check) stopifnot(is(x,"mpfr"))
+    if(check) stopifnot(extends((clx <- class(x)), "mpfr"))
     if(is.numeric(dim) && all(dim == (iv <- as.integer(dim)))) {
+        rnk <- length(iv)
 	if(check) {
-	    cl <- if(length(iv) == 2) "mpfrMatrix" else "mpfrArray"
+	    cl <- if(rnk == 2) "mpfrMatrix" else "mpfrArray"
+            if(extends(clx, "mpfrArray")) x <- as(x, "mpfr")# drop 'Dim', 'Dimnames'
 	    if(is.null(dimnames))
 		new(cl, x, Dim = iv)
 	    else new(cl, x, Dim = iv, Dimnames = dimnames)
 	} else { ## faster, non-checking
-	    r <- setDataPart(new(if(length(iv) == 2) "mpfrMatrix" else "mpfrArray"),
+	    r <- setDataPart(new(if(rnk == 2) "mpfrMatrix" else "mpfrArray"),
 			     x, check=FALSE)
 	    r@Dim <- iv
-	    if(!is.null(dimnames)) r@Dimnames <- dimnames
+	    if(!is.null(dimnames))
+		r@Dimnames <- dimnames
+##TODO R >= 2.13.2:
+##TODO	    else if(.hasSlot(x, "Dimnames")) # has "wrong' Dimnames
+	    else if(is(x, "mpfrArray")) # has "wrong' Dimnames
+		r@Dimnames <- rep.int(list(NULL), rnk)
 	    r
 	}
     }
@@ -52,6 +59,15 @@ mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
 }
 
 setAs("array", "mpfr", function(from) mpfr(from, 128L))
+## and for "base" functions to work:
+as.array.mpfr <- function(x, ...) {
+    if(is(x, "mpfrArray")) x else ## is(x, "mpfr") :
+    as.array.default(x, ...)
+}
+as.matrix.mpfr <- function(x, ...) {
+    if(is(x, "mpfrMatrix")) x else ## is(x, "mpfr") :
+    as.matrix.default(x, ...)
+}
 
 setMethod("dimnames<-", signature(x = "mpfrArray", value = "ANY"),
 	  function(x, value) {
@@ -541,3 +557,130 @@ setMethod("rbind", "Mnumber",
 	      }
 	      r
 	  })
+
+unlistMpfr <- function(x, recursive = FALSE, use.names = TRUE)  {
+    ## an "unlist(.)" for mpfr contents:
+    if(recursive) stop("'recursive = TRUE' is not implemented (yet).")
+    n <- sum(lx <- vapply(x, length, 0L))
+    ans <- mpfr(numeric(n), precBits=3L)# dummy to fill
+    ans@.Data <- unlist(lapply(x, slot, ".Data"), use.names=use.names)
+    ans
+}
+
+
+##-- Original in ~/R/D/r-devel/R/src/library/base/R/apply.R :
+##
+applyMpfr <- function(X, MARGIN, FUN, ...)
+{
+    FUN <- match.fun(FUN)
+
+    ## Ensure that X is an array object
+    dl <- length(dim(X))
+    if(!dl) stop("dim(X) must have a positive length")
+##-     if(is.object(X))
+##- 	X <- if(dl == 2L) as.matrix(X) else as.array(X)
+    ## now record dim as coercion can change it
+    ## (e.g. when a data frame contains a matrix).
+    d <- dim(X)
+    dn <- dimnames(X)
+    ds <- seq_len(dl)
+
+    ## Extract the margins and associated dimnames
+
+    if (is.character(MARGIN)) {
+        if(is.null(dnn <- names(dn))) # names(NULL) is NULL
+           stop("'X' must have named dimnames")
+        MARGIN <- match(MARGIN, dnn)
+        if (any(is.na(MARGIN)))
+            stop("not all elements of 'MARGIN' are names of dimensions")
+    }
+    s.call <- ds[-MARGIN]
+    s.ans  <- ds[MARGIN]
+    d.call <- d[-MARGIN]
+    d.ans  <- d[MARGIN]
+    dn.call<- dn[-MARGIN]
+    dn.ans <- dn[MARGIN]
+    ## dimnames(X) <- NULL
+
+    array <- function(data, dim = length(data), dimnames = NULL) {
+        dim(data) <- dim
+        if(!is.null(dimnames)) dimnames(data) <- dimnames
+        data
+    }
+
+    ## do the calls
+
+    d2 <- prod(d.ans)
+    if(d2 == 0L) {
+        ## arrays with some 0 extents: return ``empty result'' trying
+        ## to use proper mode and dimension:
+        ## The following is still a bit `hackish': use non-empty X
+        newX <- array(vector(typeof(X), 1L), dim = c(prod(d.call), 1L))
+        ans <- FUN(if(length(d.call) < 2L) newX[,1] else
+                   array(newX[, 1L], d.call, dn.call), ...)
+        return(if(is.null(ans)) ans else if(length(d.ans) < 2L) ans[1L][-1L]
+               else array(ans, d.ans, dn.ans))
+    }
+    ## else
+    newX <- aperm(X, c(s.call, s.ans))
+    dim(newX) <- c(prod(d.call), d2)
+    ans <- vector("list", d2)
+    if(length(d.call) < 2L) {# vector
+        if (length(dn.call)) dimnames(newX) <- c(dn.call, list(NULL))
+        for(i in 1L:d2) {
+            tmp <- FUN(newX[,i], ...)
+            if(!is.null(tmp)) ans[[i]] <- tmp
+        }
+    } else
+       for(i in 1L:d2) {
+           tmp <- FUN(array(newX[,i], d.call, dn.call), ...)
+           if(!is.null(tmp)) ans[[i]] <- tmp
+        }
+
+    ## answer dims and dimnames
+
+    ans.list <- !is(ans[[1L]], "mpfr") ##- is.recursive(ans[[1L]])
+    l.ans <- length(ans[[1L]])
+
+    ans.names <- names(ans[[1L]])
+    if(!ans.list)
+	ans.list <- any(unlist(lapply(ans, length)) != l.ans)
+    if(!ans.list && length(ans.names)) {
+        all.same <- vapply(ans, function(x) identical(names(x), ans.names), NA)
+        if (!all(all.same)) ans.names <- NULL
+    }
+    len.a <- if(ans.list) d2 else length(ans <- unlistMpfr(ans))
+    if(length(MARGIN) == 1L && len.a == d2) {
+	names(ans) <- if(length(dn.ans[[1L]])) dn.ans[[1L]] # else NULL
+	return(ans)
+    }
+    if(len.a == d2)
+	return(array(ans, d.ans, dn.ans))
+    if(len.a && len.a %% d2 == 0L) {
+        if(is.null(dn.ans)) dn.ans <- vector(mode="list", length(d.ans))
+        dn.ans <- c(list(ans.names), dn.ans)
+	return(array(ans, c(len.a %/% d2, d.ans),
+		     if(!all(vapply(dn.ans, is.null, NA))) dn.ans))
+    }
+    return(ans)
+}
+
+setGeneric("apply")
+setMethod ("apply", "mpfrArray", applyMpfr)
+
+setMethod("colSums", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
+    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    applyMpfr(x, (dims+1):rnk, sum)
+})
+setMethod("colMeans", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
+    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    applyMpfr(x, (dims+1):rnk, mean)
+})
+setMethod("rowSums", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
+    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    applyMpfr(x, 1:dims, sum)
+})
+setMethod("rowMeans", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
+    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    applyMpfr(x, 1:dims, mean)
+})

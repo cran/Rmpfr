@@ -65,6 +65,8 @@
 \alias{Compare,array,mpfr-method}
 %
 \alias{Logic,mpfr,mpfr-method}
+\alias{Logic,mpfr,numeric-method}
+\alias{Logic,numeric,mpfr-method}
 \alias{Summary,mpfr-method}
 \alias{Math,mpfr-method}
 \alias{Math2,mpfr-method}
@@ -301,5 +303,14 @@ f200
 as.numeric(log2(f200))# 1245.38 -- need precBits >~ 1246 for full precision
 
 ##--> see  factorialMpfr() for more such computations.
+
+##--- "Underflow" **much** later -- exponents have 30(+1) bits themselves:
+
+mpfr.min.exp2 <- - (2^30 + 1)
+two <- mpfr(2, 55)
+stopifnot(two ^ mpfr.min.exp2 == 0)
+## whereas
+two ^ (mpfr.min.exp2 * (1 - 1e-15))
+## 2.38256490488795107e-323228497   ["typically"]
 }
 \keyword{classes}

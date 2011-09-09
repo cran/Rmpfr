@@ -37,10 +37,33 @@ mpfrArray(x, precBits, dim = length(x), dimnames = NULL,
 \examples{
 ## preallocating is possible here too
 ma <- mpfrArray(NA,   prec = 80, dim = 2:4)
-validObject(a2 <- mpfrArray(1:24, prec = 64, dim = 2:4))
+validObject(A2 <- mpfrArray(1:24, prec = 64, dim = 2:4))
 
 ## recycles, gives an "mpfrMatrix" and dimnames :
 mat <- mpfrArray(1:5, 64, dim = c(5,3), dimnames=list(NULL, letters[1:3]))
 mat
+
+## Testing the apply() method :
+apply(mat, 2, range)
+apply(A2, 1:2, range)
+apply(A2, 2:3, max)
+apply(A2, 2, fivenum)% works,.. whereas quantile() fails.. "R design bug"
+stopifnot(as(apply(A2, 2, range), "matrix") ==
+          apply(as(A2,"array"), 2, range))
+\dontshow{
+ a2 <- as(A2, "array")
+ for(nf in c("colSums", "colMeans", "rowSums", "rowMeans")) {
+   FUN <- getFunction(nf)
+   for(di in c(1,2)) {
+     r <- FUN(a2, dims = di)
+     R <- FUN(A2, dims = di)
+     stopifnot(dim(r) == dim(R),
+               all.equal(as(R, if(is.array(r)) "array" else "numeric"),
+                         r, tol = 1e-15))
+   }
+ }
+%% TODO: also check examples with non-trivial dimnames !
+
+}%end{ dontshow }
 }
 \keyword{array}

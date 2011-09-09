@@ -76,6 +76,7 @@ export(
        ## .Call "Summary_mpfr"
        , "all.equal"
        , "aperm"
+       , "apply" ## <- we make it S4 generic
        , "as.vector"
        , "atan2"
        , "beta" , "lbeta"
@@ -125,12 +126,14 @@ export(
        , "tcrossprod"
        , "toNum"
        , "unique"
+       , "unirootR"
        , "y0", "y1", "yn"
        , "zeta"
        )
 
 exportMethods(
               ## "own generics":
+              "apply",
 
               ## "other generics"
               "abs", "log", "sign"
@@ -146,9 +149,14 @@ exportMethods(
               , "format"
               , "mean", "pmax", "pmin"
               , "show", "unique"
+              , "colSums", "colMeans"
+              , "rowSums", "rowMeans"
 )
 
 S3method(c, mpfr)
+
+S3method(as.array, mpfr)
+S3method(as.matrix, mpfr)
 
 S3method(print, mpfr)
 S3method(print, mpfr1)

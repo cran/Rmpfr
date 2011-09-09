@@ -42,6 +42,14 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 
     r. <- t[1]*le
     n <- 1 # 'n'(Bauer) = 2^n (Romberg Algo)
+    if(verbose) { ## FIXME -- cannot use more than 16 for "g" printing
+        ## In "mpfr" case, this is "bad" -> rather use format(.)
+        ## with higher number of digits
+        prDigs <- min(16, 2 + ceiling(-log10(rel.tol)))
+        ## FIXME: prDigs <- max(10, 2 + ceiling(-log10(rel.tol)))
+        FORM <- paste("n=%2d, 2^n=%9.0f | I = %-", formatC(5+prDigs),
+                      ".*g, abs.err = %12g\n", sep="")
+    }
     for(h in seq_len(ord)) {
 	if(verbose >= 2) print(le* t[1:h], digits = 20)
 	u <- 0
@@ -58,9 +66,8 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
         aErr <- abs(r - r.)
 	if(useTol) { ## check if we converged
 	    converged <- (aErr < min(abs(r)*rel.tol, abs.tol))
-            if(verbose)## "FIXME" - in "mpfr" case, this is suboptimal
-                cat(sprintf("n=%2d, 2^n=%9.0f | I = %16.*g, abs.err = %12g\n",
-                            h, 2*n, min(16,ceiling(-log10(rel.tol))), r, aErr))
+            if(verbose)
+                cat(sprintf(FORM, h, 2*n, prDigs, r, aErr))
 	    if(converged)
 		break
 	}
