@@ -187,7 +187,7 @@ SEXP Arith_mpfr(SEXP x, SEXP y, SEXP op)
 # define yD y
 #endif
     int nx = length(xD), ny = length(yD), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mpfr_t x_i, y_i, r;
@@ -260,7 +260,7 @@ SEXP Arith_mpfr_i(SEXP x, SEXP y, SEXP op)
 #endif
     int *yy = INTEGER(y);
     int nx = length(xD), ny = length(y), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mpfr_t x_i;
@@ -314,7 +314,7 @@ SEXP Arith_i_mpfr(SEXP x, SEXP y, SEXP op)
 #endif
     int *xx = INTEGER(x);
     int nx = length(x), ny = length(yD), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mpfr_t y_i;
@@ -382,7 +382,7 @@ SEXP Arith_mpfr_d(SEXP x, SEXP y, SEXP op)
 #endif
     double *yy = REAL(y);
     int nx = length(xD), ny = length(y), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mpfr_t x_i, yy_i;
@@ -454,7 +454,7 @@ SEXP Arith_d_mpfr(SEXP x, SEXP y, SEXP op)
 #endif
     double *xx = REAL(x);
     int nx = length(x), ny = length(yD), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mpfr_t y_i, xx_i;
@@ -534,7 +534,7 @@ SEXP Compare_mpfr(SEXP x, SEXP y, SEXP op)
 # define yD y
 #endif
     int nx = length(xD), ny = length(yD), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(LGLSXP, n));
     int *r = LOGICAL(val);
@@ -579,7 +579,7 @@ SEXP Compare_mpfr_i(SEXP x, SEXP y, SEXP op)
 #endif
     int *yy = INTEGER(y);
     int nx = length(xD), ny = length(y), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(LGLSXP, n));
     int *r = LOGICAL(val);
@@ -628,7 +628,7 @@ SEXP Compare_mpfr_d(SEXP x, SEXP y, SEXP op)
 #endif
     double *yy = REAL(y);
     int nx = length(xD), ny = length(y), i_op = asInteger(op), i,
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;
 
     SEXP val = PROTECT(allocVector(LGLSXP, n));
     int *r = LOGICAL(val);

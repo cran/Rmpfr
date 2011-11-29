@@ -301,8 +301,8 @@ R_MPFR_1_Numeric_Function(R_mpfr_ai, mpfr_ai)
 SEXP _FNAME(SEXP x, SEXP y) {					\
     SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));		\
     SEXP yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));		\
-    int nx = length(xD), ny = length(yD), i,			\
-	n = (nx * ny == 0) ? 0 : imax2(nx, ny), mismatch = 0;	\
+    int nx = length(xD), ny = length(yD), i, mismatch = 0,	\
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);		\
     SEXP val = PROTECT(allocVector(VECSXP, n));			\
     mpfr_t x_i, y_i;						\
     mpfr_init(x_i); /* with default precision */		\
@@ -349,7 +349,7 @@ SEXP _FNAME(SEXP x, SEXP y) {						\
     }									\
     PROTECT(xD = GET_SLOT(x, Rmpfr_Data_Sym));	nprot++;		\
     nx = length(xD);							\
-    n = (nx * ny == 0) ? 0 : imax2(nx, ny);				\
+    n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);			\
     PROTECT(val = allocVector(VECSXP, n)); 	nprot++;		\
     mpfr_init(x_i); /* with default precision */			\
 									\

@@ -120,6 +120,12 @@ str(unirootR(function(x) x*(x^2-1) + .5, lower = -2, upper = 2,
 str(unirootR(function(x) x*(x^2-1) + .5, lower = -2, upper = 2,
             tol = 1e-10 ), digits.d = 10)
 
+## A sign change of f(.), but not a zero but rather a "pole":
+tan. <- function(x) tan(x * (Const("pi",200)/180))# == tan( <angle> )
+(rtan <- unirootR(tan., interval = mpfr(c(80,100), 200), tol = 1e-40))
+## finds 90 {"ok"}, and now gives a warning
+\dontshow{stopifnot(all.equal(rtan$root, 90, tol = 1e-38))}
+
 ## Find the smallest value x for which exp(x) > 0 (numerically):
 r <- unirootR(function(x) 1e80*exp(x)-1e-300, c(-1000,0), tol = 1e-15)
 str(r, digits.d = 15) ##> around -745, depending on the platform.

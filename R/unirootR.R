@@ -1,4 +1,4 @@
-### This is a translatation of R_zeroin2 in ~/R/D/r-devel/R/src/appl/zeroin.c
+### This is a translation of R_zeroin2 in ~/R/D/r-devel/R/src/appl/zeroin.c
 ### from  C to R  by John Nash,
 ### ---> file rootoned/R/zeroin.R of the new (2011-08-18) R-forge package rootoned
 ###
@@ -174,9 +174,11 @@ unirootR <- function(f, interval, ...,
 
     } ## end{ while(maxit > 0) } --------------------------------------------
 
-    if(converged)
+    if(converged) {
 	iter <- val[["maxit"]]
-    else { ## (!converged) : failed!
+	if(!is.na(fb) &&  abs(fb) > 0.5*max(abs(f.lower), abs(f.upper)))# from John Nash:
+	    warning("Final function magnitude seems large -- maybe converged to sign-changing 'pole' location?")
+    } else { ## (!converged) : failed!
 	val <- list(root= b, rtol = abs(c-b))
 	iter <- maxiter
 	warning("_NOT_ converged in ", iter, " iterations")

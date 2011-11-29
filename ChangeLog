@@ -1,4 +1,15 @@
+2011-11-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-4
+
+	* src/Ops.c (Compare_mpfr, etc): fix (silly!) nx * ny integer
+	overflow; problem reported by Anton Korobeynikov.
+
+	* R/unirootR.R: produce warning when convergence happen to "pole".
+
 2011-09-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.4-3, released to CRAN on 2011-09-09
 
 	* R/array.R (applyMpfr): -> apply() method for "mfprArray"
 	(mpfr2array): fix for the case of  dim(<mpfrArray>) <- <newDim>
