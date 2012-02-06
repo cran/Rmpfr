@@ -132,8 +132,9 @@ setAs("mpfrArray", "matrix", function(from) {
     toNum(from)
 })
 
-print.mpfrArray <- function(x, digits = NULL, drop0trailing = FALSE, ...) {
-##                                                            -----
+print.mpfrArray <- function(x, digits = NULL, drop0trailing = FALSE,
+##							      -----
+			    right = TRUE, ...) {
 ## would like 'drop0... = TRUE', but that's only ok once we have a
 ## format() allowing to "jointly format a column"
 
@@ -157,7 +158,7 @@ print.mpfrArray <- function(x, digits = NULL, drop0trailing = FALSE, ...) {
         fx <- format(x, digits=digits, drop0trailing=drop0trailing)
         dim(fx) <- dim(x)
         dimnames(fx) <- dimnames(x)
-	print(fx, ..., quote = FALSE)
+	print(fx, ..., right=right, quote = FALSE)
     }
     invisible(x)
 }

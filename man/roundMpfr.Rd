@@ -1,9 +1,11 @@
 \name{roundMpfr}
 \alias{roundMpfr}
-\title{Rounding to binary bits, "mpfr-internally"}
-\description{Rounding to binary bits, not decimal digits. Closer to the number
-  representation, this also allows to increase or decrease a number's
-  precBits.
+\alias{setPrec}% <- so its found
+\title{Rounding to Binary bits, "mpfr-internally"}
+\description{Rounding to binary bits, not decimal digits.  Closer to the number
+  representation, this also allows to \emph{increase} or decrease a number's
+  precBits.  In other words, it acts as \code{setPrec()}, see
+  \code{\link{getPrec}()}.
 }
 \usage{
 roundMpfr(x, precBits)

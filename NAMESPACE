@@ -1,5 +1,18 @@
 useDynLib(Rmpfr, .registration=TRUE)
 
+if(!is.na(r <- suppressWarnings(packageDescription("gmp", fields="Version")))
+   && package_version(r) >= 0.5) {
+    ## only once we can require the new gmp
+## cheap, somewhat experimental -- hence the "."
+export(.mpfr2bigz, .bigz2mpfr)
+
+importFrom("gmp",
+           crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
+           ## not yet (maybe never) , biginteger_as, biginteger_as_character
+	   ## more to come
+	   )
+}## if( <new gmp> )
+
 exportClasses("mpfr1", "mpfr"
               , "mpfrArray"
               , "mpfrMatrix"
@@ -38,42 +51,11 @@ export(
        ## , ".packageName"
        ## , ".print.mpfr"
        ## , ".requireCachedGenerics"
-       ## .Call "Arith_d_mpfr"
-       ## .Call "Arith_i_mpfr"
-       ## .Call "Arith_mpfr"
-       ## .Call "Arith_mpfr_d"
-       ## .Call "Arith_mpfr_i"
-       ## .Call "Compare_mpfr"
-       ## .Call "Compare_mpfr_d"
-       ## .Call "Compare_mpfr_i"
        , "Ai"
        , "Bernoulli"
        , "Const"
        , "Ei"
        , "Li2"
-       ## .Call "Math_mpfr"
-       ## .Call "R_mpfr_atan2"
-       ## .Call "R_mpfr_beta"
-       ## .Call "R_mpfr_choose"
-       ## .Call "R_mpfr_fac"
-       ## .Call "R_mpfr_get_default_prec"
-       ## .Call "R_mpfr_get_version"
-       ## .Call "R_mpfr_hypot"
-       ## .Call "R_mpfr_is_finite"
-       ## .Call "R_mpfr_is_infinite"
-       ## .Call "R_mpfr_is_integer"
-       ## .Call "R_mpfr_is_na"
-       ## .Call "R_mpfr_is_zero"
-       ## .Call "R_mpfr_jn"
-       ## .Call "R_mpfr_lbeta"
-       ## .Call "R_mpfr_poch"
-       ## .Call "R_mpfr_round"
-       ## .Call "R_mpfr_set_debug"
-       ## .Call "R_mpfr_set_default_prec"
-       ## .Call "R_mpfr_yn"
-       ## .Call "Rmpfr_abs"
-       ## .Call "Rmpfr_minus"
-       ## .Call "Summary_mpfr"
        , "all.equal"
        , "aperm"
        , "apply" ## <- we make it S4 generic
@@ -82,11 +64,8 @@ export(
        , "beta" , "lbeta"
        ## S3 "c.mpfr"
        , "cbind"
-       , "chooseMpfr", "chooseMpfr.all"
-       ## .Call "const_asMpfr"
+       , "chooseMpfr", "chooseMpfr.all", "sumBinomMpfr"
        , "crossprod"
-       ## .Call "d2mpfr1"
-       ## .Call "d2mpfr1_list"
        , "erf" , "erfc"
        , "factorial"
        , "factorialMpfr"
@@ -103,9 +82,6 @@ export(
        , "mpfr.is.0"
        , "mpfr.is.integer"
        , "mpfr2array"
-       ## .Call "mpfr2d"
-       ## .Call "mpfr2i"
-       ## .Call "mpfr2str"
        , "mpfrArray"
        , "mpfrVersion"
        , "mpfr_default_prec"
@@ -113,15 +89,9 @@ export(
        , "pnorm"
        , "pochMpfr"
        , "print.integrate"
-       ## S3 "print.mpfr"
-       ## S3 "print.mpfr1"
-       ## S3 "print.mpfrArray"
-       ## .Call "print_mpfr"
-       ## .Call "print_mpfr1"
        , "rbind"
        , "roundMpfr"
        , "seqMpfr"
-       ## .Call "str2mpfr1_list"
        , "t"
        , "tcrossprod"
        , "toNum"
@@ -130,6 +100,7 @@ export(
        , "y0", "y1", "yn"
        , "zeta"
        )
+
 
 exportMethods(
               ## "own generics":
@@ -152,6 +123,7 @@ exportMethods(
               , "colSums", "colMeans"
               , "rowSums", "rowMeans"
 )
+
 
 S3method(c, mpfr)
 

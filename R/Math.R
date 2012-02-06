@@ -122,7 +122,7 @@ chooseMpfr <- function(a, n) {
     stopifnot(n >= 0)
     if(!is(a, "mpfr")) { ## use high enough default precision
         lc <- lchoose(a,n)
-        precB <- ceiling(max(lc[is.finite(lc)])/log(2))
+        precB <- if(any(iF <- is.finite(lc))) ceiling(max(lc[iF])/log(2)) else 0
         ## add n bits for the n multiplications (and recycle {a,n} to same length)
         a <- mpfr(a, precBits = n + max(2, precB))
     } else if((ln <- length(n)) != 1 && ln != length(a))
@@ -132,20 +132,48 @@ chooseMpfr <- function(a, n) {
     setDataPart(a, .Call(R_mpfr_choose, a, n))
 }
 
-chooseMpfr.all <- function(n) { ## return   chooseMpfr(n, 1:n)  "but smartly"
+chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
+    ## return   chooseMpfr(n, k0:n) or (-1)^k * choose...  "but smartly"
     if(!is.numeric(n) || (n <- as.integer(n)) < 1)
 	stop("n must be integer >= 1")
-    if(n == 1) return(mpfr(1, 32))
+    stopifnot(is.numeric(n. <- k0), n. == (k0 <- as.integer(k0)),
+              k0 <= n)
+    sig <- if(alternating) (-1)^(k0:n) else rep.int(1, (n-k0+1))
+    if(n == 1) return(mpfr(sig, 32))
     ## else : n >= 2
-    n2 <- n %/% 2
+    n2 <- n %/% 2 # >= 1
     prec <- ceiling(lchoose(n,n2)/log(2)) # number of bits needed in result
-    precBits <- max(2, n2 +  prec) # need more for cumprod(), and division
-    n2. <- mpfr(n2, precBits)
-    r <- cumprod(seqMpfr(mpfr(n, precBits), n+1-n2., length.out=n2)) /
+    precBxtr <- max(2, n2 + prec) # need more for cumprod(), and division
+    n2. <- mpfr(n2, precBxtr)
+    r <- cumprod(seqMpfr(mpfr(n, precBxtr), n+1-n2., length.out=n2)) /
         cumprod(seqMpfr(1, n2., length.out=n2))
-    r <- roundMpfr(r, max(2,prec))
-    c(r[c(seq_len(n2-1+(n%%2)), n2:1)], 1)
+    prec <- max(2,prec)
+    if(is.numeric(precBits) && (pB <- as.integer(round(precBits))) > prec)
+	prec <- pB
+    r <- roundMpfr(r, precBits = prec)
+    ##
+    ii <- c(seq_len(n2-1+(n%%2)), n2:1)
+    if(k0 >= 2) ii <- ii[-seq_len(k0 - 1)]
+    one <- .d2mpfr1(1, precBits=prec)
+    r <- c(if(k0 == 0) one, getD(r)[ii], one)
+    if(alternating) {
+	for(i in seq_along(r)) if(sig[i] == -1)
+	    slot(r[[i]], "sign", check=FALSE) <- - 1L
+    }
+    new("mpfr", r)
+}## {chooseMpfr.all}
+
+
+## http://en.wikipedia.org/wiki/N%C3%B6rlund%E2%80%93Rice_integral
+## also deals with these alternating binomial sums
+sumBinomMpfr <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
+{
+    ## Note: n0 = 0, or 1 is typical, and hence chooseMpfr.all() makes sense
+    stopifnot(0 <= n0, n0 <= n, is.function(f))
+    sum(chooseMpfr.all(n, k0=n0, alternating=alternating) *
+        f(mpfr(n0:n, precBits=precBits)))
 }
+
 
 
 ##' Rounding to binary bits, not decimal digits. Closer to the number
@@ -157,8 +185,6 @@ chooseMpfr.all <- function(n) { ## return   chooseMpfr(n, 1:n)  "but smartly"
 ##' @author Martin Maechler
 roundMpfr <- function(x, precBits) {
     stopifnot(is(x, "mpfr"))
-    ## x@.Data[] <- .Call(R_mpfr_round, x, precBits)
-    ## x
     setDataPart(x, .Call(R_mpfr_round, x, precBits))
 }
 

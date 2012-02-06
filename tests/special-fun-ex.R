@@ -18,6 +18,27 @@ stopifnot(range(x) == 0:1
 u <- 7*x - 2
 stopifnot(all.equal(pnorm(as.numeric(u)),
 		    as.numeric(pnorm(u)), tol = 1e-14))
+## systematic random input testing:
+nSim <- 50
+n2 <- 100
+for(n in 1:nSim) {
+    N <- rpois(1, lambda=n2)
+    x <- rnorm(N)
+    m <- rnorm(N, sd = 1/32)
+    s <- rlnorm(N, sd = 1/8)
+    for(LOG in c(TRUE,FALSE))
+        for(L.T in c(TRUE,FALSE)) {
+            p. <- pnorm( x, m=m,sd=s, log.p=LOG, lower.tail=L.T)
+            stopifnot(all.equal(p., pnorm(mpfr(x, precBits=48),m=m,sd=s, log.p=LOG, lower.tail=L.T),
+                                tol = 64e-16))
+            stopifnot(all.equal(p.,
+                                pnorm(mpfr(x, precBits=60),m=m,sd=s, log.p=LOG, lower.tail=L.T),
+                                tol = 2*.Machine$double.eps))
+        }
+    cat(".")
+};cat("\n")
+
+
 
 ### Riemann's Zeta function:
 

@@ -99,7 +99,6 @@
 
 \alias{show,mpfr-method}
 \alias{show,mpfr1-method}
-\alias{print.mpfr}
 \alias{print.mpfr1}
 %
 \description{

@@ -3,6 +3,7 @@
 \alias{getPrec}
 \alias{mpfr_default_prec}
 \alias{mpfr2array}
+\alias{print.mpfr}
 \alias{print.mpfrArray}
 \alias{toNum}
 \title{
@@ -16,7 +17,10 @@
 getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA)
 getD(x)
 mpfr_default_prec(prec)
-\method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE, \dots)
+\S3method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE,
+      right = TRUE, \dots)
+\S3method{print}{mpfr}(x, digits = NULL, drop0trailing = TRUE,
+      right = TRUE, \dots)
 toNum(from)
 mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 }
@@ -34,6 +38,9 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
   \item{prec}{a positive integer, or missing.}
   \item{drop0trailing}{logical indicating if trailing \code{"0"}s should
     be omitted.}
+  \item{right}{logical indicating \code{print()}ing should right
+    justify the strings; see \code{\link{print.default}()} to which it
+    is passed.}
   \item{digits, \dots}{further arguments to print methods.}
   \item{dim, dimnames}{for \code{"\linkS4class{mpfrArray}"}
     construction.}
@@ -49,7 +56,9 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 }
 \value{
   \code{getPrec(x)} returns a \code{\link{integer}} vector of the same
-  length as \code{x},
+  length as \code{x}.
+  If you need to \emph{change} the precision of \code{x}, i.e., need
+  something like \dQuote{setPrec}, use \code{\link{roundMpfr}()}.
 
   \code{getD(x)} is intended to be a fast version of \code{x@.Data},
   and should not be used outside of lower level functions.

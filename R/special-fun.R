@@ -3,56 +3,60 @@
 erf <- function(x) {
     if(is.numeric(x)) 2 * pnorm(x * sqrt(2)) - 1
     else if(is(x, "mpfr")) { # maybe also mpfrMatrix
-        ##new("mpfr", .Call(Math_mpfr, x, .Math.codes[["erf"]]))
-        x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erf"]])
-        x
+	##new("mpfr", .Call(Math_mpfr, x, .Math.codes[["erf"]]))
+	x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erf"]])
+	x
     }
     else stop("invalid class(x): ", class(x))
 }
 ##    pnorm(x* sqrt(2)) = (1 + erf(x))/2
-##==> pnorm(x.)  = (1 + erf(x./sqrt(2)))/2
+##==> pnorm(x.)	 = (1 + erf(x./sqrt(2)))/2
+
+##    pnorm(x* sqrt(2), lower=FALSE) = erfc(x)/2
+##==> pnorm(x., lower=TRUE)  = erfc(x./sqrt(2))/2
+erfc <- function(x) {
+    if(is.numeric(x)) 2 * pnorm(x * sqrt(2), lower.tail = FALSE)
+    else if(is(x, "mpfr")) {
+	x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erfc"]])
+	x
+    }
+    else stop("invalid class(x): ", class(x))
+}
 
 pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 {
     if(is.numeric(q) && is.numeric(mean) && is.numeric(sd))
-        .Internal(pnorm(q, mean, sd, lower.tail, log.p))
+	.Internal(pnorm(q, mean, sd, lower.tail, log.p))
     else if(is(q, "mpfr") || is(mean, "mpfr") || is(sd, "mpfr")) {
-        stopifnot(length(lower.tail) == 1, length(log.p) == 1)
-        q <- as(q, "mpfr")
-	prec.q <- max(.getPrec(q))
-        rt2 <- sqrt(mpfr(2, prec.q))
-        if(lower.tail) {
-            if(log.p && all(mean == 0))
-                ## log(sd/2 * (1 + erf(q/rt2)))
-                log(sd/2) + log1p(erf(q/rt2))
-            else {
-                r <- mean + sd/2 * (1 + erf(q/rt2))
-                if(log.p) log(r) else r
-            }
-        } else { ## upper.tail
-            if(log.p && all(mean == 0))
-                ## log(sd/2 * erfc(q/rt2))
-                log(sd/2) + log(erfc(q/rt2))
-            else {
-                r <- mean + sd/2 * erfc(q/rt2)
-                if(log.p) log(r) else r
-            }
-        }
-
+	stopifnot(length(lower.tail) == 1, length(log.p) == 1)
+	rr <- q <- (as(q, "mpfr") - mean) / sd
+	if(any(neg <- (q < 0))) ## swap those:	Phi(-z) = 1 - Phi(z)
+	    rr[neg] <- pnorm(-q[neg], lower.tail = !lower.tail, log.p=log.p)
+	if(any(pos <- !neg)) {
+	    q <- q[pos]
+	    prec.q <- max(.getPrec(q))
+	    rt2 <- sqrt(mpfr(2, prec.q))
+	    rr[pos] <- if(lower.tail) {
+		eq2 <- erf(q/rt2)
+		if(log.p && any(sml <- abs(eq2) < .5)) {
+		    r <- q
+		    r[ sml] <- log1p(eq2[sml]) - log(2)
+		    r[!sml] <- log((1 + eq2[!sml])/2)
+		    r
+		}
+		else {
+		    r <- (1 + eq2)/2
+		    if(log.p) log(r) else r
+		}
+	    } else { ## upper.tail
+		r <- erfc(q/rt2) / 2
+		if(log.p) log(r) else r
+	    }
+	}
+	rr
     } else stop("invalid arguments (q,mean,sd)")
-}
+}#{pnorm}
 
-
-erfc <- function(x) {
-    if(is.numeric(x)) 2 * pnorm(x * sqrt(2), lower.tail = FALSE)
-    else if(is(x, "mpfr")) {
-        x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erfc"]])
-        x
-    }
-    else stop("invalid class(x): ", class(x))
-}
-##    pnorm(x* sqrt(2), lower=FALSE) = erfc(x))/2
-##==> pnorm(x., lower=TRUE)  = erfc(x./sqrt(2))/2
 
 
 ## zeta()
@@ -135,7 +139,7 @@ yn <- function(n, x) {
 ###-------- 2-argument cases -------
 
 ## We want to automatically construct the methods needed:
-## But atan2() as argument list and  signature  (y, x)
+## But atan2() as argument list and  signature	(y, x)
 ## where  beta() has  (a,b)
 
 mpfrMath2setMeth.y.x <- function(fname, Csub) {
@@ -155,26 +159,26 @@ mpfrMath2setMeth.y.x <- function(fname, Csub) {
 
 
     setMethod(fname, signature(y = "mpfrArray", x = "mpfrArray"),
-              function(y, x) {
-                  if(dim(x) != dim(y))
-                      stop("array dimensions differ")
-                  x@.Data[] <- .Call(Csub, y, x)
-                  x
-              })
+	      function(y, x) {
+		  if(dim(x) != dim(y))
+		      stop("array dimensions differ")
+		  x@.Data[] <- .Call(Csub, y, x)
+		  x
+	      })
     setMethod(fname, signature(y = "mpfrArray", x = "ANY"),
-              function(y, x) {
-                  if(length(y) %% length(x) != 0)
-                      stop("length of first argument (array) is not multiple of the second argument's one")
-                  y@.Data[] <- .Call(Csub, y, as(x, "mpfr"))
-                  y
-              })
+	      function(y, x) {
+		  if(length(y) %% length(x) != 0)
+		      stop("length of first argument (array) is not multiple of the second argument's one")
+		  y@.Data[] <- .Call(Csub, y, as(x, "mpfr"))
+		  y
+	      })
     setMethod(fname, signature(y = "ANY", x = "mpfrArray"),
-              function(y, x) {
-                  if(length(x) %% length(y) != 0)
-                      stop("length of second argument (array) is not multiple of the first argument's one")
-                  x@.Data[] <- .Call(Csub, as(y, "mpfr"), x)
-                  x
-              })
+	      function(y, x) {
+		  if(length(x) %% length(y) != 0)
+		      stop("length of second argument (array) is not multiple of the first argument's one")
+		  x@.Data[] <- .Call(Csub, as(y, "mpfr"), x)
+		  x
+	      })
 
 } ## end{mpfrMath2setMeth.y.x}
 
@@ -198,26 +202,26 @@ mpfrMath2setMeth.a.b <- function(fname, Csub) {
 
 
     setMethod(fname, signature(a = "mpfrArray", b = "mpfrArray"),
-              function(a, b) {
-                  if(dim(b) != dim(a))
-                      stop("array dimensions differ")
-                  b@.Data[] <- .Call(Csub, a, b)
-                  b
-              })
+	      function(a, b) {
+		  if(dim(b) != dim(a))
+		      stop("array dimensions differ")
+		  b@.Data[] <- .Call(Csub, a, b)
+		  b
+	      })
     setMethod(fname, signature(a = "mpfrArray", b = "ANY"),
-              function(a, b) {
-                  if(length(a) %% length(b) != 0)
-                      stop("length of first argument (array) is not multiple of the second argument's one")
-                  a@.Data[] <- .Call(Csub, a, as(b, "mpfr"))
-                  a
-              })
+	      function(a, b) {
+		  if(length(a) %% length(b) != 0)
+		      stop("length of first argument (array) is not multiple of the second argument's one")
+		  a@.Data[] <- .Call(Csub, a, as(b, "mpfr"))
+		  a
+	      })
     setMethod(fname, signature(a = "ANY", b = "mpfrArray"),
-              function(a, b) {
-                  if(length(b) %% length(a) != 0)
-                      stop("length of second argument (array) is not multiple of the first argument's one")
-                  b@.Data[] <- .Call(Csub, as(a, "mpfr"), b)
-                  b
-              })
+	      function(a, b) {
+		  if(length(b) %% length(a) != 0)
+		      stop("length of second argument (array) is not multiple of the first argument's one")
+		  b@.Data[] <- .Call(Csub, as(a, "mpfr"), b)
+		  b
+	      })
 
 } ## end{mpfrMath2setMeth.a.b}
 

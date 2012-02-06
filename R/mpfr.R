@@ -68,7 +68,8 @@ getD <- function(x) { attributes(x) <- NULL; x }
 .mpfr.debug <- function(i = NA)
     .Call(R_mpfr_set_debug, as.integer(i))
 
-print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
+print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE,
+		       right = TRUE, ...) {
     stopifnot(is(x, "mpfr"), is.null(digits) || digits >= 2)
     ## digits = NA --> the inherent precision of x will be used
     n <- length(x)
@@ -81,7 +82,7 @@ print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
     cat(n, "'mpfr'", if(n == 1) "number" else "numbers", ch.prec, "\n")
     if(n >= 1)
 	print(format(x, digits=digits, drop0trailing=drop0trailing), ...,
-	      quote = FALSE)
+	      right=right, quote = FALSE)
     ## .Call(print_mpfr, x, as.integer(digits))
     invisible(x)
 }
@@ -146,9 +147,12 @@ setReplaceMethod("[", signature(x = "mpfr", i = "missing", j = "missing",
 				 pmax(getPrec(value), .getPrec(x)))))
 setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
 				value = "ANY"),
-	  function(x,i,j, ..., value)
-		 .mpfr.repl(x, i, value = mpfr(value, precBits =
-				  pmax(getPrec(value), .getPrec(x[i])))))
+	  function(x,i,j, ..., value) {
+	      if(length(xi <- x[i]))
+		  .mpfr.repl(x, i, value = mpfr(value, precBits =
+				   pmax(getPrec(value), .getPrec(xi))))
+	      else x # nothing to replace
+	  })
 
 
 ## I don't see how I could use setMethod("c", ...)
@@ -378,16 +382,15 @@ setMethod("seq", c(from="ANY", to="ANY", by = "mpfr"), seqMpfr)
 
 }##--not yet-- defining seq() methods -- as it fails
 
-## the fast mpfr-only version - should not return NULL
+## the fast mpfr-only version - should *not* return empty, hence the default:
 .getPrec <- function(x) {
     if(length(x)) vapply(getD(x), slot, 1L, "prec")
     else mpfr_default_prec()
 }
 ## the user version
 getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
-    ## if(!length(x)) ## NULL (from sapply(.) below) is not ok
-    ##     return(mpfr_default_prec())
-    if(isTRUE(is.mpfr) || is(x,"mpfr")) vapply(getD(x), slot, 1L, "prec")
+    if(isTRUE(is.mpfr) || is(x,"mpfr"))
+	vapply(getD(x), slot, 1L, "prec")
     else if(is.character(x)) ## number of digits --> number of bits
 	ceiling(log2(base) * nchar(gsub("[-.]", '', x)))
     else if(is.logical(x))

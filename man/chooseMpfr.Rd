@@ -21,26 +21,36 @@
 }
 \usage{
 chooseMpfr (a, n)
-chooseMpfr.all(n)
+chooseMpfr.all(n, precBits=NULL, k0=1, alternating=FALSE)
 pochMpfr(a, n)
 }
 \arguments{
   \item{a}{a numeric or \code{\linkS4class{mpfr}} vector.}
   \item{n}{an integer vector; if not of length one, \code{n} and
     \code{a} are recycled to the same length.}
+  \item{precBits}{integer or NULL for increasing the default precision
+    of the result.}
+  \item{k0}{integer scalar}
+  \item{alternating}{logical, for \code{chooseMpfr.all()}, indicating if
+    \emph{alternating sign} coefficients should be returned, see below.}
 }
 \note{
-  Yes, it would be desirable that both functions also work with a
-  \emph{vector} \code{n} (and recycle the shorter of \code{a} and
-  \code{n}).  Patches are welcome :-)
-
   If you need high precision \code{choose(a,n)} (or Pochhammer(a,n)) for
-  large \code{n}, do work with the corresponding
+  large \code{n}, maybe better work with the corresponding
   \code{\link{factorial}(mpfr(..))}, or \code{\link{gamma}(mpfr(..))}
   terms.
 }
 \value{
-  an \code{\linkS4class{mpfr}} vector as \code{a}.
+  For
+  \describe{
+    \item{\code{chooseMpfr()}, \code{pochMpfr()}:}{an
+      \code{\linkS4class{mpfr}} vector of length \code{max(length(a),
+	length(n))};}
+    \item{\code{chooseMpfr.all(n, k0)}:}{a \code{mpfr} vector of length
+      \code{n-k0+1}, of binomial coefficients \eqn{C_{n,m}}{C[n,m]}
+      or, if \code{alternating} is true, \eqn{(-1)^m\cdot C_{n,m}}{(-1)^m * C[n,m]}
+      for \eqn{m \in}{m in} \code{k0:n}.}
+  }
 }
 \seealso{
   \code{\link{choose}(n,m)} computes the binomial coefficient
@@ -63,7 +73,8 @@ stopifnot(pochMpfr(a, 10) == px,
 stopifnot(all.equal(c1, choose(1000:997, 60), tol=1e-12))
 
 ## --- Experimenting & Checking
-n.set <- c(1:20,50:55, 100:105, 200:203, 500:503, 699:702, 999:1006)
+n.set <- c(1:10, 20, 50:55, 100:105, 200:203, 300:303, 500:503,
+           699:702, 999:1001)
 C1 <- C2 <- numeric(length(n.set))
 for(i.n in seq_along(n.set)) {
   cat(n <- n.set[i.n],":")
@@ -78,7 +89,7 @@ matplot(n.set, cbind(C1,C2), type="b", log="xy",
 legend("topleft", c("chooseMpfr.all(n)", "chooseMpfr(n, 1:n)"),
        pch=as.character(1:2), col=1:2, lty=1:2, bty="n")
 
-## Currently, chooseMpfr.all() is faster only for large n (~= 600)
+## Currently, chooseMpfr.all() is faster only for large n (>= 300)
 ## That would change if we used C-code for the *.all() version
 }
 \keyword{arith}

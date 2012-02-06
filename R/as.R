@@ -28,6 +28,8 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
     else new("mpfr", ml)
 }
 
+## to be used in our own low-level R programming
+.d2mpfr1 <- function(x, precBits) .Call(d2mpfr1, x, precBits, "N")
 setAs("numeric", "mpfr1", ## use default precision of 128 bits
       function(from) .Call(d2mpfr1, from, 128L, "N"))# <- round to [N]earest
 setAs("numeric", "mpfr", function(from) mpfr(from, 128L))

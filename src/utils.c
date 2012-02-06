@@ -83,6 +83,7 @@ int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
 
 /** Binomial Coefficient --
  * all initialization and cleanup is called in the caller
+ * @result R = choose(X, n)
  */
 int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
 {
@@ -92,17 +93,22 @@ int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
     mp_prec_t p_X = mpfr_get_prec(X);
 
     mpfr_init2(x, p_X); mpfr_set(x, X, RND);
-    mpfr_init2(r, p_X); mpfr_set(r, X, RND);
-    for(i=1; i < n; ) {
-	mpfr_sub_si(x, x, 1L, RND); // x = X - i
-	mpfr_mul   (r, r, x, RND); // r := r * x = X(X-1)..(X-i)
-	mpfr_div_si(r, r, ++i, RND);
-	// r := r / (i+1) =  X(X-1)..(X-i) / (1*2..*(i+1))
+    mpfr_init2(r, p_X);
+    if(n > 0) {
+	mpfr_set(r, X, RND);
+	for(i=1; i < n; ) {
+	    mpfr_sub_si(x, x, 1L, RND); // x = X - i
+	    mpfr_mul   (r, r, x, RND); // r := r * x = X(X-1)..(X-i)
+	    mpfr_div_si(r, r, ++i, RND);
+	    // r := r / (i+1) =  X(X-1)..(X-i) / (1*2..*(i+1))
 #ifdef DEBUG_Rmpfr
-	Rprintf("my_mpfr_choose(): X (= X_0 - %d)= ", i); R_PRT(x);
-	Rprintf("\n --> r ="); R_PRT(r); Rprintf("\n");
+	    Rprintf("my_mpfr_choose(): X (= X_0 - %d)= ", i); R_PRT(x);
+	    Rprintf("\n --> r ="); R_PRT(r); Rprintf("\n");
 #endif
+	}
     }
+    else // n = 0
+	mpfr_set_si(r, (long) 1, RND);
     ans = mpfr_set(R, r, RND);
     mpfr_clear (x);
     mpfr_clear (r);
@@ -120,15 +126,20 @@ int my_mpfr_poch (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
     mp_prec_t p_X = mpfr_get_prec(X);
 
     mpfr_init2(x, p_X); mpfr_set(x, X, RND);
-    mpfr_init2(r, p_X); mpfr_set(r, X, RND);
-    for(i=1; i < n; i++) {
-	mpfr_add_si(x, x, 1L, RND); // x = X + i
-	mpfr_mul(r, r, x, RND); // r := r * x = X(X+1)..(X+i)
+    mpfr_init2(r, p_X);
+    if(n > 0) {
+	mpfr_set(r, X, RND);
+	for(i=1; i < n; i++) {
+	    mpfr_add_si(x, x, 1L, RND); // x = X + i
+	    mpfr_mul(r, r, x, RND); // r := r * x = X(X+1)..(X+i)
 #ifdef DEBUG_Rmpfr
-	Rprintf("my_mpfr_poch(): X (= X_0 + %d)= ", i); R_PRT(x);
-	Rprintf("\n --> r ="); R_PRT(r); Rprintf("\n");
+	    Rprintf("my_mpfr_poch(): X (= X_0 + %d)= ", i); R_PRT(x);
+	    Rprintf("\n --> r ="); R_PRT(r); Rprintf("\n");
 #endif
+	}
     }
+    else // n = 0
+	mpfr_set_si(r, (long) 1, RND);
     ans = mpfr_set(R, r, RND);
     mpfr_clear (x);
     mpfr_clear (r);
@@ -321,7 +332,7 @@ SEXP _FNAME(SEXP x, SEXP y) {					\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));			\
     }								\
 								\
-    MISMATCH_WARN;						\
+    /* MISMATCH_WARN; R does not warn either*/			\
     mpfr_clear (x_i); mpfr_clear (y_i);				\
     mpfr_free_cache();						\
     UNPROTECT(3);						\
@@ -365,7 +376,7 @@ SEXP _FNAME(SEXP x, SEXP y) {						\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));				\
     }									\
 									\
-    MISMATCH_WARN;							\
+    /* MISMATCH_WARN; R does not warn either*/				\
     mpfr_clear (x_i);							\
     mpfr_free_cache();							\
     UNPROTECT(nprot);							\

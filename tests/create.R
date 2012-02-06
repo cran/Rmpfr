@@ -5,6 +5,9 @@ require("Rmpfr")
 pi. <- Const("pi", prec = 260)
 pi. # nicely prints 80 digits [260 * log10(2) ~= 78.3 ~ 80]
 
+## This failed (in mpfr2str(.)) with a seg.fault:
+c(mpfr(1, prec=3), pi.)
+
 ## This is TRUE for 0 and -0 :
 Zero <- mpfr(c(0,1/-Inf), 20)
 stopifnot(mpfr.is.0(Zero))
