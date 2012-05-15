@@ -1,3 +1,20 @@
+2012-05-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/as.R (formatN.mpfr): add method
+	* NAMESPACE: import S3 generic 'formatN' from gmp.
+
+2012-05-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* NAMESPACE: import S3 generic 'is.whole' from gmp( >= 0.5-2) now.
+	* man/is.whole.Rd: only mpfr method.
+
+2012-04-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version, Depends): 0.4-7; depend on new gmp;
+	can get rid of  if(<gmp recent enough>) tests.
+
+	* R/gmp-convert.R (.bigq2mpfr): new.
+
 2012-02-06  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.4-6, (Depends): gmp, not just "suggest"..

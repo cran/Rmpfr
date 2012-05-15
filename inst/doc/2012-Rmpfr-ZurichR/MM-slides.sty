@@ -1,0 +1,48 @@
+%%% Useful abbreviations for slides in English / German
+%%% Both for 'seminar' and 'beamer' ....
+
+\newcommand{\headingCmd}[2]{%
+  \begin{center} \large\bf #1{#2}%
+  \end{center}
+  \vspace{1ex minus 1ex}}
+% use this one here:
+\newcommand{\heading}[1]{\headingCmd{\shadowbox}{#1}}
+\newcommand{\headM}[1]{\headingCmd{\fbox}{#1}}
+\newcommand{\headline}[1]{\headingCmd{\ }{#1}}
+
+\newcommand{\Em}{\hspace*{1em}}
+\newcommand{\Emm}{\hspace*{2em}}
+
+%-- Small title :
+\newcommand{\BF}[1]{\textbf{#1:}\Em\ignorespaces}
+%%-- should define this as \emph for text  (and FIX the FONT-LOCKING!)
+\newcommand{\U}[1]{\underline{#1}}%% 'emphasize' für Folien
+\newcommand{\Ul}[1]{\underline{#1}}%% = underline für Skript UND Folien
+
+%% Idee von Werner Stahel : Für Linien umbrüche etc
+
+\newcommand{\ALSO}{\ \ensuremath{\Longrightarrow}\ }%       ===>
+\newcommand{\Also}{\ \ensuremath{\longrightarrow}\ }%       --->
+\newcommand{\EQ}{\ \ \ensuremath{\Longleftrightarrow}\ \ }% <==>
+\newcommand{\Vs}{\ \ \ensuremath{\longleftrightarrow}\ \ }% <-->
+\newcommand{\nlQ}{\\ \Emm}%-- New line and Indent
+\newcommand{\nlQeng}{\\[-1ex] \Emm}%-- \Nlin ``eng''
+
+\newcommand{\nlALSO}{\nlQ \ALSO}
+\newcommand{\nlAlso}{\nlQ \Also}
+
+\newcommand{\qqquad}{\qquad\qquad}
+\newcommand{\qqqquad}{\qqquad\qqquad}
+
+\newcommand{\MidLine}{\par\noindent\centerline{\rule{.6\textwidth}{0.3mm}}\par}
+
+%%-------> THESE SHOULD go to  /u/sfs/tex/tex/latex/texab.sty : !!!!! ----
+\newenvironment{Nitemize}{\begin{itemize}%
+ \itemsep=-.7ex plus .1ex minus .1ex\topsep=-1.6ex plus .1ex minus .1ex}%
+{\end{itemize}} % I can change  \itemsep , but this fails for  topsep ...
+\newenvironment{Ndescription}{\begin{description}%
+ \itemsep=-.7ex plus .1ex minus .1ex\topsep=-1.6ex plus .1ex minus .1ex}%
+{\end{description}} % I can change  \itemsep , but this fails for  topsep ...
+\newenvironment{Nenumerate}{\begin{enumerate}%
+ \itemsep=-.7ex plus .1ex minus .1ex\topsep=-1.6ex plus .1ex minus .1ex}%
+{\end{enumerate}} % I can change  \itemsep , but this fails for  topsep ...

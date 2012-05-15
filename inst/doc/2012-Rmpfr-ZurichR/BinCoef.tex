@@ -1,0 +1,86 @@
+
+
+\setkeys{Gin}{width=\textwidth}
+
+\subsection{Exact Factorials and Binomial Coefficients}
+%% From ~/R/Pkgs/Rmpfr/inst/doc/Rmpfr-pkg.tex
+%% ---------------------------------------
+\begin{frame}[fragile]\frametitle{Exact Factorials and Binomial Coefficients}
+In combinatorics or when computing series,
+work with \emph{exact} factorials or binomial coefficients.
+E.g.,need all factorials $k!$, for $k=1,2,\dots,24$ or a full row
+of Pascal's triangle, i.e., want all $\binom{n}{k}$ for $n=50$.
+
+With \Rp's double precision,
+% and standard printing precision
+% <<factorial-1>>=
+% ns <- 1:24 ; factorial(ns)
+% @
+% the full precision of $24!$ is clearly not printed. However,
+and if you display its full internal precision,
+\begin{Schunk}
+\begin{Sinput}
+> noquote(sprintf("%-30.0f", factorial(24)))
+\end{Sinput}
+\begin{Soutput}
+[1] 620448401733239409999872      
+\end{Soutput}
+\end{Schunk}
+\smallskip
+then it is obviously wrong for $24!$, as its last digits are known to be \code{0}.
+
+\medskip
+
+Easily get full precision results, by
+replacing ``simple'' numbers by ``mpfr''s:
+\begin{Schunk}
+\begin{Sinput}
+> ns <- mpfr(5:24, 120) ; factorial(ns)
+\end{Sinput}
+\end{Schunk}
+\begin{Schunk}
+\begin{Soutput}
+20 'mpfr' numbers of precision  120   bits 
+ [1]                      120                      720
+ [3]                     5040                    40320
+ [5]                   362880                  3628800
+ [7]                 39916800                479001600
+ ....... 
+ ....... 
+[13]          355687428096000         6402373705728000
+[15]       121645100408832000      2432902008176640000
+[17]     51090942171709440000   1124000727777607680000
+[19]  25852016738884976640000 620448401733239439360000
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]
+Or for the 70-th Pascal triangle row, $\binom{n}{k}$ for $n=70$ and $k=0,\dots,n$,
+\begin{Schunk}
+\begin{Sinput}
+> chooseMpfr.all(n = 70)
+\end{Sinput}
+\end{Schunk}
+\begin{Schunk}
+\begin{Soutput}
+70 'mpfr' numbers of precision  67   bits 
+ [1]                    70                  2415                 54740
+ [4]                916895              12103014             131115985
+ [7]            1198774720            9440350920           65033528560
+[10]          396704524216         2163842859360        10638894058520
+ ....... 
+ ....... 
+[25]   6455761770304780752  11173433833219812840  18208558839321176480
+[28]  27963143931814663880  40498346384007444240  55347740058143507128
+[31]  71416438784701299520  87038784768854708790 100226479430802391940
+[34] 109069992321755544170 112186277816662845432 109069992321755544170
+ ....... 
+ ....... 
+[67]                 54740                  2415                    70
+[70]                     1
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+%%% TeX-master: "Maechler_Rmpfr.tex"

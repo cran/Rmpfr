@@ -1,5 +1,7 @@
 #### All  coercion methods for the  "Rmpfr" classes
 
+if(getRversion() < "2.15")
+    paste0 <- function(...) paste(..., sep = '')
 
 mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
 {
@@ -129,20 +131,20 @@ formatMpfr <-
 	iPos <- Ex >= 0	 & ii ## i.e., ex	 in {1,2..., digits}
 
 	nZeros <- function(n) ## e.g.  nZeros(2:0) gives  c("00","0", "")
-	    sapply(n, function(k) paste(rep.int("0", k), collapse = ""))
+	    vapply(n, function(k) paste(rep.int("0", k), collapse = ""), "")
 	if(any(eq <- (Ex == digits))) {
-	    r[eq] <- paste(r[eq], "0", sep="")
+	    r[eq] <- paste0(r[eq], "0")
 	    Ex[eq] <- Ex[eq] + 1L
 	}
 	if(any(iNeg)) { ## "0.00..." : be careful with minus sign
 	    if(any(isMin <- hasMinus[iNeg])) {
 		rr <- r[iNeg]
 		rr[isMin] <- substring(rr[isMin], 2)
-		r[iNeg] <- paste(c("","-")[1+isMin], "0.",
-				 nZeros(-ex[iNeg]), rr, sep="")
+		r[iNeg] <- paste0(c("","-")[1+isMin], "0.",
+                                  nZeros(-ex[iNeg]), rr)
 	    }
 	    else {
-		r[iNeg] <- paste("0.", nZeros(-ex[iNeg]), r[iNeg], sep="")
+		r[iNeg] <- paste0("0.", nZeros(-ex[iNeg]), r[iNeg])
 	    }
 	}
 	if(any(iPos)) ## "xy.nnnn" :
@@ -156,6 +158,10 @@ formatMpfr <-
 	      preserve.width = if (trim) "individual" else "common")
 }
 setMethod("format", "mpfr", formatMpfr)
+
+formatN.mpfr <- function(x, drop0trailing = TRUE, ...) {
+    paste0(formatMpfr(x, drop0trailing=drop0trailing, ...),"_M")
+}
 
 setAs("mpfr", "character", function(from)
       format(from, digits=NULL, drop0trailing = TRUE))

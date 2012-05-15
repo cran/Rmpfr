@@ -17,13 +17,15 @@ mpfr.is.0 <- function(x) .Call(R_mpfr_is_zero, x)
 mpfr.is.integer <- function(x)
     .Call(R_mpfr_is_integer, x)
 
-is.whole <- function(x) {
-    if(is.integer(x) || is.logical(x)) rep.int(TRUE, length(x))
-    else if(is.numeric(x)) x == floor(x)
-    else if(is.complex(x)) x == round(x)
-    else if(is(x,"mpfr")) mpfr.is.integer(x)
-    else rep.int(FALSE, length(x))
-}
+## is.whole() is now S3 generic, with default method in gmp
+## is.whole <- function(x) {
+##     if(is.integer(x) || is.logical(x)) rep.int(TRUE, length(x))
+##     else if(is.numeric(x)) x == floor(x)
+##     else if(is.complex(x)) x == round(x)
+##     else if(is(x,"mpfr")) mpfr.is.integer(x)
+##     else rep.int(FALSE, length(x))
+## }
+is.whole.mpfr <- function(x) mpfr.is.integer(x)
 
 mpfr_default_prec <- function(prec) {
     if(missing(prec) || is.null(prec))

@@ -60,7 +60,7 @@ setClass("mpfrMatrix",
 	     else TRUE
 	 })
 
-## "atomic vectors" (-> ?is.atomic ) -- as in "Matrix"..
+## "atomic vectors" (-> ?is.atomic ) -- exactly as in "Matrix":
 ## ---------------
 setClassUnion("atomicVector", ## "double" is not needed, and not liked by some
 	      members = c("logical", "integer", "numeric",
@@ -73,14 +73,22 @@ setClassUnion("atomicVector", ## "double" is not needed, and not liked by some
 ## which they would be if we used simply "vector"
 setClassUnion("array_or_vector",
 	      members = c("array", "matrix", "atomicVector"))
-## However, the above could be too large: "vector" contains much!
+## However (FIXME?), the above is too large: "matrix" extends "vector"
+## and that has "character", "list", ...
+
+## S3 classes from package gmp --- to be used in signatures {together with "mpfr"}:
+setOldClass("bigz")
+setOldClass("bigq")
 
 ## For this class, we want to define  '...' methods for cbind & rbind :
 ## FIXME(?): "array_or_vector" also contains "character"
 ##         (and even if it wouldn't, a "matrix" could have "character" entries!)
 setClassUnion("Mnumber",
 	      members = c("array_or_vector", # *but* must be numeric-like
-	      "mpfr", "mpfrArray", "mpfrMatrix"))
+	      "mpfr", "mpfrArray", "mpfrMatrix",
+	      ## from package 'gmp' :
+	      "bigz", "bigq"))
+
 if(FALSE) { ## if we did this, then ... {see below}
     setValidity("Mnumber",
 		function(object) {

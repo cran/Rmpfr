@@ -1,40 +1,53 @@
 \name{gmp-conversions}
+\alias{.bigq2mpfr}
 \alias{.bigz2mpfr}
 \alias{.mpfr2bigz}
-\title{Conversion Utilities  gmp <-> Rmpfr}
+\alias{coerce,bigq,mpfr-method}
+\alias{coerce,bigz,mpfr-method}
+\title{Conversion Utilities gmp <-> Rmpfr}
 \description{
   Coerce from and to big integers (\code{\link[gmp]{bigz}}) and
+  \code{\link{mpfr}} numbers.
+
+  Further, coerce from big rationals (\code{\link[gmp]{bigq}}) to
   \code{\link{mpfr}} numbers.
 }
 \usage{
 .bigz2mpfr(x)
 .mpfr2bigz(x, mod = NA)
+.bigq2mpfr(from)
+% as(x, "mpfr")
 }
 \arguments{
-  \item{x}{an \R object of class \code{bigz} or \code{mpfr} respectively.}
+  \item{x}{an \R object of class \code{bigz} or \code{mpfr}
+  respectively.}
+  \item{from}{an \R object of class \code{bigq}.}
   \item{mod}{a possible modulus, see \code{\link[gmp]{as.bigz}} in
     package \pkg{gmp}.}
 }
-% \details{
-% }
+\details{
+  Note that we also provide the natural (S4) coercions,
+  \code{as(x, "mpfr")} for \code{x} inheriting from class \code{"bigz"}
+  or \code{"bigq"}.
+}
 \value{
   a numeric vector of the same length as \code{x}, of the desired class.
 }
 \seealso{
-  \code{\link{mpfr}()} and \code{\link[gmp]{as.bigz}} in package
-  \pkg{gmp}.
+  \code{\link{mpfr}()}, \code{\link[gmp]{as.bigz}} and
+  \code{\link[gmp]{as.bigq}} in package \pkg{gmp}.
 }
 \examples{
-## Only if you have a recent enough version of R package "gmp" :
-if(!is.na(r <- suppressWarnings(packageDescription("gmp",
-                                                   fields="Version")))
-   && package_version(r) >= 0.5) {
-
  S <- gmp::Stirling2(50,10)
  show(S)
- SS <- S * gmp::as.bigz(1:3)^128
+ SS <- S * as.bigz(1:3)^128
  stopifnot(all.equal(log2(SS[2]) - log2(S), 128, tol=1e-15),
            identical(SS, .mpfr2bigz(.bigz2mpfr(SS))))
-}% end{if}
+
+ ## rational --> mpfr:
+ sq <- SS / as.bigz(2)^100
+ MP <- as(sq, "mpfr")
+ stopifnot(identical(MP, .bigq2mpfr(sq)),
+           SS == MP * as(2, "mpfr")^100)
 }
 \keyword{arith}% <- or better ?

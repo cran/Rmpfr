@@ -1,0 +1,610 @@
+\documentclass[article,nojss]{jss}
+%% NOTA BENE: More definitions --> further down
+%%%%%%%%%%%%
+%
+\author{Martin M\"achler \\ ETH Zurich%
+\\ April 2012 {\tiny (\LaTeX'ed \today)}%---- for now
+}
+\title{Accurately Computing $\log(1 - \exp(-\abs{a}))$ \\
+  Assessed by the \pkg{Rmpfr} package}
+%% for pretty printing and a nice hypersummary also set:
+\Plainauthor{Martin M\"achler} %% comma-separated
+\Plaintitle{Accurately Computing log(1 - exp(.)) -- Assessed by Rmpfr}
+%
+%\VignetteIndexEntry{Acccurately Computing log(1 - exp(.)) -- Assessed by Rmpfr}
+%\VignetteDepends{Rmpfr}
+%\VignetteDepends{sfsmisc}
+\SweaveOpts{engine=R,strip.white=true, width=7, height=5}
+\SweaveOpts{pdf=FALSE, eps=FALSE, grdevice = pdfaCrop}
+%      defined in R "<<preliminaries>>":     ^^^^^^^^
+
+%% an abstract and keywords
+\Abstract{In this note, we explain how $f(a) = \log(1 - e^{-a}) =\log(1 -
+  \exp(-a))$ can be computed accurately, in a simple and optimal manner,
+  building on the two related auxiliary functions
+  \code{log1p(x)} ($=\log(1+x)$) and
+  \code{expm1(x)} ($=\exp(x)-1 = e^x - 1$).
+  The cutoff, $a_0$, in use in \R{} since % version 1.9.0, April
+  2004, is shown to be optimal both theoretically and empirically, using
+  \pkg{Rmpfr} high precision arithmetic.
+}
+\Keywords{Accuracy, Cancellation Error, R, MPFR, Rmpfr}
+%% at least one keyword must be supplied
+
+%% publication information
+%% NOTE: Typically, this can be left commented and will be filled out by the technical editor
+%% \Volume{13}
+%% \Issue{9}
+%% \Month{September}
+%% \Year{2004}
+%% \Submitdate{2004-09-29}
+%% \Acceptdate{2004-09-29}
+
+%% The address of (at least) one author should be given
+%% in the following format:
+\Address{
+	Martin M\"achler\\
+	Seminar f\"ur Statistik, HG G~16\\
+	ETH Zurich\\
+	8092 Zurich, Switzerland\\
+	E-mail: \email{maechler@stat.math.ethz.ch}\\
+	URL: \url{http://stat.ethz.ch/people/maechler}
+}
+%% It is also possible to add a telephone and fax number
+%% before the e-mail in the following format:
+%% Telephone: +43/1/31336-5053
+%% Fax: +43/1/31336-734
+
+%% for those who use Sweave please include the following line (with % symbols):
+%% MM: this is "substituted" by  jss.cls:
+%% need no \usepackage{Sweave.sty}
+
+\usepackage[american]{babel}%for American English
+\usepackage{amsmath}%sophisticated mathematical formulas with amstex (includes \text{})
+\usepackage{mathtools}%fix amsmath deficiencies
+\usepackage{amssymb}%sophisticated mathematical symbols with amstex (includes \mathbb{})
+% \usepackage{amsthm}%theorem environments
+\usepackage{bm}%for bold math symbols: \bm (= bold math)
+\usepackage{enumitem}%for automatic numbering of new enumerate environments
+
+% This is already in jss above -- but withOUT the  fontsize=\small part !!
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,fontshape=sl}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontsize=\small,fontshape=sl}
+%%~-~-~-~ Make space between Sinput and Soutput smaller: ~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~
+%%--- Best advice, now from :
+% http://tex.stackexchange.com/questions/19359/reduce-space-between-sinput-and-soutput
+\newlength{\FVtopsep}
+\newlength{\FVpartopsep}
+\newlength{\FVparskip}% <- added as "no. 3" by MMa (after reading fancyvrb doc)
+\makeatletter
+\FV@AddToHook{\FV@ListParameterHook}{\topsep=\FVtopsep\partopsep=\FVpartopsep\parskip=\FVparskip}
+\makeatother
+% Control the spacing around the Sinput and Soutput environments by using the lengths
+%
+%     \FVtopsep
+%     \FVpartopsep
+%     \FVparskip
+%
+% Both *topsep  act quite similar most of the time, more details
+% can be found in the fancyvrb documentation on page 46. (MM: ==> I add FVparskip)
+%To kill all extra spacing between the environments, use {0pt} in all these
+%MM: When all three(!) are {0pt}, there's a large gap *after* Schunk (nothing in %between)
+%--  and that (end gap) get's smaller when I set all to {1pt} -- logic??
+%___TODO/FIXME: Set of experiments (with smaller Sweave file)___
+\setlength{\FVtopsep}{1pt}
+\setlength{\FVpartopsep}{1pt}
+\setlength{\FVparskip}{\parskip}% default: \parskip
+%%~-~-~-~ End {Sweave space handling} ~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~~-~-~-~~-~-~
+%%
+\setkeys{Gin}{width=\textwidth}% Sweave.sty has {width=0.8\textwidth}
+
+\newcommand*{\R}{\proglang{R}}%{\textsf{R}}
+\newcommand*{\CRANpkg}[1]{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+
+\newcommand*{\eps}{\varepsilon}
+%- \abs{ab}  -->  | ab |   ``absolut Betrag''
+        \newcommand{\abs}[1]    {\left| #1 \right|}
+% \renewcommand*{\S}{\operatorname*{S}}
+% \newcommand*{\tS}{\operatorname*{\tilde{S}}}
+% \newcommand*{\ran}{\operatorname*{ran}}
+%\newcommand*{\sgn}{\operatorname*{sgn}}
+\DeclareMathOperator{\sign}{sign}
+% \renewcommand*{\L}{\mathcal{L}}
+% \newcommand*{\Li}{\mathcal{L}^{-1}}
+% \newcommand*{\LS}{\mathcal{LS}}
+% \newcommand*{\LSi}{\LS^{-1}}
+\renewcommand*{\O}{\mathcal{O}}
+% \newcommand*{\Geo}{\operatorname*{Geo}}
+% \newcommand*{\Exp}{\operatorname*{Exp}}
+% \newcommand*{\Sibuya}{\operatorname*{Sibuya}}
+% \newcommand*{\Log}{\operatorname*{Log}}
+% \newcommand*{\U}{\operatorname*{U}}
+% \newcommand*{\B}{\operatorname*{B}}
+% \newcommand*{\NB}{\operatorname*{NB}}
+% \newcommand*{\N}{\operatorname*{N}}
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\Cor}{Corr}
+\DeclareMathOperator{\cor}{corr}
+% \newcommand*{\Var}{\operatorname*{Var}}
+% \newcommand*{\Cov}{\operatorname*{Cov}}
+% \newcommand*{\Cor}{\operatorname*{Cor}}
+%
+% \newcommand*{\loglp}{\operatorname*{log1p}}
+% \newcommand*{\expml}{\operatorname*{expm1}}
+%% cannot use "1" in latex macro name -- use "l":
+\newcommand*{\loglp}{\mathrm{log1p}}
+\newcommand*{\expml}{\mathrm{expm1}}
+
+%% journal specific aliases
+\newcommand*{\setcapwidth}[1]{}
+
+%% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+%% include your article here, just as usual
+%% Note that you should use the \pkg{}, \proglang{} and \code{} commands.
+% \section[About Java]{About \proglang{Java}}
+%% Note: If there is markup in \(sub)section, then it has to be escape as above.
+%%
+%% Note: These are explained in '?RweaveLatex' :
+<<preliminaries, echo=FALSE, results=hide>>=
+## Our custom graphics device:
+pdfaCrop <- function(name, width, height, ...) {
+    fn <- paste(name, "pdf", sep = ".")
+    if(FALSE)## debug
+        cat("pdfaCrop: fn = ",fn,"; call:\n\t",deparse(match.call()),"\n")
+    grDevices::pdf(fn, width = width, height = height, onefile=FALSE)# ...)
+    assign(".pdfaCrop.name", fn, envir = globalenv())
+}
+## This is used automagically :
+pdfaCrop.off <- function() {
+    dev.off()# for the pdf
+    f <- get(".pdfaCrop.name", envir = globalenv())
+    ## and now crop that file:
+    pdfcrop <- "pdfcrop" # relying on PATH - fix if needed
+    pdftex  <- "pdftex"  # relying on PATH - fix if needed
+    system(paste(pdfcrop, "--pdftexcmd", pdftex, f, f, "1>/dev/null 2>&1"),
+           intern=FALSE)
+}
+op.orig <-
+options(width = 75,
+	SweaveHooks= list(fig=function() par(mar=c(5.1, 4.1, 1.1, 2.1))),
+	digits = 5,
+	useFancyQuotes = "TeX",
+	## for JSS, but otherwise MM does not like it:
+	## prompt="R> ",
+	continue="  ")# 2 (or 3) blanks: use same length as 'prompt'
+
+if((p <- "package:fortunes") %in% search())
+    try(detach(p, unload=TRUE, char=TRUE))
+Sys.setenv(LANGUAGE = "en")
+if(.Platform$OS.type != "windows")
+  Sys.setlocale("LC_MESSAGES","C")
+library("sfsmisc")# e.g., for eaxis()
+library("Rmpfr")
+.plot.BC <- FALSE # no Box-Cox plot
+@
+%\section[Introduction]{Introduction \small~\footnote{\mythanks}}
+\section{Introduction: Not log() nor exp(), but log1p() and expm1()}
+
+In applied mathematics, it has been known for a very long time that direct
+computation of $\log(1 + x)$ suffers from severe cancellation (in ``$1 +
+x$'') whenever $\abs{x} \ll 1$, and for that reason, we have provided
+\code{log1p(x)} in \R{}, since R version 1.0.0 (released, Feb.~29, 2000). Similarly,
+\code{log1p()} has been provided by C math libraries and has become part of C
+language standards around the same time, see, for example, \citet{ieee04:log1p}.
+
+Analogously, since \R{}~1.5.0 (April 2002), the function \code{expm1(x)}
+computes $\exp(x) - 1 = e^x - 1$ accurately also for $\abs{x} \ll 1$, where $e^x
+\approx 1$ is (partially) cancelled by ``$-\: 1$''.
+
+In both cases, a simple solution %approach
+for small $\abs{x}$ is to use a few terms of the Taylor series,
+as
+\begin{align}
+  \label{eq:Taylor-log1p}
+  \loglp(x) &= \log(1 + x) = x - x^2/2 + x^3/3 -+ \dots,
+  \ \mathrm{for}\ \ \abs{x} < 1, %\mathrm{and}
+  \\
+  \label{eq:Taylor-expm1}
+  \expml(x) &= \exp(x) - 1 = x + x^2/2! + x^3/3! + \dots,
+  \ \mathrm{for}\ \ \abs{x} < 1,
+\end{align}
+and $n!$ denotes the factorial.
+
+We have found, however, that in some situations, the use of \code{log1p()} and
+\code{expm1()} may not be sufficient to prevent loss of numerical
+accuracy.  The topic of this note is to analyze the important case of computing
+$\log\left(1 - e^x \right) = \log(1 - \exp(x))$ for $x < 0$, computations needed
+in accurate computations of the beta, gamma, Weibull and logistic distributions,
+and % because of the latter,
+even for the logit link function in logistic regression. For the beta and
+gamma distributions, see, for example, % e.g.,
+\citet{DidAM92}\footnote{In the Fortran source, file ``\code{708}'', also
+  available as \url{http://www.netlib.org/toms/708},
+  the function ALNREL() computes log1p() and REXP() computes expm1().},
+and further references mentioned in \R{}'s \code{?pgamma} and
+\code{?pbeta} help pages.
+For the logistic distribution, $F_L(x) = \frac{e^x}{1+e^x}$, the inverse,
+aka quantile function is $q_L(p) = \mathrm{logit}(p) := \log \frac{p}{1-p}$.
+If the argument $p$ is provided on the log scale,
+$\tilde p := \log p$, hence $\tilde p \le 0$, we need
+\begin{align}
+  \label{eq:qlogis}
+  \mathtt{qlogis}(\tilde p,\: \mathtt{log.p=TRUE}) =
+  q_L\!\left(e^{\tilde p}\right) = \mathrm{logit}\!\left(e^{\tilde p}\right)
+%  = \log\Bigl(\frac{e^{\tilde p}}{1-e^{\tilde p}}\Bigr)
+  = \log      \frac{e^{\tilde p}}{1-e^{\tilde p}}
+  = \tilde p - \log\left(1 - e^{\tilde p} \right),
+\end{align}
+and the last term is exactly the topic of this note.
+
+\section{log1p() and expm1() for log(1 - exp(x))}
+Contrary to what one would expec, for computing
+$\log\left(1 - e^x \right) = \log(1 - \exp(x))$ for $x < 0$, neither
+\begin{align}
+  \label{eq:f.expm1}
+  \log(1 - \exp(x)) &= \log(-\expml(x)), \ \ \mathrm{nor}\\
+  \label{eq:f.log1p}
+  \log(1 - \exp(x)) &= \loglp(-\exp(x)),
+\end{align}
+are uniformly sufficient for numerical evaluation.
+In (\ref{eq:f.log1p}), when $x$ approaches $0$, $\exp(x)$ approaches $1$
+and loses accuracy. In (\ref{eq:f.expm1}), when $x$ is large, $\expml(x)$
+approaches $-1$ and similarly loses accuracy.
+Because of this, we will propose to use a function \code{log1mexp(x)}
+which uses either \code{expm1} (\ref{eq:f.expm1}) or
+\code{log1p} (\ref{eq:f.log1p}), where appropriate.  Already in
+\R{}~1.9.0 (\cite{R-190}), % (April 2004)
+we have defined the macro \verb|R_D_LExp(x)| to provide these two cases %branches
+automatically\footnote{look for ``log(1-exp(x))'' in
+  \url{http://svn.r-project.org/R/branches/R-1-9-patches/src/nmath/dpq.h}}.
+
+To investigate the accuracy losses empirically, we make use of the \R{} package
+\CRANpkg{Rmpfr} for arbitrarily accurate numerical computation, and use the
+following simple functions:
+<<def-t3, echo=FALSE>>=
+library(Rmpfr)
+
+t3.l1e <- function(a)
+{
+    c(def   = log(1 - exp(-a)),
+      expm1 = log( -expm1(-a)),
+      log1p = log1p(-exp(-a)))
+}
+@
+<<def-leg, echo=FALSE>>=
+leg <- local({ r <- body(t3.l1e)[[2]]; r[[1]] <- `expression`; eval(r) })
+## will be used below
+@
+<<def-test-2, echo=FALSE, eval=FALSE>>=
+##' The relative Error of log1mexp computations:
+relE.l1e <- function(a, precBits = 1024) {
+    stopifnot(is.numeric(a), length(a) == 1, precBits > 50)
+    da <- t3.l1e(a)  ## double precision
+    a. <- mpfr(a, precBits=precBits)
+    ## high precision *and* using the correct case:
+    mMa <- if(a <= log(2)) log(-expm1(-a.)) else log1p(-exp(-a.))
+    structure(as.numeric(1 - da/mMa), names = names(da))
+}
+@
+<<def-test-funs>>=
+<<def-t3>>
+<<def-test-2>>
+@
+where the last one, \code{relE.l1e()} computes the relative error of three
+different ways to compute  $\log(1 - \exp(-a))$ for positive $a$
+(instead of computing   $\log(1 - \exp(x))$ for negative $x$).
+
+%% FIXME "cache = TRUE": ---
+<<comp-big,eval=FALSE, echo=FALSE>>=
+a.s <- 2^seq(-55, 10, length = 256)
+ra.s <- t(sapply(a.s, relE.l1e))
+<<bigpic-show, eval=FALSE>>=
+<<comp-big>>
+cbind(a.s, ra.s) # comparison of the three approaches
+<<bigpic-do, echo=FALSE>>=
+<<comp-big>>
+capture.and.write(cbind(a.s, ra.s), 8, last = 6)
+@
+This is revealing: Neither method, log1p or expm1, is uniformly good enough.
+Note that for large $a$, the relative errors evaluate to \code{1}. This
+is because all three double precision methods give 0, \emph{and} that is
+the best approximation in double precision (but not in higher \code{mpfr}
+precision), hence no problem at all, and we can restrict ourselves to
+smaller $a$ (smaller than about 710, here).% < \approx 710$, here.
+<<drop-large-a, echo=FALSE>>=
+ii <- a.s < 710
+a.s  <-  a.s[ii]
+ra.s <- ra.s[ii, ]
+@
+
+What about really small $a$'s?
+<<a.small>>=
+t3.l1e(1e-20)
+as.numeric(t3.l1e(mpfr(1e-20, 256)))
+@
+% ##    expm1      def    log1p
+% ## -46.0517     -Inf     -Inf
+% as.numeric():
+% ## [1] -46.0517 -46.0517 -46.0517
+so, indeed,  the \code{expm1} method is absolutely needed here.
+
+Figure~\ref{fig:bigpic} visualizes the relative errors of the three methods.
+Note that the default basically gives the maximum of the two methods' errors,
+whereas the final \code{log1mexp()} function will have (approximately)
+minimal error of the two.
+%% --- Define figure_1 here ------------------------------
+<<bigpict-setup, eval=FALSE, echo=FALSE>>=
+par(mar = c(4.1,4.1,0.6,1.6))
+cc <- adjustcolor(c(4,1,2),.8, red.f=.7)
+lt <- c("solid","33","3262")
+ll <- c(.7, 1.5, 2)
+@
+%% main = "|relative errors| of three methods for log(1 - exp(-a))"
+<<bigpict-def, eval=FALSE>>=
+matplot(a.s, abs(ra.s), type = "l", log = "xy",
+        col=cc, lty=lt, lwd=ll, xlab = "a", ylab = "", axes=FALSE)
+legend("top", leg, col=cc, lty=lt, lwd=ll, bty="n")
+draw.machEps <- function(alpha.f = 1/3, col = adjustcolor("black", alpha.f)) {
+    abline(h = .Machine$double.eps, col=col, lty=3)
+    axis(4, at=.Machine$double.eps, label=quote(epsilon[c]), las=1, col.axis=col)
+}
+eaxis(1); eaxis(2); draw.machEps(0.4)
+@
+%% FIXME "cache = TRUE":  echo=FALSE: do not show already, but need (a.,ra2)
+<<zoomin-comp, echo=FALSE>>=
+a. <- (1:400)/256
+ra <- t(sapply(a., relE.l1e))
+ra2 <- ra[,-1]
+@
+\begin{figure}[htb!]
+\centering
+% increasing width --> effective LaTeX *height* will decrease
+<<bigpict-fig, fig=TRUE, echo=FALSE, height=5, width=7>>=
+<<bigpict-setup>>
+<<bigpict-def>>
+## draw the zoom-in region into the plot:
+yl <- range(pmax(1e-18, abs(ra2)))
+rect(min(a.), yl[1], max(a.), yl[2],
+     col= adjustcolor("black", .05), border="gray", pch = 5)
+@
+\setcapwidth{\textwidth}%
+  \caption{Absolute relative errors (with respect to 1024 bit \pkg{Rmpfr}
+    computation) of the default, $\log(1 - e^{-a})$, and the two methods
+    ``\code{expm1}'' $\log(-\expml(-a))$ and ``\code{log1p}'' $\loglp(-\exp(-a))$.
+    Figure~\ref{fig:zoomin-pic} will be a zoom into the gray rectangular region
+    where all three curves are close.}
+  \label{fig:bigpic}
+\end{figure}
+In Figure~\ref{fig:zoomin-pic} below, we zoom into the region where all
+methods have about the same (good) accuracy. The region is the
+rectangle defined by the ranges of \code{a.} and \code{ra2}:
+In Figure~\ref{fig:zoomin-pic} below, we zoom into the region where all
+methods have about the same (good) accuracy. The region is the
+rectangle defined by the ranges of \code{a.} and \code{ra2}:
+<<zoomin-show, eval=FALSE>>=
+<<zoomin-comp>>
+@
+In addition to zooming in Figure~\ref{fig:bigpic}, we want to smooth the
+two curves, using a method assuming
+approximately normal errors. Notice however that neither the original,
+nor the log-transformed values have approximately symmetric errors, so
+we use  \code{MASS::boxcox()} to determine the ``correct'' power transformation,
+<<boxcox>>=
+da <- cbind(a = a., as.data.frame(ra2))
+library(MASS)
+bc1 <- boxcox(abs(expm1) ~ a, data = da, lambda = seq(0,1, by=.01), plotit=.plot.BC)
+bc2 <- boxcox(abs(log1p) ~ a, data = da, lambda = seq(0,1, by=.01), plotit=.plot.BC)
+c(with(bc1, x[which.max(y)]),
+  with(bc2, x[which.max(y)]))## optimal powers
+## ==> taking ^ (1/3) :
+s1 <- with(da, smooth.spline(a, abs(expm1)^(1/3), df = 9))
+s2 <- with(da, smooth.spline(a, abs(log1p)^(1/3), df = 9))
+@
+and now plot a ``zoom--in'' of Figure~\ref{fig:bigpic}. This
+already suggests that the cutoff, $a_0 = \log 2$ is empirically very close to
+optimal.
+<<zoom-in-def-1, eval=FALSE>>=
+matplot(a., abs(ra2), type = "l", log = "y", # ylim = c(-1,1)*1e-12,
+        col=cc[-1], lwd=ll[-1], lty=lt[-1],
+        ylim = yl, xlab = "a", ylab = "", axes=FALSE)
+legend("topright", leg[-1], col=cc[-1], lwd=ll[-1], lty=lt[-1], bty="n")
+eaxis(1); eaxis(2); draw.machEps()
+lines(a., predict(s1)$y ^ 3, col=cc[2], lwd=2)
+lines(a., predict(s2)$y ^ 3, col=cc[3], lwd=2)
+@
+%% no title here: main = "|relative errors| of two methods for log(1 - exp(-a))")
+\enlargethispage{5ex}
+\begin{figure}[hbt!]
+\centering
+<<zoom-in-fig, fig=TRUE, height=5, width=8, echo=FALSE>>=
+cl2 <- "slateblue" # "gray35" # the color for "log(2)"
+par(mar = c(4.1,4.1,0.6,1.6))
+
+<<zoom-in-def-1>>
+
+abline(v = log(2), col = cl2, lty=4)
+axis(1, at=log(2), label=quote(a[0] == log~2), las=1,
+     col.axis=cl2, col=cl2, lty=4)
+## what system is it ?
+sysInf <- Sys.info()[c("sysname", "release", "nodename", "machine")]
+mtext(with(as.list(sysInf),
+	   paste0(sysname," ",release,"(",substr(nodename,1,16),") -- ",
+		  machine)),
+      side=1, adj=1, line=2.25, cex = 3/4)
+@
+\setcapwidth{\textwidth}%
+  \caption{A ``zoom in'' of Figure~\ref{fig:bigpic} showing the region
+    where the two basic methods, ``\code{expm1}'' and ``\code{log1p}'' switch their
+    optimality with respect to their relative errors.  Both have small
+    relative errors in this region, typically below $\eps_c :=$%
+    \code{.Machine\$double.eps} $=2^{-52} \approx 2.22\cdot 10^{-16}$.
+    \ \
+    The smoothed curves indicate crossover close to $a = a_0 := \log 2$.}
+  \label{fig:zoomin-pic}
+\end{figure}
+
+\paragraph{Why is it very plausible to take $a_0 := \log 2$ as approximately optimal cutoff?}
+
+Already from Figure~\ref{fig:zoomin-pic}, empirically, an optimal cutoff $a_0$ is
+around $0.7$.
+We propose to compute
+\begin{align}
+  \label{eq:def-log1mexp}
+  f(a) = \log\left(1 - e^{-a}\right) = \log(1 - \exp(-a)), \ \ a > 0,
+\end{align}
+by a new method or function \code{log1mexp(a)}.
+It needs a cutoff $a_0$ between choosing
+\code{expm1} for $0 < a \le a_0$  and
+\code{log1p} for $a > a_0$, i.e.,
+\begin{align}
+  \label{eq:log1mexp}
+  f(a) = \mathrm{log1mexp}(a) :=
+  \begin{cases}
+    \log(-\expml(-a))  &          0 <    a \le a_0  \ \ ( := \log 2 \approx 0.693) \\
+    \loglp(-\exp(-a))  & \phantom{0 < {}}a  >  a_0.
+  \end{cases}
+\end{align}
+The mathematical argument for choosing $a_0$ is quite simple, at least
+informally:
+In which situations does $1 - e^{-a}$ loose bits (binary digits) \emph{entirely
+independently} of the computational algorithm? Well, as soon as it
+``spends'' bits just to store its closeness to $1$. And that is as soon as
+$e^{-a} < \frac 1 2 = 2^{-1}$, because then, at least one
+bit cancels. This however is equivalent to $-a < \log(2^{-1}) = -\log(2)$ or
+$a > \log 2 =: a_0$.
+
+\section{Computation of log(1+exp(x))}
+Related to $\mathrm{log1mexp}(a)=\log(1 - e^{-a})$ is the
+log survival function of the logistic distribution % (see above)%: defined F_L
+$\log(1 - F_L(x)) = \log\frac{1}{1+e^x} = -\log(1 + e^x)$,
+\begin{align}
+  \label{eq:log1pexp}
+  g(x) := \log(1 + e^x) = \loglp(e^x),
+\end{align}
+(with a ``$+"$'' instead of a ``$-$'') which is easier to analyze and compute,
+its only problem being large $x$'s where $e^x$ % = \exp x$
+overflows numerically.
+As $g(x)= \log(1 + e^x) = \log(e^x(e^{-x} + 1)) = x + \log(1 + e^{-x})$, we see
+from (\ref{eq:Taylor-log1p}) that
+\begin{align}
+  \label{eq:log1pexp-asym}
+  g(x) = x + \log(1 + e^{-x}) = % \sim %\asymp
+%%  x + e^{-x}(1 - e^{-x}/2) + \O((e^{-x})^3),
+  x + e^{-x} + \O((e^{-x})^2),
+\end{align}
+for $x\to\infty$.
+Using double precision arithmetic, a fast and accurate computational method
+is to use
+%% The following is experimentation, not strictly needed for paper
+<<uniroot-x1, echo=FALSE, results=hide>>=
+f1 <- function(x) { x <- log1p(exp(x)) - x ; x[x==0] <- -1 ; x }
+u1 <- uniroot(f1, c(5, 50), tol=1e-13)
+str(u1, digits=10)
+x1 <- u1[["root"]]
+## Not used here: find x2, such that  x + exp(-x) =.= g(x) for x > x2
+f2 <- function(x) { x <- (x + exp(-x)) - log1p(exp(x))
+                   x[x==0] <- -1 ; x }
+u2 <- uniroot(f2, c(1, 20), tol=1e-13)
+str(u2, digits=10)
+x2 <- u2[["root"]]
+## but really the above is still ``non sense'': look at
+curve(log1p(exp(x)) - x,       33.1, 33.5, n=2^10) # for x1
+curve(x+exp(-x) - log1p(exp(x)), 15, 25,   n=2^11) # for x2
+@
+\begin{align}
+  \label{eq:log1pexp}
+  g(x) = \mathrm{log1pexp}(x) :=
+  \begin{cases}
+    \loglp(\exp(x))     & x <   x_1 := 33.3, \\
+    x                   & x \ge x_1,
+  \end{cases}
+\end{align}
+where $x_1$ can be replaced by a larger number such as $34$ (and even
+$100$, but not $800$\footnote{The \R{} plot
+  \code{curve(log1p(exp(x)) - x, 33.1, 33.5, n=2\^{}10)}
+  reveals a somewhat fuzzy cutoff $x_1$}).
+%%----- Ok, still do a little analysis --- invisibly mostly (eval=FALSE) here
+<<def-test-pfuns, echo=FALSE>>=
+t4p.l1e <- function(x)
+{
+    c(def   = log(1 + exp(x)),
+      log1p = log1p(exp(x)),
+      ## xlog1p = x + log1p(exp(-x)),
+      xpexp = x + exp(-x),
+      x = x)
+}
+leg <- local({ r <- body(t4p.l1e)[[2]]; r[[1]] <- `expression`; eval(r) })
+##' The relative Error of log1pexp computations:
+relE.pl1e <- function(x, precBits = 1024) {
+    stopifnot(is.numeric(x), length(x) == 1, precBits > 50)
+    dx <- t4p.l1e(x)  ## double precision
+    x. <- mpfr(x, precBits=precBits)
+    ## high precision *and* using the correct case:
+    mMx <- if(x < 0) log1p(exp(x.)) else x. + log1p(exp(-x.))
+    structure(as.numeric(1 - dx/mMx), names = names(dx))
+}
+@
+
+%%                      vvvvvvvvvv not currently
+<<comp-big, echo=FALSE, eval=FALSE>>=
+x.s <- seq(-100, 750, by = 5)  # <- the big picture
+x.s <- seq( 5, 60, length=512) # <- the zoom in
+rx.s <- t(sapply(x.s, relE.pl1e))
+@
+
+% \begin{figure}[hbt!]
+% \centering
+%                                                        vvvvvvvvvv not currently
+<<bigpict-2-fig, fig=TRUE, echo=FALSE, height=5,width=7, eval=FALSE>>=
+par(mar = c(4.1,4.1,0.6,1.6))
+cc <- adjustcolor(c(4,1,2,5),.8, red.f=.7)
+lt <- c("solid","33","3262","dotdash")
+ll <- c(.7, 1.5, 2, 2)
+ym <- 1e-18
+yM <- 1e-13
+matplot(x.s, pmax(pmin(abs(rx.s),yM),ym), type = "l", log = "y", axes=FALSE,
+        ylim = c(ym,yM), col=cc, lty=lt, lwd=ll, xlab = "x", ylab = "")
+legend("top", leg, col=cc, lty=lt, lwd=ll, bty="n")
+eaxis(1, at=pretty(range(x.s), n =12)); eaxis(2)
+draw.machEps(0.4); abline(v=0, col=adjustcolor("brown", 0.6), lty=3)
+@
+% increasing width --> effective LaTeX *height* will decrease
+% \setcapwidth{\textwidth}%
+%   \caption{Absolute relative errors (with respect to 1024 bit \pkg{Rmpfr}
+%     computation) of the default, $\log(1 - e^{-a})$, and the two methods
+%     ``\code{expm1}'' $\log(-\expml(-a))$ and ``\code{log1p}'' $\loglp(-\exp(-a))$.
+%     Note that the default basically gives the maximum of the two methods' errors,
+%     whereas the final \code{log1mexp()} function will have the minimum
+%     (approximately) of the two. \ \
+%     Figure~\ref{fig:zoomin-pic} will be a zoom into the gray rectangular region
+%     where all three curves are close.}
+%   \label{fig:log1pexp}
+% \end{figure}
+% Figure~\ref{fig:log1pexp} visualizes the relative errors of the methods,
+
+
+\section{Conclusion}
+We have used high precision arithmetic (\R{} package \pkg{Rmpfr}) to
+empirically verify that computing $f(a) = \log\left(1 - e^{-a}\right)$ is
+accomplished best via equation (\ref{eq:log1mexp}).
+In passing, we have also shown that accurate computation of $g(x) =
+\log(1+e^x)$ can be achieved via (\ref{eq:log1pexp}).
+
+\subsection*{Session Information}
+
+<<sessionInfo, results=tex>>=
+toLatex(sessionInfo())
+<<finalizing, echo=FALSE>>=
+options(op.orig)
+@
+
+\bibliography{log1mexp}
+
+\end{document}

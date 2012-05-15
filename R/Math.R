@@ -166,12 +166,22 @@ chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
 
 ## http://en.wikipedia.org/wiki/N%C3%B6rlund%E2%80%93Rice_integral
 ## also deals with these alternating binomial sums
-sumBinomMpfr <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
+##'
+##' version 1: already using the 'altnerating' arg in chooseMpfr.all()
+sumBinomMpfr.v1 <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
 {
     ## Note: n0 = 0, or 1 is typical, and hence chooseMpfr.all() makes sense
     stopifnot(0 <= n0, n0 <= n, is.function(f))
     sum(chooseMpfr.all(n, k0=n0, alternating=alternating) *
         f(mpfr(n0:n, precBits=precBits)))
+}
+##' version 2: chooseZ()*(-1)^(.) is considerably faster than chooseMpfr.all()
+sumBinomMpfr <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
+{
+    ## Note: n0 = 0, or 1 is typical..
+    stopifnot(0 <= n0, n0 <= n, is.function(f))
+    k <- n0:n
+    sum(chooseZ(n, k) * (-1)^(n-k) * f(mpfr(k, precBits=precBits)))
 }
 
 

@@ -1,11 +1,15 @@
 \name{formatMpfr}
 \Rdversion{1.1}
 \alias{formatMpfr}
+\alias{formatN.mpfr}
 \title{Formatting MPFR (multiprecision) Numbers}
 \description{
   Flexible formatting of \dQuote{multiprecision numbers}, i.e., objects
-  of class \code{\linkS4class{mpfr}}.  This is also the \code{mpfr}
-  method of the generic \code{\link{format}} function.
+  of class \code{\linkS4class{mpfr}}.  \code{formatMpfr()} is also the
+  \code{mpfr} method of the generic \code{\link{format}} function.
+
+  The \code{formatN()} methods for \code{\linkS4class{mpfr}} numbers
+  renders them differently than e.g., their double precision equivalents.
 }
 \usage{
 formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
@@ -13,6 +17,7 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
            big.mark = "", big.interval = 3L,
            small.mark = "", small.interval = 5L, decimal.mark = ".",
            zero.print = NULL, drop0trailing = FALSE, ...)
+\S3method{formatN}{mpfr}(x, drop0trailing = TRUE, \dots)
 }
 \arguments{
   \item{x}{an MPFR number (vector or array).}
@@ -52,6 +57,8 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
   the \code{\linkS4class{mpfr}} class description with its many methods.
   The \code{\link{format}} generic, and the \code{\link{prettyNum}}
   utility on which \code{formatMpfr} is based as well.
+  The S3 generic function \code{\link[gmp]{formatN}} from package
+  \pkg{gmp}.
 }
 \examples{
  ## Printing of MPFR numbers  uses formatMpfr() internally.
@@ -62,6 +69,9 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
  x3[4] <- 2^30
  x3[4] # automatically drops trailing zeros
  format(x3[1], dig = 41, small.mark = "'") # (41 - 1 = ) 40 digits after "."
+
+ rbind(formatN(           x3,  digits = 15),
+       formatN(as.numeric(x3), digits = 15))
 
  (Zero <- mpfr(c(0,1/-Inf), 20)) # 0 and "-0"
  xx <- c(Zero, 1:2, Const("pi", 120), -100*pi, -.00987)

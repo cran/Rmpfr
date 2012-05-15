@@ -23,10 +23,12 @@ erfc <- function(x) {
     else stop("invalid class(x): ", class(x))
 }
 
+## Using .Internal(pnorm(..)) is now forbidden by the Crania
+stats__pnorm <- stats::pnorm # only once ..
 pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 {
     if(is.numeric(q) && is.numeric(mean) && is.numeric(sd))
-	.Internal(pnorm(q, mean, sd, lower.tail, log.p))
+	stats__pnorm(q, mean, sd, lower.tail=lower.tail, log.p=log.p)
     else if(is(q, "mpfr") || is(mean, "mpfr") || is(sd, "mpfr")) {
 	stopifnot(length(lower.tail) == 1, length(log.p) == 1)
 	rr <- q <- (as(q, "mpfr") - mean) / sd

@@ -1,0 +1,96 @@
+\SweaveOpts{engine=R, keep.source=TRUE}
+\SweaveOpts{eps=FALSE, pdf=TRUE, width=9, height=6, strip.white=true}
+\setkeys{Gin}{width=\textwidth}
+
+<<preliminaries, echo=FALSE, results=hide>>=
+options(SweaveHooks= list(fig=function() par(mar=c(5.1, 4.1, 1.1, 2.1))),
+        width = 75,
+        digits = 7, # <-- here, keep R's default!
+        prompt = "> ",
+        continue="  ")
+try(Mlibrary(Rmpfr))
+stopifnot(require("Rmpfr"))
+@
+\subsection{Simple (semi-artificial!) Example: logit(exp(-L))}
+\begin{frame}[fragile]
+  Logistic regression: Computing ``logit()''s, $\log \frac{p}{1-p}$
+  accurately for very small $p$, i.e., $p = \exp(-L)$, or
+  \vspace*{-.6ex}
+  \[
+  \log\frac{p}{1-p} = \log p - \log(1 - p) = -L - \log(1 - \exp(-L)),
+  \]
+  \vspace*{-.5ex}
+
+  and hence $-\log(1 - \exp(-L))$ is needed, e.g.,
+  when p is really really close to 0, say $p = 10^{-1000}$, as then
+  we can only compute $\logit(p)$, if we specify  $L := -\log(p) \leftrightarrow p = \exp(-L)$.
+
+<<log1-exp-curve-10, fig=TRUE, height=3>>=
+curve(-log(1 - exp(-x)), 0, 10)
+@
+
+seems fine. --- ---  However, \dots
+\end{frame}
+
+\begin{frame}[fragile]
+However, further out to 50 (and on a log scale), we observe
+
+<<log1-exp-curve-log, fig=TRUE, width=8,height=5>>=
+curve(-log(1 - exp(-x)),  0, 50, log="y")
+@
+\\[-.6ex]
+which shows early underflow.
+\end{frame}
+
+\begin{frame}[fragile]
+<<p-log1mexp--def, echo=FALSE>>=
+## Nicer
+p.log1mexp <- function( n=400, col=2, colA = "blue3", lwd= 1.5, ...) {
+    cc <- curve(-log(1 - exp(-x)), 0, 50, 0, log="y", yaxt="n", n=n, col=col, lwd=lwd, ...)
+    sfsmisc::eaxis(2, labels=FALSE)
+    sfsmisc::eaxis(2, axTicks(2, log=par("ylog"))[c(TRUE,FALSE)])
+    arrows(38, 1e-15,38, 4e-17, col=colA, lwd=2, length= 1/12)
+    text  (38, 1e-15, "early underflow to 0", col=colA, adj=c(.2,-.5))
+    invisible(cc)
+}
+<<log1-exp-log-niceer, fig=TRUE, echo=FALSE>>=
+p.log1mexp()
+@
+\end{frame}
+
+\begin{frame}[fragile]
+What did happen?  Look at
+<<log1exp-ex>>=
+x <- -40:-35
+    -log(1 - exp(x))
+log(-log(1 - exp(x)))# --> -Inf values
+## ok, how about more accuracy
+x. <- mpfr(x, 120)
+log(-log(1 - exp(x.)))# aha... looks perfect now
+@
+\end{frame}
+
+\begin{frame}[fragile]
+And visually:
+<<plot-log1exp-ex, fig=TRUE>>=
+x <- seq(-40, -20, by = .5)
+plot(x,x, type="n", ylab="", ann=FALSE)
+lines(x, log(-log(1 - exp(x))), type = "o", col = "purple", lwd=3, cex = .6)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+Now repeat this with ``with accuracy'':
+<<plot-log1exp-mpfr, fig=TRUE, height=5.2>>=
+<<plot-log1exp-ex>>
+x. <- mpfr(x, 120)
+lines(x, log(-log(1 - exp(x.))), col=2, lwd=1.5)
+@
+\end{frame}
+
+
+%%% Local Variables:
+%%% TeX-command-default: "LaTeX PDF"
+%%% TeX-master: "Maechler_Rmpfr.tex"
+%%% End:
+

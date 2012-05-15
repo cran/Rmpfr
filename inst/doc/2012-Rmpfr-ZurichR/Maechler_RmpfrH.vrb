@@ -1,0 +1,22 @@
+\frametitle {Conclusion}
+  \begin{itemize}
+  \item  The package \pkg{Rmpfr} allows
+ to use arbitrary high precision numbers
+ instead of \R's double precision numbers in many \R\ computations and functions.
+
+\item
+ This is achieved by defining S4 classes of such numbers and vectors,
+ matrices, and arrays thereof, where all arithmetic and mathematical
+ functions work via the (GNU) MPFR C library, where MPFR is acronym for
+ ``\emph{\textbf{M}ultiple \textbf{P}recision \textbf{F}loating-Point \textbf{R}eliably}''.
+ MPFR is Free Software, available under the LGPL license, and
+ itself is built on the free GNU Multiple Precision arithmetic library (GMP).
+
+\item Consequently, by using \pkg{Rmpfr}, you can often call your \R\ function or
+ numerical code with mpfr--numbers instead of simple numbers, and all
+ results will automatically be much more accurate.
+
+ % Applications by the package author include testing of Bessel or
+ % polylog functions and distribution computations, e.g. for stable distributions.
+\end{itemize}
+

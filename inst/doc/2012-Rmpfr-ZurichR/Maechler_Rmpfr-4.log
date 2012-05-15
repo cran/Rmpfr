@@ -1,0 +1,784 @@
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.8.29)  24 JAN 2012 14:59
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**./Maechler_Rmpfr-4.tex
+(./Maechler_Rmpfr-4.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
+rman-x-2009-06-19, ngerman-x-2009-06-19, afrikaans, ancientgreek, ibycus, arabi
+c, armenian, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danis
+h, dutch, ukenglish, usenglishmax, esperanto, estonian, ethiopic, farsi, finnis
+h, french, galician, german, ngerman, swissgerman, monogreek, greek, hungarian,
+ icelandic, assamese, bengali, gujarati, hindi, kannada, malayalam, marathi, or
+iya, panjabi, tamil, telugu, indonesian, interlingua, irish, italian, kurmanji,
+ lao, latin, latvian, lithuanian, mongolian, mongolianlmc, bokmal, nynorsk, pol
+ish, portuguese, romanian, russian, sanskrit, serbian, serbianc, slovak, sloven
+ian, spanish, swedish, turkish, turkmen, ukrainian, uppersorbian, welsh, loaded
+.
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/pdfpages/pdfpages.sty
+Package: pdfpages 2011/03/10 v0.4n Insert pages of external PDF documents (AM)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/tools/calc.sty
+Package: calc 2007/08/22 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count87
+\calc@Bcount=\count88
+\calc@Adimen=\dimen103
+\calc@Bdimen=\dimen104
+\calc@Askip=\skip43
+\calc@Bskip=\skip44
+LaTeX Info: Redefining \setlength on input line 76.
+LaTeX Info: Redefining \addtolength on input line 77.
+\calc@Ccount=\count89
+\calc@Cskip=\skip45
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/eso-pic/eso-pic.sty
+Package: eso-pic 2010/10/06 v2.0c eso-pic (RN)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/atbegshi.sty
+Package: atbegshi 2011/01/30 v1.15 At begin shipout hook (HO)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2010/04/08 v1.3 Providing info/warning/message (HO)
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2011/04/18 v1.20 LaTeX kernel commands for general use (HO)
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in PDF mode is detected.
+))
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2007/01/21 v2.11 LaTeX color extensions (UK)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/latexconfig/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package xcolor Info: Driver file: pdftex.def on input line 225.
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
+\Gread@gobject=\count90
+)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1337.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1341.
+Package xcolor Info: Model `RGB' extended on input line 1353.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1355.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1356.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1357.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1358.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1359.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1360.
+))
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: pdftex.def on input line 91.
+)
+\Gin@req@height=\dimen105
+\Gin@req@width=\dimen106
+) (/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/pdfpages/pppdftex.def
+File: pppdftex.def 2011/03/10 v0.4n Pdfpages driver for pdfTeX (AM)
+)
+\AM@pagebox=\box26
+\AM@toc@title=\toks15
+\c@AM@survey=\count91
+\AM@templatesizebox=\box27
+)
+(./Maechler_Rmpfr-4.aux)
+\openout1 = `Maechler_Rmpfr-4.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+\AtBeginShipoutBox=\box28
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count92
+\scratchdimen=\dimen107
+\scratchbox=\box29
+\nofMPsegments=\count93
+\nofMParguments=\count94
+\everyMPshowfont=\toks16
+\MPscratchCnt=\count95
+\MPscratchDim=\dimen108
+\MPnumerator=\count96
+\makeMPintoPDFobject=\count97
+\everyMPtoPDFconversion=\toks17
+) (/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2011/04/22 v0.16 Utilities of pdfTeX for LuaTeX (HO)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2010/08/19 v1.1 Managing graphics extensions (HO)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2011/04/07 v1.3 Defining keys (HO)
+)) (/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2010/12/23 v3.10 Keyval support for LaTeX options (HO)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2011/04/07 v1.13 Key value parser (HO)
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2011/02/16 v1.5 Prefix for e-TeX command names (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 452.
+
+(/hg/s/linux/9/app/teTeX/07.11/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cf
+g
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+)) <Maechler_Rmpfr.pdf, id=3, page=1, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 364.19473pt x 273.14581pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=4, page=2, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 2>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page2 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 2>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page2 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=5, page=3, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 3>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page3 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 3>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page3 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=6, page=4, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 4>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page4 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 4>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page4 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 2>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page2 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 3>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page3 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 4>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page4 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [1
+
+ <./Maechler_Rmpfr.pdf{/hg/s/linux/9/app/teTeX/07.11/texmf-var/fonts/map/pdftex
+/updmap/pdftex.map}> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_
+Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=78, page=5, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 5>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page5 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 5>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page5 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=79, page=6, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 6>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page6 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 6>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page6 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=80, page=7, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 7>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page7 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 7>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page7 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=81, page=8, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 8>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page8 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 8>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page8 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 5>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page5 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 6>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page6 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 7>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page7 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 8>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page8 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [2 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=109, page=9, 364.19562pt x 273.14648p
+t>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 9>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page9 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 9>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page9 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=110, page=10, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 10>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page10 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 10>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page10 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=111, page=11, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 11>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page11 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 11>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page11 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=112, page=12, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 12>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page12 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 12>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page12 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 9>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page9 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 10>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page10 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 11>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page11 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 12>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page12 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [3 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=133, page=13, 364.19562pt x 273.14648
+pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 13>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page13 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 13>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page13 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=134, page=14, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 14>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page14 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 14>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page14 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=135, page=15, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 15>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page15 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 15>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page15 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=136, page=16, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 16>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page16 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 16>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page16 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 13>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page13 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 14>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page14 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 15>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page15 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 16>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page16 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [4 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=140, page=17, 364.19562pt x 273.14648
+pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 17>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page17 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 17>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page17 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=141, page=18, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 18>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page18 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 18>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page18 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=142, page=19, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 19>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page19 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 19>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page19 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=143, page=20, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 20>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page20 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 20>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page20 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 17>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page17 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 18>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page18 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 19>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page19 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 20>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page20 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [5 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=154, page=21, 364.19562pt x 273.14648
+pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 21>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page21 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 21>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page21 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=155, page=22, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 22>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page22 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 22>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page22 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=156, page=23, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 23>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page23 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 23>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page23 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=157, page=24, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 24>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page24 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 24>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page24 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 21>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page21 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 22>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page22 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 23>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page23 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 24>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page24 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [6 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=168, page=25, 364.19562pt x 273.14648
+pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 25>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page25 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 25>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page25 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=169, page=26, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 26>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page26 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 26>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page26 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=170, page=27, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 27>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page27 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 27>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page27 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=171, page=28, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 28>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page28 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 28>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page28 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 25>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page25 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 26>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page26 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 27>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page27 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 28>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page28 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [7 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=176, page=29, 364.19562pt x 273.14648
+pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 29>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page29 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 29>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page29 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=177, page=30, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 30>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page30 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 30>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page30 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=178, page=31, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 31>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page31 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 31>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page31 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+
+<Maechler_Rmpfr.pdf, id=179, page=32, 364.19562pt x 273.14648pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 32>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page32 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 32>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page32 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 29>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page29 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 30>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page30 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 31>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page31 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 32>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page32 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [8 <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Maechler_Rmpfr.pdf> <./Mae
+chler_Rmpfr.pdf>] <Maechler_Rmpfr.pdf, id=194, page=33, 364.19562pt x 273.14648
+pt>
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 33>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page33 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 33>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page33 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+ <use Maechler_Rmpfr.pdf, page 1>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page1 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+File: Maechler_Rmpfr.pdf Graphic file (type pdf)
+
+<use Maechler_Rmpfr.pdf, page 33>
+Package pdftex.def Info: Maechler_Rmpfr.pdf, page33 used on input line 4.
+(pdftex.def)             Requested size: 397.69334pt x 298.26974pt.
+ [9 <./Maechler_Rmpfr.pdf>]
+(./Maechler_Rmpfr-4.aux) ) 
+Here is how much of TeX's memory you used:
+ 2750 strings out of 493633
+ 41251 string characters out of 3140890
+ 98145 words of memory out of 3000000
+ 6042 multiletter control sequences out of 15000+200000
+ 3640 words of font info for 14 fonts, out of 3000000 for 9000
+ 831 hyphenation exceptions out of 8191
+ 41i,18n,47p,258b,401s stack positions out of 5000i,500n,10000p,200000b,50000s
+</hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmex10.pfb></hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi10.pfb></hg/s/linux/9/app/teTeX/07.11/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmmi8.pfb></hg/s/linux/9/app/teTeX/07.11/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmr10.pfb></hg/s/linux/9/app/teTeX/07.11/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></hg/s/linux/9/app/teTeX/07.11/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></hg/s/linux/9/app/teTeX/07
+.11/texmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></hg/s/linux/9/app/teT
+eX/07.11/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></hg/s/linux/9/app
+/teTeX/07.11/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></hg/s/linu
+x/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi10.pfb></hg/
+s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+</hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.
+pfb></hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+tt10.pfb></hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmtt12.pfb></hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmtt8.pfb></hg/s/linux/9/app/teTeX/07.11/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmtt9.pfb>
+Output written on Maechler_Rmpfr-4.pdf (9 pages, 271495 bytes).
+PDF statistics:
+ 224 PDF objects out of 1000 (max. 8388607)
+ 139 compressed objects within 2 object streams
+ 0 named destinations out of 1000 (max. 500000)
+ 176 words of extra memory for PDF output out of 10000 (max. 10000000)
+

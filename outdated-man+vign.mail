@@ -1,0 +1,68 @@
+From maechler  Fri Mar  9 04:25:18 2012
+X-VM-v5-Data: ([t nil nil nil nil nil nil nil nil]
+	["273" "Friday" "9" "March" "2012" "03:21:00" "+0000" "Jerry Lewis" "jerry.lewis@biogenidec.com" "<F35566C3BE44C946999C7AA38965FA7B85E1C9@biommmbx04.resource.corp.biogen.com>" "12" "Rmfpr: out of date documentation" "^From:" "maechler@stat.math.ethz.ch" "Martin Maechler" "3" "2012030904:21:00" "Rmfpr: out of date documentation" nil nil nil nil nil nil nil nil]
+	nil)
+X-Mozilla-Status: 0001
+X-Mozilla-Status2: 00010000
+MIME-Version: 1.0
+Received: from mail.ethz.ch [129.132.126.69]
+	by deb4 with IMAP (fetchmail-6.3.20)
+	for <maechler@localhost> (single-drop); Fri, 09 Mar 2012 04:25:17 +0100 (CET)
+Received: from GWS00.d.ethz.ch (82.130.70.77) by CAS20.d.ethz.ch
+ (172.31.51.110) with Microsoft SMTP Server (TLS) id 14.1.355.2; Fri, 9 Mar
+ 2012 04:21:06 +0100
+Received: from edge10.ethz.ch (82.130.75.186) by gws00.d.ethz.ch
+ (129.132.178.237) with Microsoft SMTP Server (TLS) id 8.2.254.0; Fri, 9 Mar
+ 2012 04:21:07 +0100
+Received: from phil4.ethz.ch (129.132.183.133) by edge10.ethz.ch
+ (82.130.75.186) with Microsoft SMTP Server id 14.1.355.2; Fri, 9 Mar 2012
+ 04:21:06 +0100
+Received: from service71-us.mimecast.com ([207.211.31.65])	by phil4.ethz.ch
+ with esmtp (Exim 4.69)	(envelope-from <jerry.lewis@biogenidec.com>)	id
+ 1S5qO9-0006V1-De	for maechler@stat.math.ethz.ch; Fri, 09 Mar 2012 04:21:07
+ +0100
+Received: from webmail.biogenidec.com (168.75.209.74 [168.75.209.74]) (Using
+ TLS) by service71-us.mimecast.com; Thu, 08 Mar 2012 22:21:03 -0500
+Received: from BIOMMMBX04.resource.corp.biogen.com ([169.254.2.178]) by
+ biommfe02 ([10.208.161.74]) with mapi id 14.01.0289.001; Thu, 8 Mar 2012
+ 22:21:01 -0500
+Thread-Topic: Rmfpr: out of date documentation
+Thread-Index: Acz9owD7SCxusWBVQVCSFTWSh3hW3A==
+Message-ID: <F35566C3BE44C946999C7AA38965FA7B85E1C9@biommmbx04.resource.corp.biogen.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-originating-ip: [10.14.242.110]
+X-MC-Unique: 112030822210300601
+Content-Type: text/plain; charset="WINDOWS-1252"
+Content-Transfer-Encoding: quoted-printable
+X-Tag-Only: YES
+X-Filter-Node: phil4.ethz.ch
+X-Spam-Level:
+X-Spam-Status: hits=-0.7 tests=RCVD_IN_DNSWL_LOW,SPF_PASS
+X-Spam-Flag: NO
+Return-Path: jerry.lewis@biogenidec.com
+X-MS-Exchange-Organization-AuthSource: edge10.ethz.ch
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Exchange-Organization-AVStamp-Mailbox: SMEXkv@];882300;0;This mail has
+ been scanned by Trend Micro ScanMail for Microsoft Exchange;
+X-MS-Exchange-Organization-SCL: 0
+From: Jerry Lewis <jerry.lewis@biogenidec.com>
+To: Martin Maechler <maechler@stat.math.ethz.ch>
+Subject: Rmfpr: out of date documentation
+Date: Fri, 9 Mar 2012 03:21:00 +0000
+
+I hope you had a good vacation.
+
+The documentation (both reference manual and vignette) state
+
+"Currently, digamma, and trigamma are not provided by the MPFR library, and=
+ hence the methods
+not implemented."
+
+but digamma should be removed from that caveat.
+
+Thanks,
+Jerry
+

@@ -43,6 +43,10 @@
 %
 \alias{Ops,mpfr,ANY-method}
 \alias{Ops,ANY,mpfr-method}
+\alias{Ops,mpfr,bigq-method}
+\alias{Ops,bigq,mpfr-method}
+\alias{Ops,mpfr,bigz-method}
+\alias{Ops,bigz,mpfr-method}
 \alias{Ops,array,mpfr-method}
 \alias{Ops,mpfr,array-method}
 \alias{Ops,mpfr,vector-method}
@@ -195,8 +199,8 @@
       \code{\link{atanh}}, \code{\link{gamma}}, \code{\link{lgamma}},
       \code{\link{digamma}}, and \code{\link{trigamma}}.
 
-      Currently, \code{digamma}, and \code{trigamma} are not provided by
-      the MPFR library, and hence the methods not implemented.
+      Currently, \code{trigamma} is not provided by
+      the MPFR library and hence not yet implemented.
       \cr
       Further, the \code{cum*()} methods are \emph{not yet} implemented.}
 

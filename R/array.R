@@ -451,18 +451,18 @@ setGeneric("rbind", signature = "...")
 setMethod("cbind", "Mnumber",
 	  function(..., deparse.level = 1) {
 	      args <- list(...)
-	      if(all(sapply(args, is.atomic)))
+	      if(all(vapply(args, is.atomic, NA)))
 		  return( base::cbind(..., deparse.level = deparse.level) )
 	      ## else: at least one is "mpfr(Matrix/Array)"
 
-	      if(any(sapply(args, is.character))) {
+	      if(any(vapply(args, is.character, NA))) {
 		  ## result will be  <character> matrix !
-		  isM <- sapply(args, is, class2 = "mpfr")
+		  isM <- vapply(args, is, NA, class2 = "mpfr")
 		  args[isM] <- lapply(args[isM], as, Class = "character")
 		  return(do.call(base::cbind,
 				 c(args, list(deparse.level=deparse.level))))
 
-	      } else if(any(sapply(args, is.complex))) {
+	      } else if(any(vapply(args, is.complex, NA))) {
 		  ## result will be  <complex> matrix;
 		  ## in the future <complex_mpfr>  ???
 
@@ -472,9 +472,9 @@ setMethod("cbind", "Mnumber",
               ## else
 	      L <- function(a) if(is.numeric(n <- nrow(a))) n else length(a)
 	      W <- function(a) if(is.numeric(n <- ncol(a))) n else 1L
-	      ## the number of rows of the result :
-	      NR <- max(lengths <- sapply(args, L))
-	      NC <- sum(widths	<- sapply(args, W))
+	      ## the number of rows of the result : {for now require integer}
+	      NR <- max(lengths <- vapply(args, L, integer(1)))
+	      NC <- sum(widths	<- vapply(args, W, integer(1)))
 	      r <- setDataPart(new("mpfrMatrix"), vector("list", NR*NC))
 	      r@Dim <- as.integer(c(NR, NC))
 	      if(deparse.level >= 1 && !is.null(nms <- names(widths)))
@@ -506,18 +506,18 @@ setMethod("cbind", "Mnumber",
 setMethod("rbind", "Mnumber",
 	  function(..., deparse.level = 1) {
 	      args <- list(...)
-	      if(all(sapply(args, is.atomic)))
+	      if(all(vapply(args, is.atomic, NA)))
 		  return( base::rbind(..., deparse.level = deparse.level) )
 	      ## else: at least one is "mpfr(Matrix/Array)"
 
-	      if(any(sapply(args, is.character))) {
+	      if(any(vapply(args, is.character, NA))) {
 		  ## result will be  <character> matrix !
-		  isM <- sapply(args, is, class2 = "mpfr")
+		  isM <- vapply(args, is, NA, class2 = "mpfr")
 		  args[isM] <- lapply(args[isM], as, Class = "character")
 		  return(do.call(base::rbind,
 				 c(args, list(deparse.level=deparse.level))))
 
-	      } else if(any(sapply(args, is.complex))) {
+	      } else if(any(vapply(args, is.complex, NA))) {
 		  ## result will be  <complex> matrix;
 		  ## in the future <complex_mpfr>  ???
 
@@ -527,9 +527,9 @@ setMethod("rbind", "Mnumber",
               ## else
  	      L <- function(a) if(is.numeric(n <- nrow(a))) n else 1L
 	      W <- function(a) if(is.numeric(n <- ncol(a))) n else length(a)
-	      ## the number of rows of the result :
-	      NR <- sum(lengths <- sapply(args, L))
-	      NC <- max(widths	<- sapply(args, W))
+	      ## the number of rows of the result : {for now require integer}
+	      NR <- sum(lengths <- vapply(args, L, integer(1)))
+	      NC <- max(widths	<- vapply(args, W, integer(1)))
 
 	      r <- setDataPart(new("mpfrMatrix"), vector("list", NR*NC))
 	      r@Dim <- as.integer(c(NR, NC))

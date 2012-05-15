@@ -6,6 +6,11 @@
   using the MPFR-internal implementation.
   This is mathematically (but not numerically) the same as
   \eqn{\Gamma(n+1)}{Gamma(n+1)}.
+
+%% FIXME:  factorialZ()  is not yet *vectorized* __ FIXME ___
+  \code{\link[gmp]{factorialZ}} (package \pkg{gmp}) should typically be
+  used \emph{instead} of \code{factorialMpfr()} nowadays. Hence,
+  \code{factorialMpfr} now is somewhat \bold{deprecated}.
 }
 \usage{
 factorialMpfr(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))))
@@ -19,7 +24,11 @@ factorialMpfr(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))))
   a number of (S4) class \code{\linkS4class{mpfr}}.
 }
 \seealso{
-  \code{\link{factorial}} and \code{\link{gamma}} in base \R;
+  \code{\link{factorial}} and \code{\link{gamma}} in base \R.
+
+  \code{\link[gmp]{factorialZ}} (package \pkg{gmp}), to \emph{replace}
+  \code{factorialMpfr}, see above.
+
   \code{chooseMpfr()} and \code{\link{pochMpfr}()} (on the same page).
 }
 \examples{

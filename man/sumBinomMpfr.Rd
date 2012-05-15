@@ -29,11 +29,12 @@ sumBinomMpfr(n, f, n0 = 0, alternating = TRUE, precBits = 256)
   \item{precBits}{the number of bits for MPFR precision, see \code{\link{mpfr}}.}
 }
 \details{
-  The current implementation is not particularly fast and might be
-  improved in the future, notably for the case where
+  The current implementation might be improved in the future, notably
+  for the case where
   \eqn{sB(f,n)=}\code{sumBinomMpfr(n, f, *)} is to be computed for a whole sequence
   \eqn{n = 1,\dots,N}{n = 1,...,N}.
 }
+%% Now (2012-05-15) have the first version (hidden) as sumBinomMpfr.v1()
 \value{
   an \code{\linkS4class{mpfr}} number of precision \code{precBits}, say
   \eqn{s}. If \code{alternating} is true (as per default),
@@ -53,7 +54,7 @@ sumBinomMpfr(n, f, n0 = 0, alternating = TRUE, precBits = 256)
 }
 \author{Martin Maechler, after conversations with Christophe Dutang.}
 \seealso{
-  \code{\link{chooseMpfr}}
+  \code{\link{chooseMpfr}}, \code{\link[gmp]{chooseZ}} from package \pkg{gmp}.
 }
 \examples{
 ## "naive" R implementation:

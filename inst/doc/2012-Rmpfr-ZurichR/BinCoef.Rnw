@@ -1,0 +1,76 @@
+\SweaveOpts{engine=R, keep.source=TRUE}
+\SweaveOpts{eps=FALSE, pdf=TRUE, width=9, height=6, strip.white=true}
+\setkeys{Gin}{width=\textwidth}
+
+<<preliminaries, echo=FALSE, results=hide>>=
+options(width=75)
+try(Mlibrary(Rmpfr))
+stopifnot(require("Rmpfr"))
+## MM_FIXME_  add this function to  'sfsmisc' package!
+capture.and.write <- function(EXPR, first, last = 2,
+                              middle = NA, i.middle,
+                              dotdots = " ....... ", n.dots = 2) {
+    co <- capture.output(EXPR)
+    writeLines(head(co, first))
+    catDots <- function(M) cat(rep.int(paste(dotdots,"\n", sep=""), M), sep="")
+    catDots(n.dots)
+    if(is.numeric(middle)) {
+        stopifnot(length(middle) == 1, middle >= 0, middle == round(middle))
+        i0 <- first+2
+        if(missing(i.middle)) {
+            i.middle <- max(i0, length(co) %/% 2 - middle %/% 2)
+        } else { ## !missing(i.middle)
+            if(i.middle < i0)
+                stop("'i.middle' is too small, should be at least ", i0)
+        }
+        writeLines(co[i.middle-1 + seq_len(middle)])
+        catDots(n.dots)
+    }
+    writeLines(tail(co, last))
+}
+@
+\subsection{Exact Factorials and Binomial Coefficients}
+%% From ~/R/Pkgs/Rmpfr/inst/doc/Rmpfr-pkg.tex
+%% ---------------------------------------
+\begin{frame}[fragile]\frametitle{Exact Factorials and Binomial Coefficients}
+In combinatorics or when computing series,
+work with \emph{exact} factorials or binomial coefficients.
+E.g.,need all factorials $k!$, for $k=1,2,\dots,24$ or a full row
+of Pascal's triangle, i.e., want all $\binom{n}{k}$ for $n=50$.
+
+With \Rp's double precision,
+% and standard printing precision
+% <<factorial-1>>=
+% ns <- 1:24 ; factorial(ns)
+% @
+% the full precision of $24!$ is clearly not printed. However,
+and if you display its full internal precision,
+<<factorial-full>>=
+noquote(sprintf("%-30.0f", factorial(24)))
+@
+\smallskip
+then it is obviously wrong for $24!$, as its last digits are known to be \code{0}.
+
+\medskip
+
+Easily get full precision results, by
+replacing ``simple'' numbers by ``mpfr''s:
+<<factorial-ini, echo=FALSE>>=
+ns <- mpfr(5:24, 120)
+<<factorial-mpfr-show, eval=FALSE>>=
+ns <- mpfr(5:24, 120) ; factorial(ns)
+<<factorial-mpfr, echo=FALSE>>=
+capture.and.write(factorial(ns), 5, 4)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+Or for the 70-th Pascal triangle row, $\binom{n}{k}$ for $n=70$ and $k=0,\dots,n$,
+<<chooseM-ex-fake,eval=FALSE>>=
+chooseMpfr.all(n = 70)
+<<chooseM-ex-do-hidden,echo=FALSE>>=
+capture.and.write(chooseMpfr.all(n = 70), 5, middle = 4)
+@
+\end{frame}
+
+%%% TeX-master: "Maechler_Rmpfr.tex"

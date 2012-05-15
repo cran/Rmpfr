@@ -10,6 +10,9 @@
 
   \code{chooseMpfr.all(n)} means the vector \code{\link{choose}(n, 1:n)},
   using enough bits for exact computation via MPFR.
+  However, \code{chooseMpfr.all()} is now \bold{deprecated} in favor of
+  \code{\link[gmp]{chooseZ}} from package \pkg{gmp}, as that is now
+  vectorized.
 
   \code{pochMpfr()} computes the Pochhammer symbol or \dQuote{rising
   factorial}, also called the \dQuote{Pochhammer function},
@@ -53,12 +56,18 @@ pochMpfr(a, n)
   }
 }
 \seealso{
-  \code{\link{choose}(n,m)} computes the binomial coefficient
+  \code{\link{choose}(n,m)} (\pkg{base} \R) computes the binomial coefficient
   \eqn{C_{n,m}}{C[n,m]} which can also be expressed via Pochhammer
   symbol as
   \eqn{C_{n,m} = (n-m+1)^{(m)}/m!}{C[n,m] = (n-m+1)^(m) / m!}.
 
+  \code{\link[gmp]{chooseZ}} from package \pkg{gmp};
+  for now, %% as we "deprecate" it, in favor of  factorialZ() :
   \code{\link{factorialMpfr}}.
+
+  For (alternating) binomial sums, directly use
+  \code{\link{sumBinomMpfr}}, as that is potentially % once we do it in C
+  more efficient.
 }
 \examples{
 pochMpfr(100, 4) == 100*101*102*103 # TRUE

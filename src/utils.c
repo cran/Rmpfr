@@ -308,35 +308,28 @@ R_MPFR_1_Numeric_Function(R_mpfr_ai, mpfr_ai)
 /* __NOT_ANY_MORE__ */
 
 
-#define R_MPFR_2_Numeric_Function(_FNAME, _MPFR_NAME)		\
-SEXP _FNAME(SEXP x, SEXP y) {					\
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));		\
-    SEXP yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));		\
-    int nx = length(xD), ny = length(yD), i, mismatch = 0,	\
-	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);		\
-    SEXP val = PROTECT(allocVector(VECSXP, n));			\
-    mpfr_t x_i, y_i;						\
-    mpfr_init(x_i); /* with default precision */		\
-    mpfr_init(y_i); /* with default precision */		\
-								\
-    if (nx == ny || nx == 1 || ny == 1) mismatch = 0;		\
-    else if (nx > 0 && ny > 0) {				\
-	if (nx > ny) mismatch = nx % ny;			\
-	else mismatch = ny % nx;				\
-    }								\
-								\
-    for(i=0; i < n; i++) {					\
-	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);			\
-	R_asMPFR(VECTOR_ELT(yD, i % ny), y_i);			\
-	_MPFR_NAME(x_i, x_i, y_i, GMP_RNDN);			\
-	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));			\
-    }								\
-								\
-    /* MISMATCH_WARN; R does not warn either*/			\
-    mpfr_clear (x_i); mpfr_clear (y_i);				\
-    mpfr_free_cache();						\
-    UNPROTECT(3);						\
-    return val;							\
+#define R_MPFR_2_Numeric_Function(_FNAME, _MPFR_NAME)	\
+SEXP _FNAME(SEXP x, SEXP y) {				\
+    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));	\
+    SEXP yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));	\
+    int nx = length(xD), ny = length(yD), i,		\
+	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);	\
+    SEXP val = PROTECT(allocVector(VECSXP, n));		\
+    mpfr_t x_i, y_i;					\
+    mpfr_init(x_i); /* with default precision */	\
+    mpfr_init(y_i); /* with default precision */	\
+							\
+    for(i=0; i < n; i++) {				\
+	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);		\
+	R_asMPFR(VECTOR_ELT(yD, i % ny), y_i);		\
+	_MPFR_NAME(x_i, x_i, y_i, GMP_RNDN);		\
+	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));		\
+    }							\
+							\
+    mpfr_clear (x_i); mpfr_clear (y_i);			\
+    mpfr_free_cache();					\
+    UNPROTECT(3);					\
+    return val;						\
 }
 
 R_MPFR_2_Numeric_Function(R_mpfr_atan2, mpfr_atan2)
@@ -349,7 +342,7 @@ R_MPFR_2_Numeric_Function(R_mpfr_lbeta, my_mpfr_lbeta)
 #define R_MPFR_2_Num_Long_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x, SEXP y) {						\
     SEXP xD, yt, val;							\
-    int *yy, n, nx, ny = length(y), i, nprot = 0, mismatch = 0;		\
+    int *yy, n, nx, ny = length(y), i, nprot = 0;			\
     mpfr_t x_i;								\
 									\
     if(TYPEOF(y) != INTSXP) {						\
@@ -364,19 +357,12 @@ SEXP _FNAME(SEXP x, SEXP y) {						\
     PROTECT(val = allocVector(VECSXP, n)); 	nprot++;		\
     mpfr_init(x_i); /* with default precision */			\
 									\
-    if (nx == ny || nx == 1 || ny == 1) mismatch = 0;			\
-    else if (nx > 0 && ny > 0) {					\
-	if (nx > ny) mismatch = nx % ny;				\
-	else mismatch = ny % nx;					\
-    }									\
-									\
     for(i=0; i < n; i++) {						\
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);				\
 	_MPFR_NAME(x_i, (long) yy[i % ny], x_i, GMP_RNDN);		\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));				\
     }									\
 									\
-    /* MISMATCH_WARN; R does not warn either*/				\
     mpfr_clear (x_i);							\
     mpfr_free_cache();							\
     UNPROTECT(nprot);							\

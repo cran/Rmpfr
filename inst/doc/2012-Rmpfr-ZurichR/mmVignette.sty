@@ -1,0 +1,195 @@
+%%% - derived from ~/R/Pkgs/Matrix/inst/doc/myVignette.sty
+\RequirePackage{hyperref}
+\RequirePackage{url}
+\RequirePackage{amsmath}% already contains
+%\RequirePackage{amsfonts}% for \mathbb
+\RequirePackage{bm}%-> \bm (= bold math)
+\RequirePackage{alltt}
+% from/for  ``Sweave'' :
+\RequirePackage{fancyvrb}
+\RequirePackage{color}
+%
+\RequirePackage{listings}
+% instead of {color} above .. no, remain standard
+%% browns <- grep("brown",cc <- colors(), value=TRUE); cb <- col2rgb(browns)
+%% colnames(cb) <- browns
+% \definecolor{brown}{rgb}{0.647,0.165,0.165}
+% \definecolor{orange}{rgb}{0.8,0.5,0}
+\lstset{%% to customize ``Listings'':
+  language=R,% but modify the (2001) listing default of R
+  morekeywords={setAs,setClass,setMethod,setGeneric,setValidity},
+  % otherkeywords={!,!=,~,$,*,\&,\%/\%,\%*\%,\%\%,<-,<<-,_,/},%
+  otherkeywords={!,!=,~,\$,*,\&,\%/\%,\%*\%,<-,<<-},% >>
+  %
+  basicstyle=\small,
+  %          ------ --> need \footnotesize or \tiny to become smaller
+  keywordstyle=\bfseries,
+  numbers=left, numbersep=3pt, numberstyle=\color{gray}\tiny, stepnumber=2,
+  commentstyle=\color{firebrick}\itshape,% was orange
+  stringstyle=\color{brown}\ttfamily,
+  showstringspaces=false
+}
+%
+\newcommand{\Slang}{\textsf{S} language}
+\newcommand{\R}{\mathbb{R}} % |R -- set of real numbers
+\newcommand{\RR}{\textsf{R}}
+\newcommand{\email}[1]{\href{mailto:#1}{\normalfont\texttt{#1}}}
+%- R programming markup
+%simple: \newcommand{\code}[1]{\texttt{#1}}
+%complicated:
+\newcommand\code{\bgroup\@codex}
+\def\@codex#1{{\normalfont\ttfamily\hyphenchar\font=-1 #1}\egroup}
+% \let\env=\code
+% \let\command=\code
+\newcommand*{\Rfun}[1]{\code{#1()}\index{\RR~function #1}}
+\newcommand*{\class}[1]{\code{#1}\index{class #1}}%
+\newcommand*{\pkg}[1]{\code{#1}\index{\RR~package #1}}
+%
+\newcommand{\kbd}[1]{{\normalfont\texttt{#1}}}
+\newcommand{\key}[1]{{\normalfont\texttt{\uppercase{#1}}}}
+\newcommand\samp{`\bgroup\@noligs\@sampx}
+\def\@sampx#1{{\normalfont\texttt{#1}}\egroup'}
+% \let\option=\samp
+\newcommand{\var}[1]{{\normalfont\textsl{#1}}}
+\newcommand{\file}[1]{{`\normalfont\textsf{#1}'}}
+\newcommand{\dfn}[1]{{\normalfont\textsl{#1}}}
+\newcommand{\acronym}[1]{{\normalfont\textsc{\lowercase{#1}}}}
+\newcommand{\strong}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+% \let\pkg=\strong
+% %   ---- note, \pkg above uses \index{}
+%>>>Already def:\newenvironment{example}{\begin{alltt}}{\end{alltt}}
+\newenvironment{smallexample}{\begin{alltt}\small}{\end{alltt}}
+\newenvironment{display}{\list{}{}\item\relax}{\endlist}
+\newenvironment{smallverbatim}{\small\verbatim}{\endverbatim}
+
+%%------------- begin{SweaveStyles} ------------------------------------------
+\newenvironment{Schunk}{\par\begin{minipage}{\textwidth}}{\end{minipage}}
+\definecolor{Sinput}{rgb}{0,0,0.56}
+\definecolor{Scode}{rgb}{0,0,0.56}
+\definecolor{Soutput}{rgb}{0.56,0,0}
+%Default (Rcore):
+% \DefineVerbatimEnvironment{Sinput}{Verbatim}
+% {formatcom={\color{Sinput}},fontsize=\small}
+% \DefineVerbatimEnvironment{Soutput}{Verbatim}
+% {formatcom={\color{Soutput}},fontsize=\small}
+% \DefineVerbatimEnvironment{Scode}{Verbatim}
+% {formatcom={\color{Scode}},fontsize=\small}
+%End{Default}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{formatcom={\color{Sinput}},%
+  fontsize=\small}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{formatcom={\color{Soutput}},%
+  fontsize=\footnotesize}
+\DefineVerbatimEnvironment{Scode}{Verbatim} {formatcom={\color{Scode}},%
+  fontsize=\small}
+% no colors:
+% \DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,fontshape=sl}
+% \DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
+% \DefineVerbatimEnvironment{Scode}{Verbatim}{fontsize=\small,fontshape=sl}
+%%-------------- end{SweaveStyles} ------------
+%
+\newcommand{\FIXME}[1]{\marginpar{ \dots FIXME \emph{#1} \dots}}
+\newcommand{\TODO}[1]{\par\noindent\textsc{Todo:} \textit{#1}\par}
+\newcommand{\LAPACK}{\textsc{lapack}}
+\newcommand{\BLAS}{\textsc{blas}}
+%
+\newcommand{\mQuote}[1]{$\langle${#1}$\rangle$}
+\newcommand{\Emph}[1]{\textcolor{firebrick}{\emph{#1}}}
+\newcommand{\gX}{\textcolor{Green}{\bm X}}
+\newcommand{\rZ}{\textcolor{RubineRed}{\bm Z}}
+%
+%% Matrix stuff :
+\newcommand{\inv}{\ensuremath{^{-1}}}
+% Doug:
+\newcommand{\trans}{\ensuremath{^{\mathsf{T}}}}
+\newcommand{\invtrans}{\ensuremath{^{-\mathsf{T}}}}
+% in his talks:
+%\newcommand{\trans}{\ensuremath{^\prime}}
+% Martin:
+\RequirePackage{amssymb}% for \intercal:
+\newcommand{\tr}{{}^{\intercal}}
+\newcommand{\Mtr}{{}^{-\intercal}}% Minus trans
+%
+\newcommand{\bbeta}{\ensuremath{\bm{\beta}}}
+\newcommand{\beps}{\ensuremath{\bm{\epsilon}}}
+\newcommand{\btheta}{\ensuremath{\bm{\theta}}}
+
+\newcommand{\bA}{\ensuremath{\bm{A}}}
+\newcommand{\bD}{\ensuremath{\bm{D}}}
+\newcommand{\bDelta}{\ensuremath{\bm{\Delta}}}
+\newcommand{\bI}{\ensuremath{\bm{I}}}
+\newcommand{\bP}{\ensuremath{\bm{P}}}
+\newcommand{\bU}{\ensuremath{\bm{U}}}
+\newcommand{\bL}{\ensuremath{\bm{L}}}
+\newcommand{\LXXi}[1]{\ensuremath{\bL_{\mathit{XX}({#1})}}}
+\newcommand{\LXX}{\ensuremath{\bL_\mathit{XX}}}
+\newcommand{\LXZi}[1]{\ensuremath{\bL_{\mathit{XZ}({#1})}}}
+\newcommand{\LXZ}{\ensuremath{\bL_\mathit{XZ}}}
+\newcommand{\LZZi}[1]{\ensuremath{\bL_{\mathit{ZZ}({#1})}}}
+\newcommand{\LZZ}{\ensuremath{\bL_\mathit{ZZ}}}
+\newcommand{\LZZoo}{\ensuremath{\bL_{\mathit{ZZ}11}}}
+\newcommand{\LZZot}{\ensuremath{\bL_{\mathit{ZZ}12}}}
+\newcommand{\LZZtt}{\ensuremath{\bL_{\mathit{ZZ}22}}}
+\newcommand{\bOmega}{\ensuremath{\bm{\Omega}}}
+\newcommand{\bPhi}{\ensuremath{\bm{\Phi}}}
+\newcommand{\bR}{\ensuremath{\bm{R}}}
+\newcommand{\bX}{\ensuremath{\bm{X}}}
+\newcommand{\bZ}{\ensuremath{\bm{Z}}}
+\newcommand{\bb}{\ensuremath{\bm{b}}}
+\newcommand{\dX}{\ensuremath{\bm{d}_{\mathit{X}}}}
+\newcommand{\dZ}{\ensuremath{\bm{d}_{\mathit{Z}}}}
+\newcommand{\dy}{\ensuremath{d_{\mathit{y}}}}
+\newcommand{\lyXi}[1]{\ensuremath{\bm{\ell}_{\mathit{yX}(#1)}}}
+\newcommand{\lyX}{\ensuremath{\bm{\ell}_\mathit{yX}}}
+\newcommand{\lyZi}[1]{\ensuremath{\bm{\ell}_{\mathit{yZ}(#1)}}}
+\newcommand{\lyZ}{\ensuremath{\bm{\ell}_\mathit{yZ}}}
+\newcommand{\lyyi}[1]{\ensuremath{\bm{\ell}_{\mathit{yy}(#1)}}}
+\newcommand{\lyy}{\ensuremath{\ell_\mathit{yy}}}
+\newcommand{\bu}{\ensuremath{\bm{u}}}
+\newcommand{\bx}{\ensuremath{\bm{x}}}
+\newcommand{\by}{\ensuremath{\bm{y}}}
+\newcommand{\bzer}{\ensuremath{\bm{0}}}
+
+\newcommand{\XtX}{\ensuremath{\bX\tr\bX}}
+%
+%---- lme4 ----------
+\newcommand{\bc}[1]{\ensuremath{\bm{\mathcal{#1}}}}
+%           ^^^- fails inside \section{} with package{hyperref}
+\newcommand{\rank}{\operatorname{rank}}
+
+
+%%---- more of Martin's favorites from 'texab' :
+%%
+%% (FIXME? replace \bmath by \bm from package{bm} ??)
+\newcommand{\bmath}[1]{\relax\ifmmode{\mbox{\boldmath $#1$}}%
+  \else{\boldmath $#1$}\fi}    %-- W.Stahel, M. Mächler
+%%  SfS - Sigma  for Cov.matrix:
+\newcommand{\Sig}{\relax\ifmmode\rlap{\kern0.45em\raise0.08em\hbox{|}}
+\bmath\Sigma\else$\Sig$\fi}
+\newcommand{\Sigh}{\widehat{\Sig}}
+%
+\DeclareMathOperator*{\argmin}{arg\, min}
+\DeclareMathOperator*{\argmax}{arg\, max}
+%
+%- Scalar Prod. <.,.> :  \sp{x}{zz}  -->  < x , zz >  ---
+         \newcommand{\spr}[2]   {\left\langle #1\, , #2 \right\rangle}
+%%-- No longer (March 15, 1999): breaks 'alltt' : \sp = ``sup'' (exponent)
+%%-         \renewcommand{\sp}[2]   {\left\langle #1\, , #2 \right\rangle
+%%-  \typeout{
+%%-    ------ Use '$\backslash$spr'
+%%-    instead of '$\backslash$sp' for scalar product ! -----}}
+%- \abs{ab}  -->  | ab |   ``absolut Betrag''
+        \newcommand{\abs}[1]    {\left| #1 \right|}
+%- \norm{ab}  -->  || ab ||
+        \newcommand{\norm}[1]   {\left\| #1 \right\|}
+ % the above sometimes give much too long  || -- then use the following:
+        \newcommand{\normb}[1]  {\bigl\|{#1}\bigr\|}
+        \newcommand{\normB}[1]  {\Bigl\|{#1}\Bigr\|}
+%- Indicator function: \Ind{A}  : the following *is* ugly but works, see below
+        \newcommand{\Ind}[1]    {\mbox{\larger\textbf{1}}_{#1}}
+%Gives warning ``Command \large invalid in math mode on input line ..'' :
+%       \newcommand{\Ind}[1]{\mathop{\large\mathbf{1}}_{#1}}
+%       \newcommand{\Ind}[1]{{\large\mathbf{1}}_{#1}}
+
+%- For things like ``F_{Tab}'' (F-value from table):
+\newcommand{\Xsub}[2]{{#1}_{\mathrm{\scriptscriptstyle #2}}}
+%

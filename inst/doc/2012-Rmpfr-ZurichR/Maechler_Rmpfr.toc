@@ -1,0 +1,10 @@
+\beamer@endinputifotherversion {3.10pt}
+\select@language {english}
+\beamer@sectionintoc {1}{Example: 16 digits are not always enough!}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Simple (semi-artificial!) Example: logit(exp(-L))}{4}{0}{1}
+\beamer@sectionintoc {2}{Example 2: Exact Factorials and Binomial Coefficients}{10}{0}{2}
+\beamer@subsectionintoc {2}{1}{Exact Factorials and Binomial Coefficients}{11}{0}{2}
+\beamer@sectionintoc {3}{Alternating Binomial Sums}{13}{0}{3}
+\beamer@sectionintoc {4}{Capabilities of \bgroup {\normalfont \ttfamily \hyphenchar \font =-1 Rmpfr}\egroup }{20}{0}{4}
+\beamer@sectionintoc {5}{Package and Session Information}{27}{0}{5}
+\beamer@sectionintoc {6}{Conclusions}{30}{0}{6}

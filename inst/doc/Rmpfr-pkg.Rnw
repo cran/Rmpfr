@@ -17,7 +17,7 @@
 
 %% an abstract and keywords
 \Abstract{
- The \R\ package \pkg{Rmpfr} allows to use arbitrary high precision numbers
+ The \R\ package \pkg{Rmpfr} allows to use arbitrarily precise numbers
  instead of \R's double precision numbers in many \R\ computations and functions.
 
  This is achieved by defining S4 classes of such numbers and vectors,
@@ -126,6 +126,28 @@ if(.Platform$OS.type != "windows")
   Sys.setlocale("LC_MESSAGES","C")
 <<diagnose-lib, echo=FALSE>>=
 if(nzchar(Sys.getenv("R_MM_PKG_CHECKING"))) print( .libPaths() )
+## MM_FIXME_  this will be part  'sfsmisc' package!
+capture.and.write <- function(EXPR, first, last = 2,
+                              middle = NA, i.middle,
+                              dotdots = " ....... ", n.dots = 2) {
+    co <- capture.output(EXPR)
+    writeLines(head(co, first))
+    catDots <- function(M) cat(rep.int(paste(dotdots,"\n", sep=""), M), sep="")
+    catDots(n.dots)
+    if(is.numeric(middle)) {
+        stopifnot(length(middle) == 1, middle >= 0, middle == round(middle))
+        i0 <- first+2
+        if(missing(i.middle)) {
+            i.middle <- max(i0, length(co) %/% 2 - middle %/% 2)
+        } else { ## !missing(i.middle)
+            if(i.middle < i0)
+                stop("'i.middle' is too small, should be at least ", i0)
+        }
+        writeLines(co[i.middle-1 + seq_len(middle)])
+        catDots(n.dots)
+    }
+    writeLines(tail(co, last))
+}
 @
 \section[Introduction]{Introduction}% \small~\footnote{\mythanks}}
 
@@ -159,7 +181,7 @@ work with \emph{exact} factorials or binomial coefficients, where e.g. you
 may need all factorials $k!$, for $k=1,2,\dots,24$ or a full row
 of Pascal's triangle, i.e., want all $\binom{n}{k}$ for $n=80$.
 
-With \R{}'s double precision, and standard printing precision
+With \R's double precision, and standard printing precision
 <<factorial-1>>=
 ns <- 1:24 ; factorial(ns)
 @
@@ -175,16 +197,13 @@ replacing ``simple'' numbers by mpfr-numbers:
 ns <- mpfr(1:24, 120) ; factorial(ns)
 @
 
-Or for the 80-th Pascal triangle row, $\binom{n}{k}$ for $n=80$ and $k=0,\dots,n$,
+Or for the 80-th Pascal triangle row, $\binom{n}{k}$ for $n=80$ and $k=1,\dots,n$,
 <<chooseM-ex-fake,eval=false>>=
 chooseMpfr.all(n = 80)
-<<chooseM-ex-do-hidden,echo=false,eval=false>>=
-co <- capture.output(chooseMpfr.all(n = 80))
-writeLines(co[1:5]);cat(" ... \n ... \n")
-writeLines(co[13:16]);cat(" ... \n ... \n");writeLines(tail(co,2))
-## Instead (above: eval=false): For now, still use the full:
 <<chooseM-run,echo=false>>=
+capture.and.write(
 <<chooseM-ex-fake>>
+                  , 5, 2, middle = 4, i.middle = 13)
 @
 
 %%% "FIXME:" drawback of the above is that it is *integer* arithmetic only ...
@@ -318,8 +337,8 @@ getGroupMembers("Math")
       % \code{{atanh}}, \code{{gamma}}, \code{{lgamma}},
       % \code{{digamma}}, and \code{{trigamma}}.
 
-where currently , \code{digamma}, and \code{trigamma} are not provided by
-the MPFR library, and hence the methods not implemented yet.
+where currently, \code{trigamma} is not provided by
+the MPFR library, and hence not implemented yet.
 
 %% cumsum(), cumprod() now work!
 
@@ -347,13 +366,21 @@ Note that with this definition,
 %%% FIXME --> ~/R/Meetings-Kurse-etc/2011-Warwick/1_MM_/Poster/MM-poster.tex
 
 The classes \code{"mpfrMatrix"} and \code{"mpfrArray"}
-correspond to the classical numerical \R \code{"matrix"} and \code{"array"} objects,
+correspond to the classical numerical \R\ \code{"matrix"} and \code{"array"} objects,
 which basically are arrays or vectors of numbers with a dimension
 \code{dim}, possibly named by \code{dimnames}.
 As there, they can be constructed by \code{dim(.) <- ..} setting, e.g.,
 <<Matrix-ex>>=
 head(x <- mpfr(0:7, 64)/7) ; mx <-  x
 dim(mx) <- c(4,2)
+@
+or by the \code{mpfrArray()} constructor,
+<<mpfrArr-ex>>=
+dim(aa <- mpfrArray(1:24, precBits = 80, dim = 2:4))
+<<pr-mpfrArr-fake,eval=false>>=
+aa
+<<pr-mpfrArr-do, echo=false>>=
+capture.and.write(aa, 11, 4)
 @
 and we can index and multiply such matrices, e.g.,
 <<crossprod>>=

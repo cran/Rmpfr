@@ -1,0 +1,199 @@
+
+
+\setkeys{Gin}{width=\textwidth}
+
+
+\begin{frame}[fragile]\frametitle{Capabilities of \pkg{Rmpfr} -- a Glimpse}
+  ``All'' \R arithmetic and math functions just work with ``mpfr''
+  numbers:  \\
+  Via \code{"Group"} S4 methods
+
+\begin{Schunk}
+\begin{Sinput}
+> getGroupMembers("Arith")
+\end{Sinput}
+\begin{Soutput}
+[1] "+"   "-"   "*"   "^"   "%%"  "%/%" "/"  
+\end{Soutput}
+\begin{Sinput}
+> getGroupMembers("Compare")
+\end{Sinput}
+\begin{Soutput}
+[1] "==" ">"  "<"  "!=" "<=" ">="
+\end{Soutput}
+\begin{Sinput}
+> getGroupMembers("Math")
+\end{Sinput}
+\begin{Soutput}
+ [1] "abs"      "sign"     "sqrt"     "ceiling"  "floor"    "trunc"   
+ [7] "cummax"   "cummin"   "cumprod"  "cumsum"   "exp"      "expm1"   
+[13] "log"      "log10"    "log2"     "log1p"    "cos"      "cosh"    
+[19] "sin"      "sinh"     "tan"      "tanh"     "acos"     "acosh"   
+[25] "asin"     "asinh"    "atan"     "atanh"    "gamma"    "lgamma"  
+[31] "digamma"  "trigamma"
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Capabilities of \pkg{Rmpfr} --- 2 ---}
+  In addition to the basic arithmetic (including all \code{"Math"} functions!),
+  based on the MPFR C library,
+  \code{Rmpfr} provides arbitrarily precise versions of
+
+  \begin{itemize}
+  \item Bessel functions $j_n(x)$, $y_n(x)$, and $Ai(x)$
+  \item Error functions \code{erf(x)}, and \code{erfc(x)}, or equivalently,\\
+    \code{pnorm(x)} and \code{pnorm(x, lower.tail=FALSE)}.
+  \item Riemann's $\zeta(x) = $\code{zeta(x)},
+  \item Exponential integral \code{Ei(x)}
+  \item Dilogarithm $\mathrm{Li}_2(x)=$\code{Li2(x)}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Capabilities of \pkg{Rmpfr} --- 3 ---}
+  \begin{itemize}
+  \item Arbitarily precise numerical integration (via Romberg), via our
+    \code{integrateR()}
+    \item Arbitarily root finding (and hence numerical \emph{inverse} function),
+      via \code{unirootR()}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{High precision Matrices}
+  Can also do simple arithmetic with \code{"mpfrMatrix"} and
+  \code{"mpfrArray"} objects, e.g.
+\begin{Schunk}
+\begin{Sinput}
+> head(x <- mpfr(0:7, 64)/7)
+\end{Sinput}
+\begin{Soutput}
+6 'mpfr' numbers of precision  64   bits 
+[1]                       0 0.142857142857142857141 0.285714285714285714282
+[4] 0.428571428571428571436 0.571428571428571428564 0.714285714285714285691
+\end{Soutput}
+\begin{Sinput}
+> mx <- x ; dim(mx) <- c(4,2)
+> mx[ 1:3, ] + c(1,10,100)
+\end{Sinput}
+\begin{Soutput}
+'mpfrMatrix' of dim(.) =  (3, 2) of precision  64   bits 
+     [,1]                   [,2]                  
+[1,] 1.00000000000000000000 1.57142857142857142851
+[2,] 10.1428571428571428570 10.7142857142857142860
+[3,] 100.285714285714285712 100.857142857142857144
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+\begin{frame}[fragile]% \frametitle{High precision Matrices}
+We can transpose or multiply such matrices, e.g.,
+\begin{Schunk}
+\begin{Sinput}
+> t(mx) %*% 10^(1:4)
+\end{Sinput}
+\begin{Soutput}
+'mpfrMatrix' of dim(.) =  (2, 1) of precision  64   bits 
+     [,1]                  
+[1,] 4585.71428571428571441
+[2,] 10934.2857142857142856
+\end{Soutput}
+\end{Schunk}
+or
+\begin{Schunk}
+\begin{Sinput}
+> crossprod(mx)
+\end{Sinput}
+\begin{Soutput}
+'mpfrMatrix' of dim(.) =  (2, 2) of precision  64   bits 
+     [,1]                    [,2]                   
+[1,] 0.285714285714285714282 0.775510204081632653086
+[2,] 0.775510204081632653086  2.57142857142857142851
+\end{Soutput}
+\end{Schunk}
+
+\pause
+\medskip
+
+and apply works too :
+\begin{Schunk}
+\begin{Sinput}
+> (s7 <- apply(7 * mx, 2, sum))
+\end{Sinput}
+\begin{Soutput}
+2 'mpfr' numbers of precision  64   bits 
+[1]  6 22
+\end{Soutput}
+\end{Schunk}
+\smallskip
+
+and, note that \code{all.equal()} methods are provided, as well:
+\begin{Schunk}
+\begin{Sinput}
+> all.equal(s7, c(6,22), tol = 1e-40) # note the tolerance!
+\end{Sinput}
+\begin{Soutput}
+[1] TRUE
+\end{Soutput}
+\end{Schunk}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+
+\section{Package and Session Information}
+\begin{frame}[fragile]%\frametitle{High precision Matrices}
+\begin{Schunk}
+\begin{Sinput}
+> toLatex(sessionInfo())
+\end{Sinput}
+\begin{itemize}\raggedright
+  \item R version 2.14.1 Patched (2012-01-17 r58138), \verb|x86_64-unknown-linux-gnu|
+  \item Locale: \verb|LC_CTYPE=de_CH.UTF-8|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=en_US.UTF-8|, \verb|LC_COLLATE=de_CH.UTF-8|, \verb|LC_MONETARY=en_US.UTF-8|, \verb|LC_MESSAGES=de_CH.UTF-8|, \verb|LC_PAPER=C|, \verb|LC_NAME=C|, \verb|LC_ADDRESS=C|, \verb|LC_TELEPHONE=C|, \verb|LC_MEASUREMENT=de_CH.UTF-8|, \verb|LC_IDENTIFICATION=C|
+  \item Base packages: base, datasets, graphics, grDevices,
+    methods, stats, utils
+  \item Other packages: Rmpfr~0.4-5, sfsmisc~1.0-19
+  \item Loaded via a namespace (and not attached): gmp~0.5-0,
+    tools~2.14.1
+\end{itemize}\end{Schunk}
+\end{frame}
+%%
+\begin{frame}[fragile]%\frametitle{....}
+\begin{Schunk}
+\begin{Sinput}
+> packageDescription("Rmpfr")
+\end{Sinput}
+\begin{Soutput}
+Package: Rmpfr
+Type: Package
+Title: R MPFR - Multiple Precision Floating-Point Reliable
+Version: 0.4-5
+Date: 2012-01-12
+Author: Martin Maechler
+Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
+Depends: methods, R (>= 2.11.0)
+SystemRequirements: gmp (>= 4.2.3), mpfr (>= 3.0.0)
+SystemReqsNotes: MPFR (MP Floating-Point Reliable Library,
+       http://mpfr.org/) and GMP (GNU Multiple Precision library,
+       http://gmplib.org/), see README
+Imports: gmp
+Suggests: gmp, polynom
+SuggestNotes: 'polynom' is only needed for vignette
+URL: http://rmpfr.r-forge.r-project.org/
+Description: Rmpfr provides S4 classes and methods for arithmetic
+       including transcendental ("special") functions for
+       arbitrary precision floating point numbers. To this end, it
+       interfaces to the LGPL'ed MPFR (Multiple Precision
+       Floating-Point Reliable) Library which itself is based on
+       the GMP (GNU Multiple Precision) Library.
+License: GPL (>= 2)
+Built: R 2.14.1; x86_64-unknown-linux-gnu; 2012-01-19 16:05:40
+       UTC; unix
+
+-- File: /tmp/Rmpfr.Rcheck/Rmpfr/Meta/package.rds 
+\end{Soutput}
+\end{Schunk}
+%%---^^^^^^^ or somethings smarter with capture.output() or subsetting ...
+my.strsplit(  [["LastChanged"]]  )
+\end{frame}
+
+
+%%% TeX-master: "Maechler_Rmpfr.tex"

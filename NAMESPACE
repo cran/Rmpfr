@@ -1,17 +1,18 @@
 useDynLib(Rmpfr, .registration=TRUE)
 
-if(!is.na(r <- suppressWarnings(packageDescription("gmp", fields="Version")))
-   && package_version(r) >= 0.5) {
-    ## only once we can require the new gmp
-## cheap, somewhat experimental -- hence the "."
-export(.mpfr2bigz, .bigz2mpfr)
+##-- From 'gmp' (on which we 'Depend' ------------------------------------------
 
-importFrom("gmp",
-           crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
+## cheap, somewhat experimental -- hence the "."
+export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr)
+
+importFrom("stats", pnorm)# we will use and mask it
+importFrom("gmp"
+           , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
            ## not yet (maybe never) , biginteger_as, biginteger_as_character
 	   ## more to come
+           , is.whole, formatN # because we add own S3 methods
 	   )
-}## if( <new gmp> )
+##------------------------------------------------------------------------------
 
 exportClasses("mpfr1", "mpfr"
               , "mpfrArray"
@@ -75,7 +76,6 @@ export(
        , "getPrec"
        , "hypot"
        , "integrateR"
-       , "is.whole"
        , "j0" , "j1" , "jn"
        , "mean"
        , "mpfr"
@@ -129,6 +129,9 @@ S3method(c, mpfr)
 
 S3method(as.array, mpfr)
 S3method(as.matrix, mpfr)
+
+S3method(is.whole, mpfr)
+S3method(formatN, mpfr)
 
 S3method(print, mpfr)
 S3method(print, mpfr1)
