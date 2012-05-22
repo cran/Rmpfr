@@ -26,6 +26,9 @@ Bernoulli(k, precBits = 128)
 \seealso{\code{\link{zeta}} is used to compute them.
 }
 \examples{
+\dontshow{sessionInfo()
+ .libPaths()
+ packageDescription("gmp")}
 Bernoulli(0:10)
 plot(as.numeric(Bernoulli(0:15)), type = "h")
 

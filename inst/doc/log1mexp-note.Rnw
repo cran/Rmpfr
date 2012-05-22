@@ -185,6 +185,8 @@ if((p <- "package:fortunes") %in% search())
 Sys.setenv(LANGUAGE = "en")
 if(.Platform$OS.type != "windows")
   Sys.setlocale("LC_MESSAGES","C")
+if(getRversion() < "2.15")
+    paste0 <- function(...) paste(..., sep = '')
 library("sfsmisc")# e.g., for eaxis()
 library("Rmpfr")
 .plot.BC <- FALSE # no Box-Cox plot

@@ -1,3 +1,8 @@
+2012-05-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (diff.mpfr): new method; as diff.default() commits unclass(x)
+	(str.mpfr): new.
+
 2012-05-04  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/as.R (formatN.mpfr): add method

@@ -23,8 +23,6 @@ erfc <- function(x) {
     else stop("invalid class(x): ", class(x))
 }
 
-## Using .Internal(pnorm(..)) is now forbidden by the Crania
-stats__pnorm <- stats::pnorm # only once ..
 pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 {
     if(is.numeric(q) && is.numeric(mean) && is.numeric(sd))
@@ -68,6 +66,7 @@ zeta <- function(x) {
     x
 }
 
+## "FIXME" -- rather use 'bigq' in gmp and the "sumBin" algorithm from copula!
 Bernoulli <- function(k, precBits = 128) {
     ## Purpose: Bernoulli Numbers (in high precision)
     ## -----------------------------------------------------------

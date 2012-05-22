@@ -445,3 +445,50 @@ setMethod("all.equal", signature(target = "ANY", current = "mpfr"),
 	      all.equal.numeric(as(target, "mpfr"), current,
 				tolerance=tolerance, ...)
 	  })
+
+##' This is almost identical to diff.default -- ~/R/D/r-devel/R/src/library/base/R/diff.R
+##' But that uses unclass(x) unfortunately
+diff.mpfr <- function(x, lag = 1L, differences = 1L, ...)
+{
+    ismat <- is(x, "mpfrArray") ##_ is.matrix(x)
+    xlen <- if(ismat) dim(x)[1L] else length(x)
+    if (length(lag) > 1L || length(differences) > 1L ||
+        lag < 1L || differences < 1L)
+	stop("'lag' and 'differences' must be integers >= 1")
+    if (lag * differences >= xlen)
+	return(x[0L]) # empty, but of proper mode
+    i1 <- -seq_len(lag)
+    if (ismat)
+	for (i in seq_len(differences))
+	    x <- x[i1, , drop = FALSE] -
+                x[-nrow(x):-(nrow(x)-lag+1L), , drop = FALSE]
+    else
+        for (i in seq_len(differences))
+            x <- x[i1] - x[-length(x):-(length(x)-lag+1L)]
+    x
+}
+
+str.mpfr <- function(object, nest.lev, ...) {
+    ## utils:::str.default() gives  "Formal class 'mpfr' [package "Rmpfr"] with 1 slots"
+    cl <- class(object)
+    le <- length(object)
+    if(isArr <- is(object, "mpfrArray")) di <- dim(object)
+    r.pr <- range(pr <- getPrec(object))
+    onePr <- r.pr[1] == r.pr[2]
+    cat("Class", " '", paste(cl, collapse = "', '"),
+	"' [package \"", attr(cl, "package"), "\"] of ",
+	if(isArr) paste("dimension", deparse(di, control=NULL))
+	else paste("length", le), "  and precision",
+	if(onePr) paste("", r.pr[1]) else paste0("s ", r.pr[1],"..",r.pr[2]),
+	"\n", sep = "")
+    if(missing(nest.lev)) nest.lev <- 0
+    ## maybe add a formatNum() which adds "  " as give.head=TRUE suppresses all
+    utils:::str.default(as.numeric(object),
+			give.head=FALSE, nest.lev = nest.lev+1, ...)
+    ##                   max.level = NA, vec.len = strO$vec.len, digits.d = strO$digits.d,
+    ## nchar.max = 128, give.attr = TRUE, give.head = TRUE, give.length = give.head,
+    ## width = getOption("width"), nest.lev = 0, indent.str = paste(rep.int(" ",
+    ##     max(0, nest.lev + 1)), collapse = ".."), comp.str = "$ ",
+    ## no.list = FALSE, envir = baseenv(), strict.width = strO$strict.width,
+    ## formatNum = strO$formatNum, list.len = 99, ...)
+}

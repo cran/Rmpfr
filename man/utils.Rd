@@ -1,6 +1,8 @@
 \name{mpfr.utils}
 \title{MPFR Number Utilities}
 \alias{c.mpfr}
+\alias{diff.mpfr}
+\alias{str.mpfr}
 \alias{mpfr.is.0}
 \alias{mpfr.is.integer}
 \alias{mpfrVersion}
@@ -38,15 +40,21 @@
 mpfrVersion()
 mpfr.is.0(x)
 mpfr.is.integer(x)
-\method{c}{mpfr}(...)
+\method{c}{mpfr}(\dots)
+\method{diff}{mpfr}(x, lag = 1L, differences = 1L, \dots)
+\method{str}{mpfr}(object, nest.lev, \dots)
 
 hypot(x,y)
 }
 \arguments{
-  \item{x,y}{an object of class \code{\linkS4class{mpfr}}.}
+  \item{x,y, object}{an object of class \code{\linkS4class{mpfr}}.}
   \item{\dots}{further \code{\linkS4class{mpfr}} class objects or simple
-  numbers (\code{\link{numeric}} vectors) which are coerced to
-  \code{mpfr} with default precision of 128 bits.}
+    numbers (\code{\link{numeric}} vectors) which are coerced to
+    \code{mpfr} with default precision of 128 bits.}
+  \item{lag, differences}{for \code{diff()}: exact same meaning as in
+    \code{\link{diff}()}'s default method, \code{\link{diff.default}}.}
+  \item{nest.lev}{for \code{\link{str}()}, typically only used when
+    called by a higher level \code{str()}.}
 }
 % \details{
 %   ~~ If necessary, more details than the description above ~~
@@ -83,12 +91,16 @@ hypot(x,y)
 mpfrVersion()
 
 (x <- c(Const("pi", 64), mpfr(-2:2, 64)))
-mpfr.is.0(x)        # one of them is
-str(x[mpfr.is.0(x)])# but it may not have been obvious..
+mpfr.is.0(x)    # one of them is
+x[mpfr.is.0(x)] # but it may not have been obvious..
+str(x)
 
 xy <- expand.grid(x = -2:2, y = -2:2) ; x <- xy[,"x"] ; y <- xy[,"y"]
 a2. <- atan2(y,x)
+
 stopifnot(all.equal(a2., atan2(as(y,"mpfr"), x)),
-          mpfr.is.integer(mpfr(2, 500) ^ (1:200)))
+          mpfr.is.integer(mpfr(2, 500) ^ (1:200)),
+          all.equal(diff(x), diff(as.numeric(x))),
+          TRUE)
 }
 \keyword{arith}

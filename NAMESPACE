@@ -5,7 +5,8 @@ useDynLib(Rmpfr, .registration=TRUE)
 ## cheap, somewhat experimental -- hence the "."
 export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr)
 
-importFrom("stats", pnorm)# we will use and mask it
+importFrom("utils", str)
+importFrom("stats", stats__pnorm = pnorm)# import *and* rename !
 importFrom("gmp"
            , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
            ## not yet (maybe never) , biginteger_as, biginteger_as_character
@@ -129,6 +130,9 @@ S3method(c, mpfr)
 
 S3method(as.array, mpfr)
 S3method(as.matrix, mpfr)
+
+S3method(diff, mpfr)
+S3method(str,  mpfr)
 
 S3method(is.whole, mpfr)
 S3method(formatN, mpfr)

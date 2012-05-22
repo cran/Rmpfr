@@ -34,6 +34,7 @@ URGENT or "DO first" :
 
 
 
+
 ---------------------------- compare to ./Done ------------------------
 
 2)
@@ -109,7 +110,7 @@ URGENT or "DO first" :
 
 22) *do* test  rank(), sort(), order() [, quantile()] -- we claim they work
     in man/mpfr-class.Rd
-23)
+23)  Bernoulli() should really happen in 'gmp', using "bigq" (and "bigz")
 24)
 25)
 
