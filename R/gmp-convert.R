@@ -17,16 +17,17 @@ if(!is.na(r <- suppressWarnings(packageDescription("gmp",
 ### TODO(?:  gmp should "export" its C++ API ( -> inst/include/*.hh )
 ### and we should add  'LinkingTo: gmp' to DESCRIPTION and
 ###  then use C++ with "C" { ...} for those parts
-.bigz2mpfr <- function(x) {
+.bigz2mpfr <- function(x, precB = NULL) {
     stopifnot(inherits(x, "bigz"))
-    ..bigz2mpfr(x)
+    ..bigz2mpfr(x, precB)
 }
 ## Fast, no-checking (and not exported) version:
-..bigz2mpfr <- function(x, precB = 4L*nchar(cx))
+..bigz2mpfr <- function(x, precB = NULL)
     ## precB: 4 == log2(16) = log(base)
 {
     b <- 16L
     cx <- .Call(gmp:::biginteger_as_character, x, b)
+    if(is.null(precB)) precB <- 4L*nchar(cx)
     new("mpfr", .Call(str2mpfr1_list, cx, precB, b, "N"))
 }
 setAs("bigz", "mpfr", function(from) ..bigz2mpfr(from))
@@ -45,14 +46,23 @@ as.bigz.mpfr <-
 }
 
 
-.bigq2mpfr <- function(from) {
-    stopifnot(inherits(from, "bigq"))
-    eN <- frexpZ(N <- numerator(from))$exp
-    eD <- frexpZ(D <- denominator(from))$exp
-    precRes <- eN + eD + 1L # precision of result
-    ..bigz2mpfr(N, precRes) / ..bigz2mpfr(D, precRes)
+## Fast, no-checking (and not exported) version:
+..bigq2mpfr <- function(x, precB = NULL) {
+    N <- numerator(x)
+    D <- denominator(x)
+    if(is.null(precB)) {
+        eN <- frexpZ(N)$exp
+        eD <- frexpZ(D)$exp
+        precB <- eN + eD + 1L # precision of result
+    }
+    ..bigz2mpfr(N, precB) / ..bigz2mpfr(D, precB)
 }
-setAs("bigq", "mpfr", .bigq2mpfr)
+
+.bigq2mpfr <- function(x, precB = NULL) {
+    stopifnot(inherits(x, "bigq"))
+    ..bigq2mpfr(x, precB)
+}
+setAs("bigq", "mpfr", function(from) ..bigq2mpfr(from))
 
 
 }# only if gmp ..

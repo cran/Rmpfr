@@ -1,5 +1,7 @@
 URGENT or "DO first" :
 
+xx) sumBinomMpfr()  accept  f.x
+
 17b)  see 'Ops' in R/Arith.R  and
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
@@ -22,15 +24,6 @@ URGENT or "DO first" :
       in src/utils.c
       	 ~~~~~~~~~~~
 
-23) quantile(<mpfr>)  does not work
-
-    Reason: in stats::quantile.default(),
-
-      ifelse(h == 0, qs[i], (1 - h) * qs[i] + h * x[hi[i]])
-
-    produces a list of 'mpfr1' instead a real 'mpfr' vector.
-    One solution: fix quantile.default() to use a fast .ifelse() substitute
-    ~/R/D/r-devel/R/src/library/stats/R/quantile.R
 
 
 
@@ -108,11 +101,19 @@ URGENT or "DO first" :
 
 19) outer() fails too, (similarly I think)
 
-22) *do* test  rank(), sort(), order() [, quantile()] -- we claim they work
-    in man/mpfr-class.Rd
-23)  Bernoulli() should really happen in 'gmp', using "bigq" (and "bigz")
-24)
-25)
+22) *do* test rank(), sort(), order() : we claim they work in man/mpfr-class.Rd
+    quantile() should work from R 2.15.1 (June 2012) on       ~~~~~~~~~~~~~~~~~
+
+24)  Bernoulli() should really happen in 'gmp', using "bigq" (and "bigz")
+25) mpfr(<mpfr>, ...) should work: return argument unchanged *if* precision
+    and rounding mode are ok; otherwise use roundMpfr() *BUT* that needs an
+    additional rnd.mode  argument -- as mpfr
+26) (?) Revert the decision to *not* care about rounding mode in Ops/function,
+    and rather expose that as in mpfr(), e.g., in R/Math.R  roundMpfr
+    -- see  GMP_RNDN in src/utils.c and others; see also src/convert.c  R_rnd2GMP()
+
+27)
+28)
 
 50) For *complex* arithmetic, build interface to the  "MPC" library
    ---> http://www.multiprecision.org/mpc -- which is LGPL and itself

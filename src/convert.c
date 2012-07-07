@@ -158,19 +158,21 @@ SEXP d2mpfr1(SEXP x, SEXP prec, SEXP rnd_mode) {
 
 SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
 {
-    int nx = LENGTH(x), np = LENGTH(prec), n = imax2(nx, np),
-	*iprec, i, nprot = 1;
+    int nx = LENGTH(x), np = LENGTH(prec),
+	n = (nx == 0 || np == 0) ? 0 : imax2(nx, np),
+	nprot = 1;
     SEXP val = PROTECT(allocVector(VECSXP, n));
-    mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
-    double *dx;
-    if(!isReal(x))       { PROTECT(x    = coerceVector(x,   REALSXP)); nprot++; }
-    if(!isInteger(prec)) { PROTECT(prec = coerceVector(prec, INTSXP)); nprot++; }
-    dx = REAL(x);
-    iprec = INTEGER(prec);
-
-    for(i = 0; i < n; i++) {
-	/* FIXME: become more efficient by doing R_..._2R_init() only once*/
-	SET_VECTOR_ELT(val, i, d2mpfr1_(dx[i % nx], iprec[i % np], rnd));
+    if(nx > 0) {
+	mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
+	int *iprec; double *dx;
+	if(!isReal(x))       { PROTECT(x    = coerceVector(x,   REALSXP)); nprot++; }
+	if(!isInteger(prec)) { PROTECT(prec = coerceVector(prec, INTSXP)); nprot++; }
+	dx = REAL(x);
+	iprec = INTEGER(prec);
+	for(int i = 0; i < n; i++) {
+	    /* FIXME: become more efficient by doing R_..._2R_init() only once*/
+	    SET_VECTOR_ELT(val, i, d2mpfr1_(dx[i % nx], iprec[i % np], rnd));
+	}
     }
 
     UNPROTECT(nprot);
@@ -209,8 +211,9 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 {
 /* NB: Both x and prec are "recycled" to the longer one if needed */
     int ibase = asInteger(base), *iprec,
-	nx = LENGTH(x), np = LENGTH(prec), n = imax2(nx, np),
-	i, nprot = 1;
+	nx = LENGTH(x), np = LENGTH(prec),
+	n = (nx == 0 || np == 0) ? 0 : imax2(nx, np),
+	nprot = 1;
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
     mpfr_t r_i;
@@ -221,7 +224,7 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 
     iprec = INTEGER(prec);
 
-    for(i = 0; i < n; i++) {
+    for(int i = 0; i < n; i++) {
 	int ierr;
 	mpfr_set_prec(r_i, (mpfr_prec_t) iprec[i % np]);
 	ierr = mpfr_set_str(r_i, CHAR(STRING_ELT(x, i % nx)), ibase, rnd);
@@ -246,8 +249,9 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 SEXP d2mpfr(SEXP x, SEXP prec)
 {
     int i_prec = asInteger(prec),
-	nx = LENGTH(x), np = LENGTH(prec), n = imax2(nx, np),
-	i, nprot = 1;
+	nx = LENGTH(x), np = LENGTH(prec),
+	n = (nx == 0 || np == 0) ? 0 : imax2(nx, np),
+	nprot = 1;
     SEXP val = PROTECT(NEW_OBJECT(MAKE_CLASS("mpfr"))),
 	lis = ALLOC_SLOT(val, Rmpfr_Data_Sym, VECSXP, n);
     double *dx;
@@ -256,7 +260,7 @@ SEXP d2mpfr(SEXP x, SEXP prec)
     REprintf("d2mpfr(x, prec): length(x) = %d, prec = %d -> length(lis) = %d\n",
 	     nx, i_prec, LENGTH(lis));
     dx = REAL(x);
-    for(i = 0; i < n; i++) {
+    for(int i = 0; i < n; i++) {
 	SET_VECTOR_ELT(lis, i, duplicate(d2mpfr1_(dx [i % nx],
 						  i_prec [i % np])));
     }

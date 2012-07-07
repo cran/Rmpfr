@@ -7,13 +7,29 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
 {
     if(is.character(x))
 	stopifnot(length(base) == 1, 2 <= base, base <= 36)
+    stopifnot(is.character(rnd.mode))
+    rnd.mode <- toupper(rnd.mode)
+    rnd.mode <- match.arg(rnd.mode)
+
+    if(is.raw(x)) { # is.raw() is faster
+	stopifnot(missing(precBits) || precBits >= 2)
+	if(inherits(x, "bigz")) {
+	    if(missing(precBits)) precBits <- max(2L, frexpZ(x)$exp)
+	    if(getOption("verbose"))
+	       warning("mpfr(<bigz>) --> .bigz2mpfr()")# via character
+	    return(..bigz2mpfr(x, precBits))
+	} else if(inherits(x, "bigq")) {
+	    if(missing(precBits)) precBits <- getPrec(x)#-> warning
+	    if(getOption("verbose"))
+		warning("mpfr(<bigq>) --> .bigq2mpfr()")# via character
+	    return(..bigq2mpfr(x, precBits))
+	}
+    } ## else
     if(missing(precBits)) {
 	precBits <- getPrec(x, base = base, doNumeric = FALSE)
     }
     ## libmpfr would exit (after good error message) for precBits == 1
-    stopifnot(precBits >= 2, is.character(rnd.mode))
-    rnd.mode <- toupper(rnd.mode)
-    rnd.mode <- match.arg(rnd.mode)
+    stopifnot(precBits >= 2)
 
     ml <-
 	if(is.numeric(x) || is.logical(x) || is.raw(x))
@@ -30,7 +46,7 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
     else new("mpfr", ml)
 }
 
-## to be used in our own low-level R programming
+##' to be used in our own low-level R programming
 .d2mpfr1 <- function(x, precBits) .Call(d2mpfr1, x, precBits, "N")
 setAs("numeric", "mpfr1", ## use default precision of 128 bits
       function(from) .Call(d2mpfr1, from, 128L, "N"))# <- round to [N]earest

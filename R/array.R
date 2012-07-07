@@ -357,14 +357,14 @@ setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
     if(getOption("verbose"))
         message(sprintf("nargs() == %d  mpfrArray indexing ... ", nA))
 
-    r <- getD(x)
+    r <- getD(x) # the data part, a list()
     if(nA == 2) ## A[i]
         return(new("mpfr", r[i]))
     ## else: nA != 2 : nA > 2 -
     dim(r) <- (dx <- dim(x))
     dimnames(r) <- dimnames(x)
     r <- r[i,j, ..., drop=drop]
-    if(drop & is.null(dim(r)))
+    if(drop && is.null(dim(r)))
         new("mpfr", r)
     else {
         D <- if(is.null(dr <- dim(r))) # ==> drop is FALSE; can this happen?

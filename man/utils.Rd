@@ -2,7 +2,6 @@
 \title{MPFR Number Utilities}
 \alias{c.mpfr}
 \alias{diff.mpfr}
-\alias{str.mpfr}
 \alias{mpfr.is.0}
 \alias{mpfr.is.integer}
 \alias{mpfrVersion}
@@ -42,19 +41,16 @@ mpfr.is.0(x)
 mpfr.is.integer(x)
 \method{c}{mpfr}(\dots)
 \method{diff}{mpfr}(x, lag = 1L, differences = 1L, \dots)
-\method{str}{mpfr}(object, nest.lev, \dots)
 
 hypot(x,y)
 }
 \arguments{
-  \item{x,y, object}{an object of class \code{\linkS4class{mpfr}}.}
-  \item{\dots}{further \code{\linkS4class{mpfr}} class objects or simple
-    numbers (\code{\link{numeric}} vectors) which are coerced to
+  \item{x,y}{an object of class \code{\linkS4class{mpfr}}.}
+  \item{\dots}{For \code{diff}, further \code{\linkS4class{mpfr}} class
+    objects or simple numbers (\code{\link{numeric}} vectors) which are coerced to
     \code{mpfr} with default precision of 128 bits.}
   \item{lag, differences}{for \code{diff()}: exact same meaning as in
     \code{\link{diff}()}'s default method, \code{\link{diff.default}}.}
-  \item{nest.lev}{for \code{\link{str}()}, typically only used when
-    called by a higher level \code{str()}.}
 }
 % \details{
 %   ~~ If necessary, more details than the description above ~~
@@ -82,6 +78,7 @@ hypot(x,y)
   class \code{\linkS4class{mpfr}}.
 }
 \seealso{
+  \code{\link{str.mpfr}} for the \code{\link{str}} method.
   \code{\link{erf}} for special mathematical functions on MPFR;
   The class description \code{\linkS4class{mpfr}} mentioning the
   generic arithmetic and mathematical functions for which \code{"mpfr"}

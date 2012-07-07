@@ -11,11 +11,13 @@ mpfr(x, precBits, base = 10, rnd.mode = c("N","D","U","Z"))
 Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
 }
 \arguments{
-  \item{x}{a \code{\link{numeric}} or \code{\link{character}} vector or
+  \item{x}{a \code{\link{numeric}}, \code{\link[gmp]{bigz}},
+    \code{\link[gmp]{bigq}}, or \code{\link{character}} vector or
     \code{\link{array}}.}
   \item{precBits, prec}{a number, the maximal precision to be used, in
     \bold{\emph{bits}}; i.e. \code{53} corresponds to double precision.
-    Must be at least 2.}
+    Must be at least 2.  If \code{\link{missing}},
+    \code{\link{getPrec}(x)} determines a default precision.}
   \item{base}{(only when \code{x} is \code{\link{character}}) the base
     with respect to which \code{x[i]} represent numbers; \code{base}
     \eqn{b} must fulfill \eqn{2 \le b \le 36}{2 <= b <= 36}.}
@@ -86,6 +88,18 @@ print(mpfr("111.1111", base=2)) * 2^4
 
 mpfr("af21.01020300a0b0c", base=16)
 ##  68 bit prec.  44833.00393694653820642
+
+## --- Large integers from package 'gmp':
+Z <- as.bigz(7)^(1:200)
+head(Z, 40)
+## mfpr(Z) by default chooses the correct *maximal* default precision:
+mZ. <- mpfr(Z)
+## more efficiently chooses precision individually
+m.Z <- mpfr(Z, precBits = frexpZ(Z)$exp)
+## the precBits chosen are large enough to keep full precision:
+stopifnot(identical(cZ <- as.character(Z),
+                    as(mZ.,"character")),
+          identical(cZ, as(m.Z,"character")))
 
 ## look at different "rounding modes":
 sapply(c("N", "D","U","Z"), function(RND)

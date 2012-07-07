@@ -176,12 +176,14 @@ sumBinomMpfr.v1 <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
         f(mpfr(n0:n, precBits=precBits)))
 }
 ##' version 2: chooseZ()*(-1)^(.) is considerably faster than chooseMpfr.all()
-sumBinomMpfr <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
+sumBinomMpfr <- function(n, f, n0=0, alternating=TRUE, precBits = 256,
+			 f.k = f(mpfr(k, precBits=precBits)))
 {
     ## Note: n0 = 0, or 1 is typical..
-    stopifnot(0 <= n0, n0 <= n, is.function(f))
+    stopifnot(0 <= n0, n0 <= n,
+	      is.function(f) || (is(f.k, "mpfr") && length(f.k) == n-n0+1))
     k <- n0:n
-    sum(chooseZ(n, k) * (-1)^(n-k) * f(mpfr(k, precBits=precBits)))
+    sum(chooseZ(n, k) * (-1)^(n-k) * f.k)
 }
 
 

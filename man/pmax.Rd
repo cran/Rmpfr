@@ -5,16 +5,16 @@
 \alias{pmax-methods}
 \alias{pmin-methods}
 \alias{pmax,ANY-method}
-\alias{pmax,Mnumber-method}
+\alias{pmax,mNumber-method}
 \alias{pmin,ANY-method}
-\alias{pmin,Mnumber-method}
+\alias{pmin,mNumber-method}
 \title{Parallel Maxima and Minima}
 \description{
   Returns the parallel maxima and minima of the input values.
 
   The functions \code{pmin} and \code{pmax} have been made S4 generics,
   and this page documents the \dQuote{\code{...} method for class
-    \code{"Mnumber"}}, i.e., for arguments that are numeric or from
+    \code{"mNumber"}}, i.e., for arguments that are numeric or from
   \code{\link{class} "\linkS4class{mpfr}"}.
 }
 \usage{
@@ -40,7 +40,7 @@ pmin(\dots, na.rm = FALSE)
     \item{... = "ANY"}{the default method, really just
       \code{\link[base:Extremes]{base::pmin}} or \code{base::pmax},
       respectively.}
-    \item{... = "Mnumber"}{the method for \code{\linkS4class{mpfr}}
+    \item{... = "mNumber"}{the method for \code{\linkS4class{mpfr}}
       arguments, mixed with numbers; designed to follow the same semantic as
       the default method.}
   }

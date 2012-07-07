@@ -55,3 +55,11 @@
 
 22) apply(<mpfrArray>, .) --> S4 method
 
+23) quantile(<mpfr>)  does not work ---- but will from R 2.15.1 with better quantile.default()
+    Reason: in stats::quantile.default(),
+      ifelse(h == 0, qs[i], (1 - h) * qs[i] + h * x[hi[i]])
+    produces a list of 'mpfr1' instead a real 'mpfr' vector.
+    -> Fixed in ~/R/D/r-devel/R/src/library/stats/R/quantile.R
+
+23x) sumBinomMpfr()  accept  f.x
+

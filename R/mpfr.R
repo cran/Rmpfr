@@ -175,7 +175,7 @@ setMethod("unique", signature(x="mpfr", incomparables="missing"),
 setGeneric("pmin", signature = "...")# -> message about override ...
 setGeneric("pmax", signature = "...")
 
-setMethod("pmin", "Mnumber",
+setMethod("pmin", "mNumber",
 	  function(..., na.rm = FALSE) {
 	      args <- list(...)
 	      if(all(vapply(args, is.atomic, NA)))
@@ -216,7 +216,7 @@ setMethod("pmin", "Mnumber",
 	      r
 	  })
 
-setMethod("pmax", "Mnumber",
+setMethod("pmax", "mNumber",
 	  function(..., na.rm = FALSE) {
 	      args <- list(...)
 	      if(all(vapply(args, is.atomic, NA)))
@@ -397,8 +397,17 @@ getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
 	ceiling(log2(base) * nchar(gsub("[-.]", '', x)))
     else if(is.logical(x))
 	2L # even 1 would suffice - but need 2 (in C ?)
-    else if(is.raw(x))
-	8L
+    else if(is.raw(x)) {
+	if(is.object(x)) { ## Now deal with 'bigz' and 'bigq'
+	    if(inherits(x,"bigz"))
+		frexpZ(x)$exp
+	    else if(inherits(x,"bigq")) {
+		warning("default precision for 'bigq' arbitrarily chosen as 128")
+		128L
+	    }
+	    else 8L
+	} else 8L
+    }
     else {
 	if(!doNumeric) stop("must specify 'precBits' for numeric 'x'")
 	## else
@@ -468,19 +477,20 @@ diff.mpfr <- function(x, lag = 1L, differences = 1L, ...)
     x
 }
 
-str.mpfr <- function(object, nest.lev, ...) {
+str.mpfr <- function(object, nest.lev, give.head=TRUE, ...) {
     ## utils:::str.default() gives  "Formal class 'mpfr' [package "Rmpfr"] with 1 slots"
     cl <- class(object)
     le <- length(object)
     if(isArr <- is(object, "mpfrArray")) di <- dim(object)
     r.pr <- range(pr <- getPrec(object))
     onePr <- r.pr[1] == r.pr[2]
-    cat("Class", " '", paste(cl, collapse = "', '"),
-	"' [package \"", attr(cl, "package"), "\"] of ",
-	if(isArr) paste("dimension", deparse(di, control=NULL))
-	else paste("length", le), "  and precision",
-	if(onePr) paste("", r.pr[1]) else paste0("s ", r.pr[1],"..",r.pr[2]),
-	"\n", sep = "")
+    if(give.head)
+	cat("Class", " '", paste(cl, collapse = "', '"),
+	    "' [package \"", attr(cl, "package"), "\"] of ",
+	    if(isArr) paste("dimension", deparse(di, control=NULL))
+	    else paste("length", le), " and precision",
+	    if(onePr) paste("", r.pr[1]) else paste0("s ", r.pr[1],"..",r.pr[2]),
+	    "\n", sep = "")
     if(missing(nest.lev)) nest.lev <- 0
     ## maybe add a formatNum() which adds "  " as give.head=TRUE suppresses all
     utils:::str.default(as.numeric(object),

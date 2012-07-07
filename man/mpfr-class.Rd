@@ -315,5 +315,12 @@ stopifnot(two ^ mpfr.min.exp2 == 0)
 ## whereas
 two ^ (mpfr.min.exp2 * (1 - 1e-15))
 ## 2.38256490488795107e-323228497   ["typically"]
+
+## Above, we mention {sort}, {order}, {quantile}, {rank}.
+p <- mpfr(rpois(12, lambda=500), precBits=128)^10
+\dontshow{
+if(FALSE)## FIXME
+  stopifnot(all(diff(sort(p)) > 0))
+}% dontshow
 }
 \keyword{classes}

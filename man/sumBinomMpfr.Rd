@@ -18,7 +18,8 @@
   \eqn{\Delta f(x) = f(x+1) - f(x)} (for \eqn{x = 0}).
 }
 \usage{
-sumBinomMpfr(n, f, n0 = 0, alternating = TRUE, precBits = 256)
+sumBinomMpfr(n, f, n0 = 0, alternating = TRUE, precBits = 256,
+             f.k = f(mpfr(k, precBits=precBits)))
 }
 \arguments{
   \item{n}{upper summation index (integer).}
@@ -26,7 +27,11 @@ sumBinomMpfr(n, f, n0 = 0, alternating = TRUE, precBits = 256)
     \code{k in n0:n}.}
   \item{n0}{lower summation index, typically \code{0} (= default) or \code{1}.}
   \item{alternating}{logical indicating if the sum is alternating, see below.}
-  \item{precBits}{the number of bits for MPFR precision, see \code{\link{mpfr}}.}
+  \item{precBits}{the number of bits for MPFR precision, see
+    \code{\link{mpfr}}.}
+  \item{f.k}{can be specified instead of \code{f} and \code{precBits},
+    and must contain the equivalent of its default,
+    \code{f(mpfr(k, precBits=precBits))}.}
 }
 \details{
   The current implementation might be improved in the future, notably

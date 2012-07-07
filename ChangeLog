@@ -1,4 +1,20 @@
+2012-06-16  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-0, released to CRAN, ...
+
+	* R/as.R (mpfr): <bigz> or <bigq> arguments now "work" (with a warning).
+
+	* R/gmp-convert.R (.bigz2mpfr, .bigq2mpfr): new optional argument
+	\code{precB}, typically for increasing the default precision.
+
+2012-06-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/optimizers.R (optimizeR): new simple golden ratio, thanks to
+	Hans Borchert.
+
 2012-05-22  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version, Depends): 0.4-8, released to CRAN.
 
 	* R/mpfr.R (diff.mpfr): new method; as diff.default() commits unclass(x)
 	(str.mpfr): new.

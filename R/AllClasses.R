@@ -102,3 +102,21 @@ if(FALSE) { ## if we did this, then ... {see below}
     ## ...., then, the following would fail (!)
     validObject( new("character", LETTERS) )
 }
+
+###----- Simpler {without 'matrix' -> 'character' ...} -------------------------
+###
+setClassUnion("numericVector", members = c("logical", "integer", "numeric"))
+
+setClassUnion("mNumber",
+	      members = c("numericVector",
+	      "mpfr", "mpfrArray", "mpfrMatrix",
+	      ## from package 'gmp' :
+	      "bigz", "bigq"))
+setValidity("mNumber",
+            function(object) {
+                if(is.numeric(object) ||
+                   is.logical(object) ||
+                   is(object, "mpfr")) return(TRUE)
+                ## else
+                "Not a valid 'mNumber' class object"
+		})

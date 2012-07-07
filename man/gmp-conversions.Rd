@@ -13,15 +13,18 @@
   \code{\link{mpfr}} numbers.
 }
 \usage{
-.bigz2mpfr(x)
+.bigz2mpfr(x, precB = NULL)
+.bigq2mpfr(x, precB = NULL)
 .mpfr2bigz(x, mod = NA)
-.bigq2mpfr(from)
+
 % as(x, "mpfr")
 }
 \arguments{
-  \item{x}{an \R object of class \code{bigz} or \code{mpfr}
-  respectively.}
-  \item{from}{an \R object of class \code{bigq}.}
+  \item{x}{an \R object of class \code{bigz}, \code{bigq} or \code{mpfr}
+    respectively.}
+  \item{precB}{precision in bits for the result.  The default,
+    \code{NULL}, means to use the \emph{minimal} precision necessary for
+    correct representation.}
   \item{mod}{a possible modulus, see \code{\link[gmp]{as.bigz}} in
     package \pkg{gmp}.}
 }
@@ -43,6 +46,9 @@
  SS <- S * as.bigz(1:3)^128
  stopifnot(all.equal(log2(SS[2]) - log2(S), 128, tol=1e-15),
            identical(SS, .mpfr2bigz(.bigz2mpfr(SS))))
+
+ .bigz2mpfr(S)            # 148 bit precision
+ .bigz2mpfr(S, precB=256) # 256 bit
 
  ## rational --> mpfr:
  sq <- SS / as.bigz(2)^100

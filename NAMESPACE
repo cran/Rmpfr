@@ -22,6 +22,10 @@ exportClasses("mpfr1", "mpfr"
               , "atomicVector"
               , "array_or_vector"
               , "Mnumber"
+
+              ## new, *not* containing "matrix" (which has -> "character"!):
+              , "numericVector"
+              , "mNumber"
 )
 
 export(
@@ -86,6 +90,8 @@ export(
        , "mpfrArray"
        , "mpfrVersion"
        , "mpfr_default_prec"
+       , "optimizeR"
+       , "hjkMpfr" ## <-- FIXME, rather part of an  optimR(...., method = "hjk")
        , "pmax", "pmin"
        , "pnorm"
        , "pochMpfr"
