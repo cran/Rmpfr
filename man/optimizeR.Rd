@@ -85,9 +85,11 @@ oM.gs <- optimizeR(iG5, 0, 10, method="Golden")
 oM.Br <- optimizeR(iG5, 0, 10, method="Brent", trace=TRUE)
 oM.gs$min ; oM.gs$iter
 oM.Br$min ; oM.Br$iter
-## more accuracy:
-oM.gs <- optimizeR(iG5, 0, 10, method="Golden", tol = 1e-70)
-oM.Br <- optimizeR(iG5, 0, 10,                  tol = 1e-70)
+(doExtras <- Rmpfr:::doExtras())
+if(doExtras) {## more accuracy {takes a few seconds}
+ oM.gs <- optimizeR(iG5, 0, 10, method="Golden", tol = 1e-70)
+ oM.Br <- optimizeR(iG5, 0, 10,                  tol = 1e-70)
+}
 rbind(Golden = c(err = as.numeric(oM.gs$min -5), iter = oM.gs$iter),
       Brent  = c(err = as.numeric(oM.Br$min -5), iter = oM.Br$iter))
 
@@ -109,9 +111,11 @@ msq <- optimizeR(f.sq, 0, 5, tol = 1e-50, trace=5)
 str(msq) # ok
 stopifnot(abs(msq$minimum - 2) < 1e-49)
 
+if(doExtras) { # considerably more expensive
 ## find the other local minimum: -- non-smooth ==> Golden-section is used
 msq2 <- optimizeR(f.sq, 3.5, 5, tol = 1e-50, trace=10)
 stopifnot(abs(msq2$minimum - 4) < 1e-49)
+}
 
 ## and a local maximum:
 msq3 <- optimizeR(f.sq, 3, 4, maximum=TRUE, trace=2)
@@ -122,14 +126,16 @@ stopifnot(abs(msq3$maximum - 3.57) < 1e-2)
 
 ##----- "impossible" one to get precisely ------------------------
 
+ff <- function(x) exp(-1/(x-8)^2)
 curve(exp(-1/(x-8)^2), -3, 13, n=1001)
 (opt. <- optimizeR(function(x) exp(-1/(x-8)^2), -3, 13, trace = 5))
 ## -> close to 8 {but not very close!}
-ff <- function(x) exp(-1/(x-8)^2)
 ff(opt.$minimum) # gives 0
-## try harder ... in vain ..
-str(opt1 <- optimizeR(ff, -3,13, tol = 1e-60, precFactor = 4))
-print(opt1$minimum, digits=20)
-## still just  7.99998038 or 8.000036655 {depending on method}
+if(doExtras) {
+ ## try harder ... in vain ..
+ str(opt1 <- optimizeR(ff, -3,13, tol = 1e-60, precFactor = 4))
+ print(opt1$minimum, digits=20)
+ ## still just  7.99998038 or 8.000036655 {depending on method}
+}
 }
 \keyword{optimize}

@@ -2,7 +2,7 @@ URGENT or "DO first" :
 
 xx) sumBinomMpfr()  accept  f.x
 
-17b)  see 'Ops' in R/Arith.R  and
+17b)  see 'Ops' in R/Arith.R  ,  Rmpfr:::.Math.codes,  and
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
 
@@ -112,7 +112,13 @@ xx) sumBinomMpfr()  accept  f.x
     and rather expose that as in mpfr(), e.g., in R/Math.R  roundMpfr
     -- see  GMP_RNDN in src/utils.c and others; see also src/convert.c  R_rnd2GMP()
 
-27)
+27) sapply(), vapply() etc do not work with mpfr --- show workaround
+    e.g. from ~/R/MM/Pkg-ex/Rmpfr/Dutang_test_v6.R
+	 res.mpfr <- lapply(1:length(n), function(i) binomsum.mpfr.MM(n[i], f, n0, precBits=precBits[i], ...))
+	 sapply(res.mpfr, as, "double")
+
+
+
 28)
 
 50) For *complex* arithmetic, build interface to the  "MPC" library

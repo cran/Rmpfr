@@ -67,8 +67,8 @@ setClassUnion("atomicVector", ## "double" is not needed, and not liked by some
 			  "complex", "raw", "character"))
 
 ## This is tricky ...
-## With the following class,  arrays/matrices  are covered as they are with
-## "vector" already. *However*, they are
+## With the following class,  arrays/matrices  are covered as 
+## they are also with "vector" already. *However*, they are
 ## *not* made into vectors in method dispatch,
 ## which they would be if we used simply "vector"
 setClassUnion("array_or_vector",

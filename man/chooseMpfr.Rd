@@ -84,6 +84,10 @@ stopifnot(all.equal(c1, choose(1000:997, 60), tol=1e-12))
 ## --- Experimenting & Checking
 n.set <- c(1:10, 20, 50:55, 100:105, 200:203, 300:303, 500:503,
            699:702, 999:1001)
+if(!Rmpfr:::doExtras()) { ## speed up: smaller set
+  n. <- n.set[-(1:10)]
+  n.set <- c(1:10, n.[ c(TRUE, diff(n.) > 1)])
+}
 C1 <- C2 <- numeric(length(n.set))
 for(i.n in seq_along(n.set)) {
   cat(n <- n.set[i.n],":")

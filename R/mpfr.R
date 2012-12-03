@@ -200,7 +200,7 @@ setMethod("pmin", "mNumber",
 		  if((n.i <- lengths[i]) != N)
 		      x <- x[rep(seq_len(n.i), length.out = N)]
 		  nas <- cbind(is.na(r), is.na(x))
-		  if(!is.m[i]) x <- mpfr(x, prec=mPrec)
+		  if(!is.m[i]) x <- mpfr(x, precBits = mPrec)
 		  if(has.na || (has.na <- any(nas))) {
 		      r[nas[, 1L]] <- x[nas[, 1L]]
 		      x[nas[, 2L]] <- r[nas[, 2L]]
@@ -241,7 +241,7 @@ setMethod("pmax", "mNumber",
 		  if((n.i <- lengths[i]) != N)
 		      x <- x[rep(seq_len(n.i), length.out = N)]
 		  nas <- cbind(is.na(r), is.na(x))
-		  if(!is.m[i]) x <- mpfr(x, prec=mPrec)
+		  if(!is.m[i]) x <- mpfr(x, precBits = mPrec)
 		  if(has.na || (has.na <- any(nas))) {
 		      r[nas[, 1L]] <- x[nas[, 1L]]
 		      x[nas[, 2L]] <- r[nas[, 2L]]

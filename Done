@@ -49,6 +49,11 @@
 
 17a) as(1, "mpfr") & TRUE : no longer gives infinite recursion error
 
+17a) Write a 'Rmpfr-package' help page that mentions that we have *many*
+     Math etc functions, including  gamma, digamma, ....  {which are not
+     quickly visible on the help pages now}.
+
+
 20) integrateR( ... rel.tol, verbose= TRUE) :
     the precision of the output should be increased a bit,
     (still depending  on rel.tol !)

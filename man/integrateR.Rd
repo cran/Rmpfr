@@ -104,4 +104,3 @@ stopifnot(print(as.numeric(I.true - I$value)) < 4e-25)
 }
 \keyword{math}
 \keyword{utilities}
-
