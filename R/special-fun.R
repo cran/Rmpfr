@@ -258,3 +258,48 @@ hypot <- function(x,y) {
     else
 	new("mpfr", .Call(R_mpfr_hypot, as(x, "mpfr"), as(y, "mpfr")))
 }
+
+## The Beta(a,b)  Cumulative Probabilities are exactly computable for *integer* a,b:
+pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
+		   precBits = NULL) {
+    stopifnot(is.whole(shape1), is.whole(shape2),
+	      length(shape1) == 1, length(shape2) == 1,
+	      length(lower.tail) == 1, length(log.p) == 1,
+	      0 <= q, q <= 1, ncp == 0,
+	      is.null(precBits) ||
+	      (is.numeric(precBits) && is.whole(precBits) && precBits >= 2))
+    a <- as.integer(shape1)
+    b <- as.integer(shape2)
+    n <- a+b-1L # = a+b-1
+    pr.x <- getPrec(q)
+    if(is.null(precBits)) {
+        aq <- abs(as.numeric(q))
+        mq <- if(any(po <- aq > 0)) min(aq[po]) else 1 # ==> log = 0
+        ## -n*log(|x|): such that 1 - |x|^n does not completely cancel
+	precBits <- max(128L, pr.x, -n*log(mq))
+    }
+    if(pr.x < precBits || !is(q, "mpfr"))
+	q <- mpfr(q, precBits=precBits)
+
+    mpfr1 <- list(.Call(const_asMpfr, 1, 16L)) # as prototype for vapply()
+    F <- if(log.p) log else identity
+
+    if(lower.tail) {
+	## The prob. is	  P[ X <= x ] = \sum_{k=a}^ n    (n \\ k) x^k (1-x)^(n-k)
+        ## but we want to sum from 0 {smallest --> largest} as well:
+        ##                P[ X <= x ] = \sum_{k=0}^{b-1} (n \\ k) (1-x)^k x^(n-k)
+	k <- 0:(b - 1L)
+        FUN.x <- function(x) sum(n.choose.k * (1-x)^k * x^(n-k))
+    } else { ## upper tail
+	## Prob. P[ X > q ] =  1 - P[X <= q ] = \sum_{k=0}^{a-1} (n \\ k) x^k (1-x)^(n-k)
+	k <- 0:(a - 1L)
+        FUN.x <- function(x) sum(n.choose.k * x^k * (1-x)^(n-k))
+    }
+    n.choose.k <- chooseZ(n, k)
+    roundMpfr(F(
+	## "vapply() for "mpfr"
+	new("mpfr",
+	    vapply(q, FUN.x, mpfr1))),
+	      ## reduce the precision, in order to not "claim wrongly":
+	      precBits=precBits)
+}

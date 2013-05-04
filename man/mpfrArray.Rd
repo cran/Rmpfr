@@ -32,16 +32,25 @@ mpfrArray(x, precBits, dim = length(x), dimnames = NULL,
   an object of class \code{"\linkS4class{mpfrArray}"}, specifically
  \code{"\linkS4class{mpfrMatrix}"} when \code{length(dim) == 2}.
 }
-\seealso{\code{\link{mpfr}}, \code{\link{array}}.
+\seealso{\code{\link{mpfr}}, \code{\link{array}};
+  \code{\link{asNumeric}()} as \dQuote{inverse} of \code{mpfrArray()},
+  to get back a numeric array.
+
+  \code{\link{mpfr2array}(x)} is for \code{"mpfr"} classed \code{x},
+  only, whereas \code{mpfrArray(x)} is for numeric (\dQuote{non-mpfr})
+  \code{x}.
 }
 \examples{
 ## preallocating is possible here too
-ma <- mpfrArray(NA,   prec = 80, dim = 2:4)
+ma <- mpfrArray(NA, prec = 80, dim = 2:4)
 validObject(A2 <- mpfrArray(1:24, prec = 64, dim = 2:4))
 
 ## recycles, gives an "mpfrMatrix" and dimnames :
 mat <- mpfrArray(1:5, 64, dim = c(5,3), dimnames=list(NULL, letters[1:3]))
 mat
+asNumeric(mat)
+stopifnot(identical(asNumeric(mat),
+                    matrix(1:5 +0, 5,3, dimnames=dimnames(mat))))
 
 ## Testing the apply() method :
 apply(mat, 2, range)
@@ -59,7 +68,7 @@ stopifnot(as(apply(A2, 2, range), "matrix") ==
      R <- FUN(A2, dims = di)
      stopifnot(dim(r) == dim(R),
                all.equal(as(R, if(is.array(r)) "array" else "numeric"),
-                         r, tol = 1e-15))
+                         unname(r), tol = 1e-15))
    }
  }
 %% TODO: also check examples with non-trivial dimnames !

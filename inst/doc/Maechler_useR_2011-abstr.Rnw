@@ -1,0 +1,138 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage{amsfonts, amsmath, hanging, hyperref, natbib, parskip, times}
+\usepackage[pdftex]{graphicx}
+\hypersetup{
+  colorlinks,
+  linkcolor=blue,
+  urlcolor=blue
+}
+\SweaveOpts{eps=FALSE,pdf=TRUE,width=7,height=4,strip.white=true,keep.source=TRUE}
+%\VignetteIndexEntry{useR-2011-abstract}
+%\VignetteDepends{Rmpfr}
+<<preliminaries, echo=FALSE, results=hide>>=
+options(SweaveHooks= list(fig=function() par(mar=c(5.1, 4.1, 1.1, 2.1))),
+        width = 75)
+Sys.setenv(LANGUAGE = "en")
+if(.Platform$OS.type != "windows")
+  Sys.setlocale("LC_MESSAGES","C")
+stopifnot(require("Rmpfr"))
+@
+
+\let\section=\subsubsection
+\newcommand{\pkg}[1]{{\normalfont\fontseries{b}\selectfont #1}}
+\let\proglang=\textit
+\let\code=\texttt
+\renewcommand{\title}[1]{\begin{center}{\bf \LARGE #1}\end{center}}
+\newcommand{\affiliations}{\footnotesize}
+\newcommand{\keywords}{\paragraph{Keywords:}}
+
+\setlength{\topmargin}{-15mm}
+\setlength{\oddsidemargin}{-2mm}
+\setlength{\textwidth}{165mm}
+\setlength{\textheight}{250mm}
+\usepackage{Sweave}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,fontshape=sl}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
+\DefineVerbatimEnvironment{Scode}{Verbatim}{fontsize=\small,fontshape=sl}
+% but when submitting, do get rid of too much vertical space between R
+% input & output, i.e. between Sinput and Soutput:
+\fvset{listparameters={\setlength{\topsep}{0pt}}}% !! quite an effect!
+%%
+%
+\newcommand*{\R}{\proglang{R}}%{\textsf{R}}
+
+\begin{document}
+\pagestyle{empty}
+\vspace*{-15ex}
+\begin{flushleft}\footnotesize
+  Corrected abstract for ``late-breaking poster'' and ``Lightning talk'' to be held at
+  ``UseR! 2011'', U.~Warwick, 16th Aug.~2011%, 17:00--18:00
+  \\[-1ex]\noindent\rule{\textwidth}{0.5pt}\\ % horizontal line
+\end{flushleft}
+\vspace*{+9ex}
+
+\title{Arbitrarily Accurate Computation with R: Package 'Rmpfr'}
+
+\begin{center}
+  {\bf Martin M\"achler$^{1,2,^\star}$}
+\end{center}
+
+\begin{affiliations}
+1. ETH Zurich (Seminar for Statistics), Switzerland \\[-2pt]
+2. R Core Development Team \\[-2pt]
+$^\star$Contact author: \href{mailto:maechler@stat.math.ethz.ch}{maechler@stat.math.ethz.ch}
+\end{affiliations}
+
+\keywords Arbitrary Precision, High Accuracy, Multiple Precision Floating-Point, Rmpfr
+
+\vskip 0.8cm
+
+% Some suggestions: if you mention a programming language like
+% \proglang{R}, typeset the language name with the {\tt \textbackslash
+%   proglang\{\}} command.  If you mention an \proglang{R} function \code{foo},
+% typeset the function name with the with the {\tt\textbackslash code\{\}}
+% command.  If you mention an \proglang{R} package \pkg{fooPkg}, typeset
+% the package name with the {\tt\textbackslash pkg\{\}} command.
+% Abstracts should not exceed one page.  The page should not be numbered.
+ The \proglang{R}\ package \pkg{Rmpfr} allows to use arbitrarily precise numbers
+ instead of \proglang{R}'s double precision numbers in many \proglang{R}\ computations and functions.
+
+ This is achieved by defining S4 classes of such numbers and vectors,
+ matrices, and arrays thereof, where all arithmetic and mathematical
+ functions work via the (GNU) MPFR C library, where MPFR is acronym for
+ ``\emph{\textbf{M}ultiple \textbf{P}recision \textbf{F}loating-Point
+   \textbf{R}eliably}''\nocite{FousseHLPZ:2007}.
+ MPFR is Free Software, available under the LGPL
+ license\nocite{FousseHLPZ-MPFR:2011}, and itself is built on the free GNU
+ Multiple Precision arithmetic library (GMP)\nocite{GMP:2011}.
+
+ Consequently, by using \pkg{Rmpfr}, you can often call your \proglang{R}\ function or
+ numerical code with mpfr--numbers instead of simple numbers, and all
+ results will automatically be much more accurate.
+<<ex-exp>>=
+options(digits = 17)# to print to full "standard R" precision
+.N <- function(.) mpfr(., precBits = 200)
+
+exp(   1 )
+exp(.N(1))
+<<nice-but-does-not-fit-on-1-page,eval=FALSE,echo=FALSE>>=
+choose    ( 200, 99:100 )
+chooseMpfr( 200, 99:100 )
+@
+%%
+ Applications by the package author include testing of Bessel or
+ polylog functions and distribution computations, e.g. for stable distributions.
+%%
+ In addition, the \pkg{Rmpfr} has been used on the \code{R-help} or
+ \code{R-devel} mailing list for high-accuracy computations, e.g., in
+ comparison with results from commercial software such as Maple, and in
+ private communications with Petr Savicky about fixing \proglang{R} bug
+ \href{https://bugs.R-project.org/bugzilla3/show_bug.cgi?id=14491}{\code{PR\#14491}}.
+
+ We expect the package to be used in more situations for easy comparison
+ studies about the accuracy of algorithms implemented in \proglang{R}, both
+ for ``standard \proglang{R}'' and extension packages.
+
+%% references:
+\nocite{%
+MM-Rmpfr_pkg}
+
+
+%\bibliographystyle{chicago}%% how on earth do I get the URLs ??/
+\bibliographystyle{jss}%% how on earth do I get the URLs ??/
+
+\bibliography{Rmpfr}
+
+%% references can alternatively be entered by hand
+%\subsubsection*{References}
+
+%\begin{hangparas}{.25in}{1}
+%AuthorA (2007). Title of a web resource, \url{http://url/of/resource/}.
+
+%AuthorC (2008a). Article example in proceedings. In \textit{useR! 2008, The R
+%User Conference, (Dortmund, Germany)}, pp. 31--37.
+
+%AuthorC (2008b). Title of an article. \textit{Journal name 6}, 13--17.
+%\end{hangparas}
+
+\end{document}

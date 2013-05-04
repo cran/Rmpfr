@@ -18,7 +18,7 @@ u <- 10*(1:4)
 y <- 7 * mpfr(1:12, 80)
 my <- y
 dim(my) <- 3:4
-m.y <- matrix(7 * 1:12, 3,4)
+m.y <- asNumeric(my)
 stopifnot(all.equal(m2, mpfr(m.x, 64), tol=0), # not identical(..)
 	  my[2,2] == 35,
 	  my[,1] == 7*(1:3))

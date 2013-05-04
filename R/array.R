@@ -78,7 +78,7 @@ setMethod("dimnames<-", signature(x = "mpfrArray", value = "ANY"),
 	      x
 	  })
 
-setMethod("t", "mpfrMatrix",
+setMethod("t", "mpfrMatrix", t.mpfrMatrix <-
 	  function(x) {
 	      d <- x@Dim; n <- d[1]; m <- d[2]
 	      ## These are the indices to get the transpose of m {n x m} :
@@ -88,7 +88,7 @@ setMethod("t", "mpfrMatrix",
 	      ## faster than { x@.Data <- x@.Data[rep.int(1:n, rep(m,n)) + n*(0:(m-1))] ; x } :
 	      setDataPart(x, getD(x)[rep.int(1:n, rep(m,n)) + n*(0:(m-1))], check=FALSE)
 	  })
-setMethod("t", "mpfr",
+setMethod("t", "mpfr", t.mpfr <-
 	  function(x) { # t(<n-vector>) |-->  {1 x n} matrix
 	      r <- new("mpfrMatrix")
 	      r@Dim <- c(1L, length(x))
@@ -96,8 +96,8 @@ setMethod("t", "mpfr",
 	      setDataPart(r, getD(x), check=FALSE)
 	  })
 
-setMethod("aperm", signature(a="mpfrArray"),
-	  function(a, perm, resize=TRUE) {
+setMethod("aperm", signature(a="mpfrArray"), aperm.mpfrArray <-
+	  function(a, perm, resize=TRUE, ...) {
 	      stopifnot(1 <= (k <- length(d <- a@Dim)))
 	      if(missing(perm)) perm <- k:1
 	      else stopifnot(length(perm <- as.integer(perm)) == k, 1 <= perm, perm <= k)
@@ -117,9 +117,11 @@ setMethod("as.vector", "mpfrArray", function(x) as(x, "mpfr"))
 setAs("mpfrArray", "vector", function(from) as(from, "mpfr"))
 
 toNum <- function(from) {
-    structure(.Call(mpfr2d, from),
-	      dim = dim(from),
-	      dimnames = dimnames(from))
+    if(is.null(dn <- dimnames(from)) || identical(dn, list(NULL,NULL)))
+	## --> result has NULL dimnames
+	structure(.Call(mpfr2d, from), dim = dim(from))
+    else
+	structure(.Call(mpfr2d, from), dim = dim(from), dimnames = dn)
 }
 
 setAs("mpfrArray", "array", toNum)
@@ -254,6 +256,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
     z <- new("mpfrMatrix")
     z0 <- as(0, "mpfr")
 
+    precBits <- max(getPrec(x), getPrec(y))
     if (op == 0) { ## %*%
 	if (ncx != nry) stop("non-conformable arguments")
 
@@ -263,7 +266,12 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	    j <- 0L:(ncx - 1L)
 	    for(i in 1:nrx) {
 		for (k in 0L:(ncy - 1L))
-		    z[i + k * nrx] <- sum(x[i + j * nrx] * y[1L+ j + k * nry])
+		    z[i + k * nrx] <-
+                        ## sum(x[i + j * nrx] * y[1L+ j + k * nry])
+                        new("mpfr",
+                            .Call(R_mpfr_sumprod,
+                                  x[i + j * nrx], y[1L+ j + k * nry],
+                                  precBits, alternating=FALSE))
 	    }
 	}
 	else	    #/* zero-extent operations should return zeroes */
@@ -278,7 +286,13 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	    j <- 1L:nrx
 	    for(i in 0L:(ncx - 1L)) {
 		for (k in 0L:(ncy - 1L))
-		    z[1L +i + k * ncx] <- sum(x[j + i * nrx] * y[j + k * nry])
+		    z[1L +i + k * ncx] <-
+                        ## sum(x[j + i * nrx] * y[j + k * nry])
+                        new("mpfr",
+                            .Call(R_mpfr_sumprod,
+                                  x[j + i * nrx], y[j + k * nry],
+                                  precBits, alternating=FALSE))
+
 	    }
 	} else
 	    for(i in seq_len(ncx*ncy)) z[i] <- z0
@@ -292,7 +306,13 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	    for(i in seq_len(nrx)) {
 		j <- 0L:(ncx - 1L)
 		for (k in 0L:(nry - 1L))
-		    z[i + k * nrx] <- sum(x[i + j * nrx] * y[1L +k + j * nry])
+		    z[i + k * nrx] <-
+                        ## sum(x[i + j * nrx] * y[1L +k + j * nry])
+                        new("mpfr",
+                            .Call(R_mpfr_sumprod,
+                                  x[i + j * nrx], y[1L +k + j * nry],
+                                  precBits, alternating=FALSE))
+
 	    }
 	else
 	    for(i in seq_len(nrx*nry)) z[i] <- z0
@@ -442,6 +462,16 @@ for(it in c("ANY", "missing"))
 		     .mA.subAssign(x,i=i,j=j,...,value=value,
 				   n.a=nargs(), isMpfr = FALSE))
 rm(it,jt)
+
+setMethod("diag", signature(x = "mpfrMatrix"),
+	  function(x, nrow, ncol) {
+              n <- min(dim(x)); i <- seq_len(n); x[cbind(i,i)] })
+
+setMethod("diag<-", signature(x = "mpfrMatrix"),
+	  function(x, value) {
+	      n <- min(dim(x)); i <- seq_len(n); x[cbind(i,i)] <-  value; x })
+
+
 
 ###-----------
 
@@ -686,3 +716,68 @@ setMethod("rowMeans", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
     stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
     applyMpfr(x, 1:dims, mean)
 })
+
+## Cut'n'paste from  ~/R/Pkgs/Matrix/R/Auxiliaries.R {FIXME? load Matrix:::mkDet}
+mkDet <- function(d, logarithm = TRUE, ldet = sum(log(abs(d))),
+                  sig = -1L+2L*as.integer(prod(sign(d)) >= 0))
+{		# sig: -1 or +1 (not 0 !)
+    modulus <- if (logarithm) ldet else exp(ldet)
+    attr(modulus, "logarithm") <- logarithm
+    val <- list(modulus = modulus, sign = sig)
+    class(val) <- "det"
+    val
+}
+
+## S3 method instead of S4, as  base::determinant is S3 generic
+determinant.mpfrMatrix <-
+    function(x, logarithm = TRUE, asNumeric = (d[1] > 3),
+             precBits = max(.getPrec(x)), ...)
+{
+    d <- x@Dim
+    if(d[1] != d[2]) stop("'x' must ba a square matrix")
+    if((n <- d[1]) == 0) determinant(matrix(1,0,0), logarithm=logarithm)
+    else if(n == 1)
+        mkDet(x[1], logarithm=logarithm)
+    else { ## n x n,	for  n >= 2
+        if(asNumeric)
+            return(determinant(asNumeric(x), logarithm=logarithm, ...))
+        ## else use recursive (Care: horribly slow for non-small n!)
+        Det <- function(x, n = dim(x)[1]) {
+            if(n == 1) x[1]
+            else if(n == 2) x[1]*x[4] - x[2]*x[3]
+            else {
+                a <- mpfr(numeric(n), precBits=3L) # dummy to fill
+                n1 <- n-1L
+                for(i in seq_len(n)) {
+                    a[i] <- Det(x[-i,-1], n=n1)
+                }
+                ## sum(x[,1] * a),  faster :
+                new("mpfr",
+                    .Call(R_mpfr_sumprod, x[,1], a,
+                          precBits, alternating=TRUE))
+            }
+        }
+        mkDet(Det(x, n=n), logarithm=logarithm)
+    }
+}
+
+## Only needed for S4 determinant(), not for S3 one:
+## The ``Right Thing'' to do :
+## base::det() calls [base::]determinant();
+## our det() should call our determinant() :
+## det <- base::det
+## environment(det) <- environment()## == asNamespace("Rmpfr")
+
+if(FALSE) {
+## This will become easy, once we have  outer(...)  working, basically almost ==
+## base::.kronecker                     ~~~~~~~~~
+## ------^---------
+setMethod("kronecker", signature(X = "mpfrMatrix", Y = "mpfrMatrix"),
+	  function (X, Y, FUN = "*", make.dimnames = FALSE, ...)
+      {
+	  ydim <- Y@Dim
+          rprec <- max(.getPrec(X),.getPrec(Y))
+          xx <- .......
+          mpfr2array(xx, dim = X@Dim * ydim)
+      })
+}

@@ -1,7 +1,6 @@
 
-R version 2.14.2 beta (2012-02-19 r58418)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.0.0 RC (2013-03-29 r62436) -- "Masked Marvel"
+Copyright (C) 2013 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -22,7 +21,7 @@ Loading required package: gmp
 
 Attaching package: 'gmp'
 
-The following object(s) are masked from 'package:base':
+The following object is masked from 'package:base':
 
     %*%, apply, crossprod, matrix, tcrossprod
 
@@ -30,11 +29,11 @@ Loading C code of R package 'Rmpfr': GMP using 64 bits per limb
 
 Attaching package: 'Rmpfr'
 
-The following object(s) are masked from 'package:stats':
+The following object is masked from 'package:stats':
 
     pnorm, print.integrate
 
-The following object(s) are masked from 'package:base':
+The following object is masked from 'package:base':
 
     cbind, pmax, pmin, rbind
 
@@ -185,8 +184,11 @@ c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636,
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  1.248 0.068 1.455 0.001 0.006 
+Time elapsed:  1.212 0.032 1.24 0 0 
 > 
 > if(!interactive()) warnings()
 NULL
 > 
+> proc.time()
+   user  system elapsed 
+  1.216   0.032   1.241 

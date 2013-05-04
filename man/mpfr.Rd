@@ -82,6 +82,9 @@ x
 ## character input :
 mpfr("2.718281828459045235360287471352662497757") - exp(mpfr(1, 150))
 ## ~= -4 * 10^-40
+## Also works for  NA, NaN, ... :
+cx <- c("1234567890123456", 345, "NA", "NaN", "Inf", "-Inf")
+mpfr(cx)
 
 ## with some 'base' choices :
 print(mpfr("111.1111", base=2)) * 2^4
@@ -100,6 +103,10 @@ m.Z <- mpfr(Z, precBits = frexpZ(Z)$exp)
 stopifnot(identical(cZ <- as.character(Z),
                     as(mZ.,"character")),
           identical(cZ, as(m.Z,"character")))
+
+## compare mpfr-arithmetic with exact rational one:
+stopifnot(all.equal(mpfr(as.bigq(355,113), 99),
+                    mpfr(355, 99) / 113,	tol = 2^-98))
 
 ## look at different "rounding modes":
 sapply(c("N", "D","U","Z"), function(RND)

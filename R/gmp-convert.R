@@ -6,12 +6,6 @@ if(!is.na(r <- suppressWarnings(packageDescription("gmp",
                                                    fields="Version")))
    && package_version(r) >= 0.5) {
 
-
-
-    ## does not work (as desired):
-    ## biginteger_as_character <- gmp:::biginteger_as_character
-    ## biginteger_as           <- gmp:::biginteger_as
-
 ### FIXME: we go via character.. which is not really efficient.
 ### Directly in C, we'd need both Rmpfr and gmp's  C code (!)
 ### TODO(?:  gmp should "export" its C++ API ( -> inst/include/*.hh )
@@ -26,7 +20,7 @@ if(!is.na(r <- suppressWarnings(packageDescription("gmp",
     ## precB: 4 == log2(16) = log(base)
 {
     b <- 16L
-    cx <- .Call(gmp:::biginteger_as_character, x, b)
+    cx <- .Call(biginteger_as_character, x, b)
     if(is.null(precB)) precB <- 4L*nchar(cx)
     new("mpfr", .Call(str2mpfr1_list, cx, precB, b, "N"))
 }
@@ -42,7 +36,7 @@ as.bigz.mpfr <-
     cx <- format(trunc(x), drop0trailing=TRUE)
     dim(cx) <- dx ## needed?? {should *not* be, as in base R!}
     ## .Call(biginteger_as, cx, mod)
-    .Call(gmp:::biginteger_as, cx, mod)
+    .Call(biginteger_as, cx, mod)
 }
 
 
@@ -53,7 +47,7 @@ as.bigz.mpfr <-
     if(is.null(precB)) {
         eN <- frexpZ(N)$exp
         eD <- frexpZ(D)$exp
-        precB <- eN + eD + 1L # precision of result
+        precB <- pmax(128L, eN + eD + 1L) # precision of result
     }
     ..bigz2mpfr(N, precB) / ..bigz2mpfr(D, precB)
 }

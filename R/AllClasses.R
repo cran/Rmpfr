@@ -35,8 +35,7 @@ setClass("mpfr", ## a *vector* of "mpfr1", i.e., multi-precision float numbers
 setClass("mpfrArray", ## mpfr + "dim" + dimnames
 	 contains = "mpfr",
 	 representation = list(Dim = "integer", Dimnames = "list"),
-	 prototype = prototype(new("mpfr"), Dim= 0L,
-			       Dimnames = list(NULL)),
+	 prototype = prototype(new("mpfr"), Dim= 0L),
 	 validity = function(object) {
 	     if(length(object) != prod(D <- object@Dim))
 		 "Dimension does not match length()"
@@ -48,6 +47,22 @@ setClass("mpfrArray", ## mpfr + "dim" + dimnames
 	     else
 		 TRUE
 	 })
+
+setMethod("initialize", "mpfrArray", function(.Object, ..., Dim, Dimnames)
+      {
+	  if(!missing(Dim))
+	      .Object@Dim <- as.integer(Dim)
+	  k <- length(.Object@Dim)
+	  if(missing(Dimnames))
+	      .Object@Dimnames <- rep(list(NULL), k)
+          else if(length(Dimnames) != k) {
+              message(sprintf("in initialize: length(Dimnames) != k = %d;  setting to NULL",k))
+	      .Object@Dimnames <- rep(list(NULL), k)
+          } else
+	      .Object@Dimnames <- Dimnames
+	  callNextMethod()
+      })
+
 
 setClass("mpfrMatrix",
 	 contains = "mpfrArray",
@@ -67,7 +82,7 @@ setClassUnion("atomicVector", ## "double" is not needed, and not liked by some
 			  "complex", "raw", "character"))
 
 ## This is tricky ...
-## With the following class,  arrays/matrices  are covered as 
+## With the following class,  arrays/matrices  are covered as
 ## they are also with "vector" already. *However*, they are
 ## *not* made into vectors in method dispatch,
 ## which they would be if we used simply "vector"

@@ -104,6 +104,8 @@ pi.. <- 2*sol$min/3
 print(pi.., digits=51)
 stopifnot(all.equal(pi.., Const("pi", 256), tol = 10*1e-50))
 
+if(doExtras) { # considerably more expensive
+
 ## a harder one:
 f.sq <- function(x) sin(x-2)^4 + sqrt(pmax(0,(x-1)*(x-4)))*(x-2)^2
 curve(f.sq, 0, 4.5, n=1000)
@@ -111,17 +113,15 @@ msq <- optimizeR(f.sq, 0, 5, tol = 1e-50, trace=5)
 str(msq) # ok
 stopifnot(abs(msq$minimum - 2) < 1e-49)
 
-if(doExtras) { # considerably more expensive
 ## find the other local minimum: -- non-smooth ==> Golden-section is used
 msq2 <- optimizeR(f.sq, 3.5, 5, tol = 1e-50, trace=10)
 stopifnot(abs(msq2$minimum - 4) < 1e-49)
-}
 
 ## and a local maximum:
 msq3 <- optimizeR(f.sq, 3, 4, maximum=TRUE, trace=2)
 stopifnot(abs(msq3$maximum - 3.57) < 1e-2)
 
-
+}#end {doExtras}
 
 
 ##----- "impossible" one to get precisely ------------------------

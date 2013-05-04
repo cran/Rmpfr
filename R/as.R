@@ -62,6 +62,9 @@ setAs("mpfr", "integer", function(from) .Call(mpfr2i, from))
 setMethod("as.numeric", "mpfr", function(x) .Call(mpfr2d, x))
 setMethod("as.integer", "mpfr", function(x) .Call(mpfr2i, x))
 
+setMethod("asNumeric", "mpfr",      function(x) .Call(mpfr2d, x))
+setMethod("asNumeric", "mpfrArray", function(x) toNum(x))
+
 setAs("mpfr1", "numeric",  ## just for user-de-confusion :
       function(from) {
 	  warning("coercing \"mpfr1\" via \"mpfr\" (inefficient)")

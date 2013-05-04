@@ -86,17 +86,21 @@ static R_INLINE int R_mpfr_nr_limbs(mpfr_t r)
 
 
 /* ./convert.c : */
-mp_rnd_t R_rnd2GMP(SEXP rnd_mode);
+mpfr_rnd_t R_rnd2MP(SEXP rnd_mode);
 SEXP d2mpfr1 (SEXP x, SEXP prec, SEXP rnd_mode);
-SEXP d2mpfr1_(double x, int i_prec, mp_rnd_t rnd);
+SEXP d2mpfr1_(double x, int i_prec, mpfr_rnd_t rnd);
 SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode);
 SEXP mpfr2d(SEXP x);
 SEXP mpfr2i(SEXP x);
 SEXP mpfr2str(SEXP x, SEXP digits);
 SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode);
 
+#ifdef R_had_R_Outputfile_in_API
+# ifndef WIN32
 SEXP print_mpfr (SEXP x, SEXP digits);
 SEXP print_mpfr1(SEXP x, SEXP digits);
+# endif
+#endif
 
 SEXP Rmpfr_minus(SEXP x);
 SEXP Rmpfr_abs(SEXP x);
@@ -113,6 +117,7 @@ SEXP Compare_mpfr_i(SEXP x, SEXP y, SEXP op);
 SEXP Compare_mpfr_d(SEXP x, SEXP y, SEXP op);
 
 SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op);
+SEXP R_mpfr_sumprod(SEXP x, SEXP y, SEXP minPrec, SEXP alternating);
 
 #ifdef __NOT_ANY_MORE__
 /* deprecated: */

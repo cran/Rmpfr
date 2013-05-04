@@ -44,7 +44,7 @@
 		      i, dd[i], i,r->_mpfr_d[i])
 
 # define R_mpfr_FILL_EXP ex[0] = (int)r->_mpfr_exp
-# define R_mpfr_GET_EXP  r->_mpfr_exp = (mp_exp_t) ex[0]
+# define R_mpfr_GET_EXP  r->_mpfr_exp = (mpfr_exp_t) ex[0]
 
 
 
@@ -73,7 +73,7 @@
     ex[1] = (int) (r->_mpfr_exp >> 32)
 
 # define R_mpfr_GET_EXP							\
-    r->_mpfr_exp = (mp_exp_t) (RIGHT_HALF(ex[0]) | LEFT_SHIFT(ex1));	\
+    r->_mpfr_exp = (mpfr_exp_t) (RIGHT_HALF(ex[0]) | LEFT_SHIFT(ex1));	\
     R_mpfr_dbg_printf("ex[0:1]= (%10lu,%10lu) -> _exp = 0x%lx\n",	\
                       ex[0],ex1, r->_mpfr_exp)
 
@@ -108,7 +108,7 @@ SEXP MPFR_as_R(mpfr_t r) {
     return val;
 }
 
-SEXP d2mpfr1_(double x, int i_prec, mp_rnd_t rnd)
+SEXP d2mpfr1_(double x, int i_prec, mpfr_rnd_t rnd)
 {
     mpfr_t r;
     int nr_limbs = N_LIMBS(i_prec), i;
@@ -133,27 +133,26 @@ SEXP d2mpfr1_(double x, int i_prec, mp_rnd_t rnd)
  *
  * @param rnd_mode: an R character (string with nchar() == 1).
  *
- * @return one of the (currently 4) different  GMP_RND[DNUZ] modes.
+ * @return one of the (currently 4) different  MPFR_RND[DNUZ] modes.
  */
-// FIXME: add the new (mpfr 3.0.0) rounding mode
-mp_rnd_t R_rnd2GMP(SEXP rnd_mode) {
+mpfr_rnd_t R_rnd2MP(SEXP rnd_mode) {
     const char* r_ch = CHAR(asChar(rnd_mode));
     switch(r_ch[0]) {
-    case 'D': return GMP_RNDD;
-    case 'N': return GMP_RNDN;
-    case 'U': return GMP_RNDU;
-    case 'Z': return GMP_RNDZ;
+    case 'D': return MPFR_RNDD;
+    case 'N': return MPFR_RNDN;
+    case 'U': return MPFR_RNDU;
+    case 'Z': return MPFR_RNDZ;
     default:
 	error(_("illegal rounding mode '%s'; must be one of {'D','N','U','Z'}"),
 	      r_ch);
-	/* Wall: */ return GMP_RNDN;
+	/* Wall: */ return MPFR_RNDN;
     }
 }
 
 SEXP d2mpfr1(SEXP x, SEXP prec, SEXP rnd_mode) {
     if(LENGTH(x) != 1)
 	error("length(x) (=%d) is not 1", LENGTH(x));
-    return d2mpfr1_(asReal(x), asInteger(prec), R_rnd2GMP(rnd_mode));
+    return d2mpfr1_(asReal(x), asInteger(prec), R_rnd2MP(rnd_mode));
 }
 
 SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
@@ -163,7 +162,7 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
 	nprot = 1;
     SEXP val = PROTECT(allocVector(VECSXP, n));
     if(nx > 0) {
-	mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
+	mpfr_rnd_t rnd = R_rnd2MP(rnd_mode);
 	int *iprec; double *dx;
 	if(!isReal(x))       { PROTECT(x    = coerceVector(x,   REALSXP)); nprot++; }
 	if(!isInteger(prec)) { PROTECT(prec = coerceVector(prec, INTSXP)); nprot++; }
@@ -184,13 +183,17 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
   -- Function: int mpfr_set_q (mpfr_t ROP, mpq_t OP, mpfr_rnd_t RND)
 
 --> would want functions
-        SEXP mpz2mpfr1_(mpz_t x, int i_prec, mp_rnd_t rnd);
+        SEXP mpz2mpfr1_(mpz_t x, int i_prec, mpfr_rnd_t rnd);
 	SEXP mpz2mpfr1 (SEXP x, SEXP prec, SEXP rnd_mode);
 	SEXP mpz2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode);
+    {and the same for 'q' instead of 'z'}
 
    completely parallel to the d2mpfr*() functions above
+
    *BUT* we cannot easily do the [R package gmp C++ code]-part of
    SEXP -> mpz !
+
+   MM: still do it .. should not be so hard to "guess"
 */
 
 
@@ -198,7 +201,7 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
 /* From the MPFR (2.3.2, 2008) doc :
  -- Function:
 
- int mpfr_set_str (mpfr_t ROP, const char *S, int BASE, mp_rnd_t RND)
+ int mpfr_set_str (mpfr_t ROP, const char *S, int BASE, mpfr_rnd_t RND)
 
      Set ROP to the value of the whole string S in base BASE, rounded
      in the direction RND.  See the documentation of `mpfr_strtofr' for
@@ -215,7 +218,7 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 	n = (nx == 0 || np == 0) ? 0 : imax2(nx, np),
 	nprot = 1;
     SEXP val = PROTECT(allocVector(VECSXP, n));
-    mp_rnd_t rnd = R_rnd2GMP(rnd_mode);
+    mpfr_rnd_t rnd = R_rnd2MP(rnd_mode);
     mpfr_t r_i;
     mpfr_init(r_i);
 
@@ -225,12 +228,15 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
     iprec = INTEGER(prec);
 
     for(int i = 0; i < n; i++) {
-	int ierr;
 	mpfr_set_prec(r_i, (mpfr_prec_t) iprec[i % np]);
-	ierr = mpfr_set_str(r_i, CHAR(STRING_ELT(x, i % nx)), ibase, rnd);
-	if(ierr)
-	    error("str2mpfr1_list(x, *): x[%d] cannot be made into MPFR",
-		  i+1);
+	int ierr = mpfr_set_str(r_i, CHAR(STRING_ELT(x, i % nx)), ibase, rnd);
+	if(ierr) {
+	    if (!strcmp("NA", CHAR(STRING_ELT(x, i % nx))))
+		mpfr_set_nan(r_i); // "NA" <=> "NaN" (which *are* treated well, by mpfr_set_str)
+	    else
+		error("str2mpfr1_list(x, *): x[%d] cannot be made into MPFR",
+		      i+1);
+	}
 	/* FIXME: become more efficient by doing R_..._2R_init() only once*/
 	SET_VECTOR_ELT(val, i, MPFR_as_R(r_i));
     }
@@ -303,11 +309,11 @@ void R_asMPFR(SEXP x, mpfr_ptr r)
     return;
 }
 
+#ifdef R_had_R_Outputfile_in_API
 #ifndef WIN32
 /* This only works on  "unix-alikes" ... but we don't really need it */
 /* for R_Outputfile : */
 #include <Rinterface.h>
-
 
 SEXP print_mpfr1(SEXP x, SEXP digits)
 {
@@ -319,7 +325,7 @@ SEXP print_mpfr1(SEXP x, SEXP digits)
 /*     Rprintf(" * [dbg] after R_asMPFR() ..\n"); */
     mpfr_out_str (R_Outputfile, 10,
 		  use_x_digits ? 0 : asInteger(digits),
-		  r, GMP_RNDD);
+		  r, MPFR_RNDD);
     /* prints the value of s in base 10, rounded towards -Inf, where the third
        argument 0 means that the number of printed digits is automatically
        chosen from the precision of s; */
@@ -348,7 +354,7 @@ SEXP print_mpfr(SEXP x, SEXP digits)
 /* 	Rprintf */
 /* #else  /\* requires R_Outputfile  from  R's Interfaces.h  ___Unix-alike only__ *\/ */
 	mpfr_out_str (R_Outputfile, 10, use_x_digits ? 0 : asInteger(digits),
-		      r, GMP_RNDD);
+		      r, MPFR_RNDD);
 /* #endif */
 	Rprintf("\n");
     }
@@ -360,6 +366,8 @@ SEXP print_mpfr(SEXP x, SEXP digits)
 
 #endif
 /* ^^^ Unix-alike only */
+#endif
+
 
 /* Convert R "mpfr" object (list of "mpfr1")  to R "double" vector : */
 SEXP mpfr2d(SEXP x) {
@@ -371,7 +379,7 @@ SEXP mpfr2d(SEXP x) {
 
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
-	r[i] = mpfr_get_d(R_i, GMP_RNDD);
+	r[i] = mpfr_get_d(R_i, MPFR_RNDD);
     }
 
     mpfr_clear (R_i);
@@ -390,12 +398,12 @@ SEXP mpfr2i(SEXP x) {
 
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
-	if(!mpfr_fits_sint_p(R_i, GMP_RNDD)) {
+	if(!mpfr_fits_sint_p(R_i, MPFR_RNDD)) {
 	    warning("NAs introduced by coercion from \"mpfr\" [%d]", i+1);
 	    r[i] = NA_INTEGER;
 	}
 	else {
-	    long lr = mpfr_get_si(R_i, GMP_RNDD);
+	    long lr = mpfr_get_si(R_i, MPFR_RNDD);
 	    r[i] = (int) lr;
 	}
     }
@@ -440,8 +448,8 @@ SEXP mpfr2str(SEXP x, SEXP digits) {
     mpfr_init(R_i); /* with default precision */
 
     for(i=0; i < n; i++) {
-	mp_exp_t exp = (mp_exp_t) 0;
-	mp_exp_t *exp_ptr = &exp;
+	mpfr_exp_t exp = (mpfr_exp_t) 0;
+	mpfr_exp_t *exp_ptr = &exp;
 	int dig_needed, dig_n_max = -1;
 
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
@@ -451,7 +459,7 @@ SEXP mpfr2str(SEXP x, SEXP digits) {
  * deeper and I currently suspect a problem/bug in MPFR library's  mpfr_get_str(..) */
 #ifdef __Rmpfr_FIRST_TRY_FAILS__
 	ch = mpfr_get_str(NULL, exp_ptr, B,
-			  (size_t) n_dig, R_i, GMP_RNDN);
+			  (size_t) n_dig, R_i, MPFR_RNDN);
 #else
 	if(n_dig) {/* use it as desired precision */
 	    dig_needed = n_dig;
@@ -468,10 +476,10 @@ SEXP mpfr2str(SEXP x, SEXP digits) {
 	    dig_n_max = dig_needed;
 	}
 
-	/* char * mpfr_get_str (char *STR, mp_exp_t *EXPPTR, int B,
-	 *			size_t N, mpfr_t OP, mp_rnd_t RND) */
+	/* char * mpfr_get_str (char *STR, mpfr_exp_t *EXPPTR, int B,
+	 *			size_t N, mpfr_t OP, mpfr_rnd_t RND) */
 	mpfr_get_str(ch, exp_ptr, B,
-		     (size_t) n_dig, R_i, GMP_RNDN);
+		     (size_t) n_dig, R_i, MPFR_RNDN);
 #endif
 	SET_STRING_ELT(str, i, mkChar(ch));
 	i_exp[i] = (int) exp_ptr[0];

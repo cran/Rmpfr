@@ -316,11 +316,18 @@ stopifnot(two ^ mpfr.min.exp2 == 0)
 two ^ (mpfr.min.exp2 * (1 - 1e-15))
 ## 2.38256490488795107e-323228497   ["typically"]
 
-## Above, we mention {sort}, {order}, {quantile}, {rank}.
-p <- mpfr(rpois(12, lambda=500), precBits=128)^10
-\dontshow{
-if(FALSE)## FIXME
-  stopifnot(all(diff(sort(p)) > 0))
-}% dontshow
+##--- "Assert" that {sort}, {order}, {quantile}, {rank}, all work :
+
+p <- mpfr(rpois(32, lambda=500), precBits=128)^10
+np <- as.numeric(log(p))
+stopifnot(all(diff(sort(p)) >= 0),
+   identical(order(p), order(np)),
+   identical(rank (p), rank (np)),
+   all.equal(sapply(1:9, function(Typ) quantile(np, type=Typ, names=FALSE)),
+      sapply(lapply(1:9, function(Typ) quantile( p, type=Typ, names=FALSE)),
+             function(x) as.numeric(log(x))),
+      tol = 1e-3),# quantiles: interpolated in orig. <--> log scale
+ TRUE)
+
 }
 \keyword{classes}

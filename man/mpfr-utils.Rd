@@ -1,6 +1,6 @@
 \name{mpfr-utils}
-\alias{getD}
 \alias{getPrec}
+\alias{getD}
 \alias{mpfr_default_prec}
 \alias{mpfr2array}
 \alias{print.mpfr}
@@ -75,13 +75,18 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
   \code{\link{matrix}}, when \code{m} is of class
   \code{"\linkS4class{mpfrArray}"} or \code{"\linkS4class{mpfrMatrix}"},
   respectively.  It should be equivalent to \code{as(m, "array")} or
-  \code{... "matrix"}.
+  \code{... "matrix"}.   Note that the slightly more general
+  \code{\link{asNumeric}()} is preferred now.
 
   \code{mpfr2array()} a slightly more flexible alternative to
   \code{dim(.) <- dd}.
 }
 \seealso{
   Start using \code{\link{mpfr}(..)}, and compute with these numbers.
+
+  \code{\link{mpfrArray}(x)} is for numeric (\dQuote{non-mpfr})
+  \code{x}, whereas \code{mpfr2array(x)} is for \code{"mpfr"} classed
+  \code{x}, only.
 }
 \examples{
 getPrec(as(c(1,pi), "mpfr")) # 128 for both

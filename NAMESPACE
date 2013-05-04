@@ -8,8 +8,9 @@ export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr)
 importFrom("utils", str)
 importFrom("stats", stats__pnorm = pnorm)# import *and* rename !
 importFrom("gmp"
+           , asNumeric
            , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
-           ## not yet (maybe never) , biginteger_as, biginteger_as_character
+           , biginteger_as, biginteger_as_character# <- .Call() them
 	   ## more to come
            , is.whole, formatN # because we add own S3 methods
 	   )
@@ -92,6 +93,7 @@ export(
        , "mpfr_default_prec"
        , "optimizeR"
        , "hjkMpfr" ## <-- FIXME, rather part of an  optimR(...., method = "hjk")
+       , "pbetaI"
        , "pmax", "pmin"
        , "pnorm"
        , "pochMpfr"
@@ -110,15 +112,26 @@ export(
 
 
 exportMethods(
-              ## "own generics":
-              "apply",
+              ##___ "own generics" ___
+              "apply", "asNumeric",
 
-              ## "other generics"
+              ##___ "other generics" ___
+
+	      ## Group Methods
+	      "Arith",
+	      "Compare",
+	      "Logic",
+	      "Math",
+	      "Math2",
+	      "Ops",
+	      "Summary",
+
               "abs", "log", "sign"
               , "all.equal", "aperm"
               , "as.vector", "as.integer", "as.numeric"
               , "coerce", "coerce<-"
               , "cbind", "rbind"
+	      , "diag", "diag<-"
               , "dim", "dim<-", "dimnames", "dimnames<-"
               , "atan2", "beta", "lbeta"
               , "factorial"
@@ -137,6 +150,8 @@ S3method(c, mpfr)
 S3method(as.array, mpfr)
 S3method(as.matrix, mpfr)
 
+S3method(determinant, mpfrMatrix)
+
 S3method(diff, mpfr)
 S3method(str,  mpfr)
 
@@ -146,3 +161,9 @@ S3method(formatN, mpfr)
 S3method(print, mpfr)
 S3method(print, mpfr1)
 S3method(print, mpfrArray)
+
+## useful, to have  base::outer() work automatically:
+S3method(rep, mpfr)
+S3method(t, mpfr)
+S3method(t, mpfrMatrix)
+S3method(aperm, mpfrArray)

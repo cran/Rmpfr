@@ -14,6 +14,8 @@
     integer-valued argument, notably using MPFR's mpfr_fac_ui; see also end
     of man/mpfr-class.Rd
 
+13) all the NOT_YET in src/Ops.c are implemented, *apart* from trigamma()
+    --> TODO 16)
 
 
 14) Want to *change*  'precBits' of existing MPFR numbers;
@@ -67,4 +69,14 @@
     -> Fixed in ~/R/D/r-devel/R/src/library/stats/R/quantile.R
 
 23x) sumBinomMpfr()  accept  f.x
+
+28) determinant() and hence det() "fail" (with a reasonable error message).
+    Easy: go via asNumeric(.) with a  warning() that can be suppressed
+    Standard R uses LAPACK's  LU() decomposition.  Would be cool to have
+    that in C (using MPFR).
+    Alternatively, do it for 2x2 and via recursion mxm for small m.
+    (but it is *really* inefficient: complexity  \propto  m! )
+
+30) pmin() and pmax(), for simple cases pmin(x,n) are now, 2013-02, quite "fast",
+        (see also --> ~/R/MM/Pkg-ex/Rmpfr/SLOW-pmin.R)
 

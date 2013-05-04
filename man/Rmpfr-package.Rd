@@ -57,7 +57,7 @@ chooseMpfr              Binomial Coefficients and Pochhammer Symbol aka
                         Rising Factorial
 factorialMpfr           Factorial 'n!'  in Arbitrary Precision
 formatMpfr              Formatting MPFR (multiprecision) Numbers
-getD                    Rmpfr - Utilities for Precision Setting, Printing, etc
+getPrec                 Rmpfr - Utilities for Precision Setting, Printing, etc
 hjkMpfr                 Hooke-Jeeves Derivative-Free Minimization R (working for MPFR)
 roundMpfr               Rounding to Binary bits, "mpfr-internally"
 seqMpfr                 "mpfr" Sequence Generation

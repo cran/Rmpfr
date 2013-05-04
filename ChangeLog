@@ -1,3 +1,34 @@
+2013-05-04  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/mpfr.R (.mat2ind): from a proposal by Serguei Sokol,
+	new utility, to be used for matrix subsetting and replacement,
+	in .mpfr.subset() and .mpfr.repl().
+__FIXME__ add checking code!
+
+2013-02-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/Math.R (sumBinomMpfr): oops: docu had (-1)^k instead of (-1)^(n-k);
+	alternating=FALSE has been wrong, since (r101, 2012-05-15)
+
+2013-02-14  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/gmp-convert.R (..bigq2mpfr): precB = NULL --> at least 128
+
+2013-02-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-2
+	* R/as.R (asNumeric): new function; mainly for 'mpfrArray'
+
+	* src/Ops.c (R_mpfr_mod): for Arith_mpfr[_i|_d]), R's %% and %/%:
+	now working correctly, checked in
+	* tests/arith-ex.R:
+
+	* R/array.R (mkDet, determinant): provide recursive method for
+	determinant() and hence det(). *Only* for small matrices !!
+
+	* src/Summary.c (R_mpfr_sumprod): new for sum(x * y)  ==  x %*% y
+	-> 20-40% faster matrix multiplication {still not fast!}.
+
 2012-12-03  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 0.5-1, released to CRAN 2012-12-03

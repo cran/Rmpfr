@@ -167,7 +167,7 @@ chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
 ## http://en.wikipedia.org/wiki/N%C3%B6rlund%E2%80%93Rice_integral
 ## also deals with these alternating binomial sums
 ##'
-##' version 1: already using the 'altnerating' arg in chooseMpfr.all()
+##' version 1: already using the 'alternating' arg in chooseMpfr.all()
 sumBinomMpfr.v1 <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
 {
     ## Note: n0 = 0, or 1 is typical, and hence chooseMpfr.all() makes sense
@@ -176,16 +176,19 @@ sumBinomMpfr.v1 <- function(n, f, n0=0, alternating=TRUE, precBits = 256)
         f(mpfr(n0:n, precBits=precBits)))
 }
 ##' version 2: chooseZ()*(-1)^(.) is considerably faster than chooseMpfr.all()
-sumBinomMpfr <- function(n, f, n0=0, alternating=TRUE, precBits = 256,
+sumBinomMpfr.v2 <- function(n, f, n0=0, alternating=TRUE, precBits = 256,
 			 f.k = f(mpfr(k, precBits=precBits)))
 {
     ## Note: n0 = 0, or 1 is typical..
     stopifnot(0 <= n0, n0 <= n,
 	      is.function(f) || (is(f.k, "mpfr") && length(f.k) == n-n0+1))
     k <- n0:n
-    sum(chooseZ(n, k) * (-1)^(n-k) * f.k)
+    sum(if(alternating) chooseZ(n, k) * (-1)^(n-k) * f.k
+        else chooseZ(n, k) * f.k)
 }
-
+## NB:  pbetaI() in  ./special-fun.R  uses a special version..
+## --- if we do this *fast* in C --  do  pbetaI()  as well.
+sumBinomMpfr <- sumBinomMpfr.v2
 
 
 ##' Rounding to binary bits, not decimal digits. Closer to the number

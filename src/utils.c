@@ -13,25 +13,25 @@
 # ifndef WIN32
 #  include <Rinterface.h>
 # endif
-#define R_PRT(_X_) mpfr_out_str (R_Outputfile, 10, 0, _X_, GMP_RNDD)
+#define R_PRT(_X_) mpfr_out_str (R_Outputfile, 10, 0, _X_, MPFR_RNDD)
 #endif
 
-int my_mpfr_beta (mpfr_t ROP, mpfr_t X, mpfr_t Y, mp_rnd_t RND);
-int my_mpfr_lbeta(mpfr_t ROP, mpfr_t X, mpfr_t Y, mp_rnd_t RND);
+int my_mpfr_beta (mpfr_t ROP, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND);
+int my_mpfr_lbeta(mpfr_t ROP, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND);
 
-int my_mpfr_choose(mpfr_t ROP, long n,    mpfr_t X, mp_rnd_t RND);
-int my_mpfr_poch  (mpfr_t ROP, long n,    mpfr_t X, mp_rnd_t RND);
-int my_mpfr_round (mpfr_t ROP, long prec, mpfr_t X, mp_rnd_t RND);
+int my_mpfr_choose(mpfr_t ROP, long n,    mpfr_t X, mpfr_rnd_t RND);
+int my_mpfr_poch  (mpfr_t ROP, long n,    mpfr_t X, mpfr_rnd_t RND);
+int my_mpfr_round (mpfr_t ROP, long prec, mpfr_t X, mpfr_rnd_t RND);
 /* argument order above must match the one of mpfr_jn() etc .. */
 
 /*------------------------------------------------------------------------*/
-int my_mpfr_beta (mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
+int my_mpfr_beta (mpfr_t R, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND)
 {
     /* NOTA BENE: When called, R is typically *identical* to X
      *            ==> can use  R  only at the very end! */
     int ans;
     mpfr_t s,t;
-    mp_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
+    mpfr_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
     if(p_X < p_Y) p_X = p_Y;
     mpfr_init2(s, p_X);
     mpfr_init2(t, p_X);
@@ -60,11 +60,11 @@ int my_mpfr_beta (mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
     return ans;
 }
 
-int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
+int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND)
 {
     int ans;
     mpfr_t s,t;
-    mp_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
+    mpfr_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
     if(p_X < p_Y) p_X = p_Y;
     mpfr_init2(s, p_X);
     mpfr_init2(t, p_X);
@@ -85,7 +85,7 @@ int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mp_rnd_t RND)
  * all initialization and cleanup is called in the caller
  * @result R = choose(X, n)
  */
-int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
+int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mpfr_rnd_t RND)
 {
     int ans;
     long i;
@@ -118,7 +118,7 @@ int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
 /** Pochhammer Symbol -- *rising* factorial   x * (x+1) * ... (x+n-1)
  * all initialization and cleanup is called in the caller
  */
-int my_mpfr_poch (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
+int my_mpfr_poch (mpfr_t R, long n, mpfr_t X, mpfr_rnd_t RND)
 {
     int ans;
     long i;
@@ -148,7 +148,7 @@ int my_mpfr_poch (mpfr_t R, long n, mpfr_t X, mp_rnd_t RND)
 
 /** round to (binary) bits, not (decimal) digits
  */
-int my_mpfr_round (mpfr_t R, long prec, mpfr_t X, mp_rnd_t RND)
+int my_mpfr_round (mpfr_t R, long prec, mpfr_t X, mpfr_rnd_t RND)
 {
     int ans;
     if(prec < MPFR_PREC_MIN)
@@ -206,10 +206,10 @@ SEXP const_asMpfr(SEXP I, SEXP prec)
     mpfr_init2(r, asInteger(prec));
 
     switch(asInteger(I)) {
-    case 1: mpfr_const_pi     (r, GMP_RNDN); break;
-    case 2: mpfr_const_euler  (r, GMP_RNDN); break;
-    case 3: mpfr_const_catalan(r, GMP_RNDN); break;
-    case 4: mpfr_const_log2   (r, GMP_RNDN); break;
+    case 1: mpfr_const_pi     (r, MPFR_RNDN); break;
+    case 2: mpfr_const_euler  (r, MPFR_RNDN); break;
+    case 3: mpfr_const_catalan(r, MPFR_RNDN); break;
+    case 4: mpfr_const_log2   (r, MPFR_RNDN); break;
     default:
 	error("invalid integer code {const_asMpfr()}"); /* -Wall */
     }
@@ -258,7 +258,7 @@ SEXP R_mpfr_fac (SEXP n_, SEXP prec)
     for(i=0; i < n; i++) {
 	// never happens when called from R:
 	if(nn[i] < 0) error("R_mpfr_fac(%d): negative n.", nn[i]);
-	mpfr_fac_ui(r_i, nn[i], GMP_RNDN);
+	mpfr_fac_ui(r_i, nn[i], MPFR_RNDN);
 	SET_VECTOR_ELT(val, i, MPFR_as_R(r_i));
     }
 
@@ -282,7 +282,7 @@ SEXP _FNAME(SEXP x) {							\
 									\
     for(i=0; i < n; i++) {						\
 	R_asMPFR(VECTOR_ELT(D, i), r_i);				\
-	_MPFR_NAME(r_i, r_i, GMP_RNDN);					\
+	_MPFR_NAME(r_i, r_i, MPFR_RNDN);					\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(r_i));				\
     }									\
 									\
@@ -322,7 +322,7 @@ SEXP _FNAME(SEXP x, SEXP y) {				\
     for(i=0; i < n; i++) {				\
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);		\
 	R_asMPFR(VECTOR_ELT(yD, i % ny), y_i);		\
-	_MPFR_NAME(x_i, x_i, y_i, GMP_RNDN);		\
+	_MPFR_NAME(x_i, x_i, y_i, MPFR_RNDN);		\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));		\
     }							\
 							\
@@ -359,7 +359,7 @@ SEXP _FNAME(SEXP x, SEXP y) {						\
 									\
     for(i=0; i < n; i++) {						\
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);				\
-	_MPFR_NAME(x_i, (long) yy[i % ny], x_i, GMP_RNDN);		\
+	_MPFR_NAME(x_i, (long) yy[i % ny], x_i, MPFR_RNDN);		\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));				\
     }									\
 									\

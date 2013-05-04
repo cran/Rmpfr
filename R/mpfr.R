@@ -50,6 +50,7 @@ print.mpfr1 <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
 
 setMethod(show, "mpfr1", function(object) print.mpfr1(object))
 
+if(FALSE) ## no longer -- as R CMD check complains about use of non-API R_Outputfile
 ## For testing, debugging etc
 if(.Platform$OS.type != "windows") {## No R_Outputfile (in C) on Windows
 
@@ -90,13 +91,42 @@ print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE,
 }
 setMethod(show, "mpfr", function(object) print.mpfr(object))
 
+## Proposal by Serguei Sokol in order to make  diag() work:
+if(FALSE)## << MM is in line with our "as.matrix" methods, but is extreme
+setMethod("is.matrix", "mpfr",
+          function(x) length(dim(x)) == 2L)
+## e.g. M0 <- (M <- cbind(mpfr(1.1, 100)^(98:99)))[,FALSE]; diag(M0)
+## gives list() instead of length 0 mpfr
+
+## For matrix indexing:  matrix i |-->  regular i :
+.mat2ind <- function(i, dim.x, dimnms.x) {
+    ndx <- length(dim.x)
+    if(!is.null(di <- dim(i))) {
+        if(di[2L] == ndx) {
+	    ## k-column Matrix subsetting for array of rank k
+	    if(is.character(i)) {
+		i <- vapply(seq_along(dim.x), function(j)
+			    match(i[,j], dimnms.x[[j]]), seq_len(di[1]))
+		if(any(is.na(i)))
+		    stop("character matrix index out of limits")
+	    }
+	    i <- if(is.numeric(i))
+		i[,1L] + colSums(t(i[,-1L]-1L)* cumprod(dim.x)[-ndx])
+	    else getD(i)
+	} else {
+	    i <- getD(i)
+	}
+    }
+    i
+}
 
 ## "[" which also keeps names ... JMC says that names are not support(ed|able)
 ## ---	for such objects..
 .mpfr.subset <- function(x,i,j, ..., drop) {
     nA <- nargs()
     if(nA == 2) { ## x[i] etc -- vector case -- to be fast, need C! --
-        xd <- structure(getD(x)[i], names=names(x)[i])
+        ## i <- .mat2ind(i, dim(x), dimnames(x))
+        xd <- structure(getD(x)[i], names = names(x)[i])
         if(any(iN <- vapply(xd, is.null, NA))) # e.g. i > length(x)
             xd[iN] <- mpfr(NA, precBits = 2L)
         ## faster than  { x@.Data <- xd ; x }:
@@ -112,10 +142,29 @@ setMethod(show, "mpfr", function(object) print.mpfr(object))
         ##		     new("mpfr", D)
     }
     else
-        stop(sprintf("invalid 'mpfr' subsetting (nargs = %d)",nA))
-}
+        stop(gettextf("invalid 'mpfr' subsetting (nargs = %d)",nA))
+} ## .mpfr.subset()
+
+.mpfr.msubset <- function(x,i,j, ..., drop) {
+    nA <- nargs()
+    if(nA == 2) {
+        i <- .mat2ind(i, dim(x), dimnames(x))
+        xd <- structure(getD(x)[i], names=names(x)[i])
+        if(any(iN <- vapply(xd, is.null, NA))) # e.g. i > length(x)
+            xd[iN] <- mpfr(NA, precBits = 2L)
+        ## faster than  { x@.Data <- xd ; x }:
+        setDataPart(x[i], xd, check=FALSE)
+    }
+    else
+        stop(gettext("invalid 'mpfr' matrix subsetting with a matrix (nargs = %d)",nA))
+} ## .mpfr.msubset()
+
+### ---------- FIXME:  ./array.R  has other  "mpfrArray" methods for "[" and "[<-" !!!!!!-----------
+
 setMethod("[", signature(x = "mpfr", i = "ANY", j = "missing", drop = "missing"),
           .mpfr.subset)
+setMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing", drop = "missing"),
+          .mpfr.msubset)
 
 setMethod("[[", signature(x = "mpfr", i = "ANY"),
 	  function(x,i) {
@@ -127,10 +176,11 @@ setMethod("[[", signature(x = "mpfr", i = "ANY"),
 	  })
 
 ## "[<-" :
-.mpfr.repl <- function(x, i, ..., value, check=TRUE) {
+.mpfr.repl <- function(x, i, ..., value, check = TRUE) {
     if(length(list(...))) ## should no longer happen:
 	stop("extra replacement arguments ", deparse(list(...)),
 	     " not dealt with")
+    ## if(!missing(i)) i <- .mat2ind(i, dim(x), dimnames(x))
     n <- length(xD <- getD(x))
     xD[i] <- value
     if((nn <- length(xD)) > n+1)
@@ -138,9 +188,28 @@ setMethod("[[", signature(x = "mpfr", i = "ANY"),
 	xD[setdiff((n+1):(nn-1), i)] <- mpfr(NA, precBits = 2L)
     setDataPart(x, xD, check=check)
 }
+## FIXME: Should not need this; rather add .mat2ind to .mpfr.repl() above
+.mpfr.mrepl <- function(x, i, ..., value, check=TRUE) {
+    if(length(list(...))) ## should no longer happen:
+	stop("extra replacement arguments ", deparse(list(...)),
+	     " not dealt with")
+    i <- .mat2ind(i, dim(x), dimnames(x))
+    n <- length(xD <- getD(x))
+    xD[i] <- value
+    if((nn <- length(xD)) > n+1)
+	## must "fill" the newly created NULL entries
+	xD[setdiff((n+1):(nn-1), i)] <- mpfr(NA, precBits = 2L)
+    setDataPart(x, xD, check=check)
+}
+
+## value = "mpfr"
 setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
 				value = "mpfr"),
-                 function(x, i, j, ..., value) .mpfr.repl(x, i, ..., value=value))
+		 function(x, i, j, ..., value) .mpfr.repl(x, i, ..., value=value))
+setReplaceMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing",
+				value = "mpfr"),
+		 function(x, i, j, ..., value) .mpfr.mrepl(x, i, ..., value=value))
+
 ## for non-"mpfr", i.e. "ANY" 'value', coerce to mpfr with correct prec:
 setReplaceMethod("[", signature(x = "mpfr", i = "missing", j = "missing",
 				value = "ANY"),
@@ -155,107 +224,194 @@ setReplaceMethod("[", signature(x = "mpfr", i = "ANY", j = "missing",
 				   pmax(getPrec(value), .getPrec(xi))))
 	      else x # nothing to replace
 	  })
+setReplaceMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing",
+				value = "ANY"),
+	  function(x,i,j, ..., value) {
+	      if(length(xi <- x[i]))
+		  .mpfr.mrepl(x, i, value = mpfr(value, precBits =
+				    pmax(getPrec(value), .getPrec(xi))))
+	      else x # nothing to replace
+	  })
 
 
 ## I don't see how I could use setMethod("c", ...)
 ## but this works "magically"  when the first argument is an mpfr :
 c.mpfr <- function(...) new("mpfr", unlist(lapply(list(...), as, Class = "mpfr")))
 
-
-setMethod("unique", signature(x="mpfr", incomparables="missing"),
-	  function(x, incomparables = FALSE, ...)
-	  new("mpfr", unique(getD(x), incomparables, ...)))
-
-## -> duplicated() now work
+##  duplicated() now works, checked in ../man/mpfr-class.Rd
 
 ## sort() works too  (but could be made faster via faster
 ## ------  xtfrm() method !  [ TODO ]
+
+setMethod("unique", signature(x = "mpfr", incomparables = "missing"),
+	  function(x, incomparables = FALSE, ...)
+	  new("mpfr", unique(getD(x), incomparables, ...)))
+
+## This is practically identical to  grid's rep.unit :
+rep.mpfr <- function(x, times = 1, length.out = NA, each = 1, ...)
+    ## Determine an appropriate index, then call subsetting code
+    x[ rep(seq_along(x), times=times, length.out=length.out, each=each) ]
+
 
 
 setGeneric("pmin", signature = "...")# -> message about override ...
 setGeneric("pmax", signature = "...")
 
+## Check if we should "dispatch" to base
+## should be fast, as it should not slow down "base pmin() / pmax()"
+## Semantically:  <==> is.atomic(x) && !(is(x, "bigz") || is(x, "bigq"))
+pm.ok.base <- function(x, cld = getClassDef(class(x))) is.atomic(x) &&
+    (!is.object(x) || { !(extends(cld, "bigz") || extends(cld, "bigq")) })
+
 setMethod("pmin", "mNumber",
 	  function(..., na.rm = FALSE) {
 	      args <- list(...)
-	      if(all(vapply(args, is.atomic, NA)))
-		  return( base::pmin(..., na.rm = na.rm) )
-	      ## else: at least one is "mpfr(Matrix/Array)"
-	      is.m <- vapply(args, is, NA, "mpfr")
-	      if(!any(is.m))
-		  stop("no \"mpfr\" argument -- wrong method chosen")
-
+              ## Fast(*) check if "base dispatch" should happen (* "fast" for base cases):
+	      ## if((allA <- all(vapply(args, is.atomic, NA))) &&
+              ##    ((nonO <- !any(is.obj <- vapply(args, is.object, NA))) ||
+              ## {
+              ##     cld <- lapply(args, function(.) getClassDef(class(.)))
+              ##     cld.o <- cld[is.obj]
+              ##     all(vapply(cld.o, extends, NA, "bigz") |
+              ##         vapply(cld.o, extends, NA, "bigq")) }))
+              if(all(vapply(args, pm.ok.base, NA)))
+                  return( base::pmin(..., na.rm = na.rm) )
+	      ## else: at least one is "mpfr(Matrix/Array)", "bigz" or "bigq"
+	      ## if(!allA || nonO)
+              cld <- lapply(args, function(.) getClassDef(class(.)))
+              ## else have defined cld above
+	      is.m <- vapply(cld, extends, NA, "mpfr")
+	      is.q <- vapply(cld, extends, NA, "bigq")
+	      is.z <- vapply(cld, extends, NA, "bigz")
+	      is.N <- vapply(args, function(x) is.numeric(x) || is.logical(x), NA)
+	      if(!any(is.mq <- is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
+		  stop("no \"mpfr\", \"bigz\", or \"bigq\" argument -- wrong method chosen; please report!")
 	      N <- max(lengths <- vapply(args, length, 1L))
+	      any.m <- any(is.m)
+	      any.q <- any(is.q)
 	      ## precision needed -- FIXME: should be *vector*
 	      mPrec <- max(unlist(lapply(args[is.m], .getPrec)),# not vapply
 			   if(any(vapply(args[!is.m], is.double, NA)))
-			   .Machine$double.digits)
+			   .Machine$double.digits,
+			   if(any.q) 128L,# arbitrary as in getPrec()
+			   unlist(lapply(args[is.z], function(z) frexpZ(z)$exp))# as in getPrec()
+			   )
 	      ## to be the result :
-	      r <- mpfr(rep.int(Inf, N), precBits = mPrec)
+	      ## r <- mpfr(rep.int(Inf, N), precBits = mPrec)
+	      ## more efficient (?): start with the first 'mpfr' argument
+	      i.frst.m <- which.max(if(any.m) is.m else if(any.q) is.q else is.z)
+	      ## ==> r is "mpfr" if there's any, otherwise "bigq", or "bigz"
+	      r <- args[[i.frst.m]]
+	      if((n.i <- lengths[i.frst.m]) != N)
+		  r <- r[rep(seq_len(n.i), length.out = N)]
 
 	      ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
 	      has.na <- FALSE
-	      for(i in seq_along(args)) {
+	      ii <- seq_along(lengths) ## = seq_along(args)
+	      ii <- ii[ii != i.frst.m]
+	      for(i in ii) {
 		  x <- args[[i]]
 		  if((n.i <- lengths[i]) != N)
 		      x <- x[rep(seq_len(n.i), length.out = N)]
-		  nas <- cbind(is.na(r), is.na(x))
-		  if(!is.m[i]) x <- mpfr(x, precBits = mPrec)
-		  if(has.na || (has.na <- any(nas))) {
-		      r[nas[, 1L]] <- x[nas[, 1L]]
-		      x[nas[, 2L]] <- r[nas[, 2L]]
+		  n.r <- is.na(r); n.x <- is.na(x)
+		  ## mpfr() is relatively expensive
+		  if(doM <- any.m && !is.m[i] && !is.N[i]) # "bigz", "bigq"
+		      ## r is "mpfr"
+		      x <- mpfr(x, precBits = mPrec)
+		  else if(doQ <- !any.m && !is.q[i] && !is.N[i]) # "bigz"
+		      ## r is "bigq"
+		      x <- as.bigq(x)
+		  if(has.na || (has.na <- any(n.r, n.x))) {
+		      r[n.r] <- x[n.r]
+		      x[n.x] <- if(!doM && !doQ) as(r[n.x],class(x)) else r[n.x]
 		  }
 		  change <- r > x
-		  change <- change & !is.na(change)
+		  change <- which(change & !is.na(change))
 		  r[change] <- x[change]
 		  if (has.na && !na.rm)
-		      r[nas[, 1L] | nas[, 2L]] <- NA
+		      r[n.r | n.x] <- NA
 	      }
-
-	      mostattributes(r) <- attributes(args[[1L]])
+	      ## wouldn't be ok, e.g for 'bigq' r and args[[1]]:
+	      ## mostattributes(r) <- attributes(args[[1L]])
+	      ## instead :
+	      if(!is.null(d <- dim(args[[1L]]))) dim(r) <- d
 	      r
-	  })
+	  })## end { pmin }
 
 setMethod("pmax", "mNumber",
 	  function(..., na.rm = FALSE) {
 	      args <- list(...)
-	      if(all(vapply(args, is.atomic, NA)))
-		  return( base::pmax(..., na.rm = na.rm) )
-	      ## else: at least one is "mpfr(Matrix/Array)"
-	      is.m <- vapply(args, is, NA, "mpfr")
-	      if(!any(is.m))
-		  stop("no \"mpfr\" argument -- wrong method chosen")
-
+              ## Fast(*) check if "base dispatch" should happen (* "fast" for base cases):
+	      ## if((allA <- all(vapply(args, is.atomic, NA))) &&
+              ##    ((nonO <- !any(is.obj <- vapply(args, is.object, NA))) ||
+              ## {
+              ##     cld <- lapply(args, function(.) getClassDef(class(.)))
+              ##     cld.o <- cld[is.obj]
+              ##     all(vapply(cld.o, extends, NA, "bigz") |
+              ##         vapply(cld.o, extends, NA, "bigq")) }))
+              if(all(vapply(args, pm.ok.base, NA)))
+                  return( base::pmax(..., na.rm = na.rm) )
+	      ## else: at least one is "mpfr(Matrix/Array)", "bigz" or "bigq"
+	      ## if(!allA || nonO)
+              cld <- lapply(args, function(.) getClassDef(class(.)))
+              ## else have defined cld above
+	      is.m <- vapply(cld, extends, NA, "mpfr")
+	      is.q <- vapply(cld, extends, NA, "bigq")
+	      is.z <- vapply(cld, extends, NA, "bigz")
+	      is.N <- vapply(args, function(x) is.numeric(x) || is.logical(x), NA)
+	      if(!any(is.mq <- is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
+		  stop("no \"mpfr\", \"bigz\", or \"bigq\" argument -- wrong method chosen; please report!")
 	      N <- max(lengths <- vapply(args, length, 1L))
+	      any.m <- any(is.m)
+	      any.q <- any(is.q)
 	      ## precision needed -- FIXME: should be *vector*
 	      mPrec <- max(unlist(lapply(args[is.m], .getPrec)),# not vapply
 			   if(any(vapply(args[!is.m], is.double, NA)))
-			   .Machine$double.digits)
+			   .Machine$double.digits,
+			   if(any.q) 128L,# arbitrary as in getPrec()
+			   unlist(lapply(args[is.z], function(z) frexpZ(z)$exp))# as in getPrec()
+			   )
 	      ## to be the result :
-	      r <- mpfr(rep.int(-Inf, N), precBits = mPrec)
+	      ## r <- mpfr(rep.int(Inf, N), precBits = mPrec)
+	      ## more efficient (?): start with the first 'mpfr' argument
+	      i.frst.m <- which.max(if(any.m) is.m else if(any.q) is.q else is.z)
+	      ## ==> r is "mpfr" if there's any, otherwise "bigq", or "bigz"
+	      r <- args[[i.frst.m]]
+	      if((n.i <- lengths[i.frst.m]) != N)
+		  r <- r[rep(seq_len(n.i), length.out = N)]
 
 	      ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
 	      has.na <- FALSE
-	      for(i in seq_along(args)) {
+	      ii <- seq_along(lengths) ## = seq_along(args)
+	      ii <- ii[ii != i.frst.m]
+	      for(i in ii) {
 		  x <- args[[i]]
 		  if((n.i <- lengths[i]) != N)
 		      x <- x[rep(seq_len(n.i), length.out = N)]
-		  nas <- cbind(is.na(r), is.na(x))
-		  if(!is.m[i]) x <- mpfr(x, precBits = mPrec)
-		  if(has.na || (has.na <- any(nas))) {
-		      r[nas[, 1L]] <- x[nas[, 1L]]
-		      x[nas[, 2L]] <- r[nas[, 2L]]
+		  n.r <- is.na(r); n.x <- is.na(x)
+		  ## mpfr() is relatively expensive
+		  if(doM <- any.m && !is.m[i] && !is.N[i]) # "bigz", "bigq"
+		      ## r is "mpfr"
+		      x <- mpfr(x, precBits = mPrec)
+		  else if(doQ <- !any.m && !is.q[i] && !is.N[i]) # "bigz"
+		      ## r is "bigq"
+		      x <- as.bigq(x)
+		  if(has.na || (has.na <- any(n.r, n.x))) {
+		      r[n.r] <- x[n.r]
+		      x[n.x] <- if(!doM && !doQ) as(r[n.x],class(x)) else r[n.x]
 		  }
 		  change <- r < x
-		  change <- change & !is.na(change)
+		  change <- which(change & !is.na(change))
 		  r[change] <- x[change]
 		  if (has.na && !na.rm)
-		      r[nas[, 1L] | nas[, 2L]] <- NA
+		      r[n.r | n.x] <- NA
 	      }
-
-	      mostattributes(r) <- attributes(args[[1L]])
+	      ## wouldn't be ok, e.g for 'bigq' r and args[[1]]:
+	      ## mostattributes(r) <- attributes(args[[1L]])
+	      ## instead :
+	      if(!is.null(d <- dim(args[[1L]]))) dim(r) <- d
 	      r
-	  })
+	  })## end { pmax }
 
 
 ### seq() :
@@ -332,7 +488,7 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 	as(from,"mpfr")[FALSE] # of same precision
     ## else if (One) 1:length.out
     else if(missing(by)) {
-	# if(from == to || length.out < 2) by <- 1
+	## if(from == to || length.out < 2) by <- 1
         length.out <- as.integer(length.out)
 	if(missing(to))
 	    to <- as(from,"mpfr") + length.out - 1
@@ -342,7 +498,8 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 	    if(from == to)
 		rep.int(as(from,"mpfr"), length.out)
 	    else { f <- as(from,"mpfr")
-		   as.vector(c(f, f + (1:(length.out - 2)) * by, to)) }
+		   as.vector(c(f, f + (1:(length.out - 2)) * by, to))
+}
 	else as.vector(c(as(from,"mpfr"), to))[seq_len(length.out)]
     }
     else if(missing(to))
@@ -365,22 +522,22 @@ setGeneric("seq", function(from, to, by, ...) standardGeneric("seq"),
 
 setGeneric("seq", function(from, to, by, ...) standardGeneric("seq"),
 	   useAsDefault =
-	   function(from=1, to=1, by=((to-from)/(length.out-1)), ...)
+	   function(from = 1, to = 1, by = ((to-from)/(length.out-1)), ...)
 	   base::seq(from, to, by, ...))
 
 setGeneric("seq", function (from, to, by, length.out, along.with, ...)
 	   standardGeneric("seq"),
 	   signature = c("from", "to", "by"),
 	   useAsDefault = {
-	       function(from=1, to=1, by=((to-from)/(length.out-1)),
-			length.out=NULL, along.with=NULL, ...)
+	       function(from = 1, to = 1, by = ((to-from)/(length.out-1)),
+			length.out = NULL, along.with = NULL, ...)
 		   base::seq(from, to, by,
 			     length.out=length.out, along.with=along.with, ...)
 	   })
 
-setMethod("seq", c(from="mpfr", to="ANY", by = "ANY"), seqMpfr)
-setMethod("seq", c(from="ANY", to="mpfr", by = "ANY"), seqMpfr)
-setMethod("seq", c(from="ANY", to="ANY", by = "mpfr"), seqMpfr)
+setMethod("seq", c(from = "mpfr", to = "ANY", by = "ANY"), seqMpfr)
+setMethod("seq", c(from = "ANY", to = "mpfr", by = "ANY"), seqMpfr)
+setMethod("seq", c(from = "ANY", to = "ANY", by = "mpfr"), seqMpfr)
 
 }##--not yet-- defining seq() methods -- as it fails
 
@@ -392,7 +549,7 @@ setMethod("seq", c(from="ANY", to="ANY", by = "mpfr"), seqMpfr)
 ## the user version
 getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
     if(isTRUE(is.mpfr) || is(x,"mpfr"))
-	vapply(getD(x), slot, 1L, "prec")
+	vapply(getD(x), slot, 1L, "prec")# possibly of length 0
     else if(is.character(x)) ## number of digits --> number of bits
 	ceiling(log2(base) * nchar(gsub("[-.]", '', x)))
     else if(is.logical(x))
@@ -477,7 +634,7 @@ diff.mpfr <- function(x, lag = 1L, differences = 1L, ...)
     x
 }
 
-str.mpfr <- function(object, nest.lev, give.head=TRUE, ...) {
+str.mpfr <- function(object, nest.lev, give.head = TRUE, ...) {
     ## utils:::str.default() gives  "Formal class 'mpfr' [package "Rmpfr"] with 1 slots"
     cl <- class(object)
     le <- length(object)
@@ -487,14 +644,14 @@ str.mpfr <- function(object, nest.lev, give.head=TRUE, ...) {
     if(give.head)
 	cat("Class", " '", paste(cl, collapse = "', '"),
 	    "' [package \"", attr(cl, "package"), "\"] of ",
-	    if(isArr) paste("dimension", deparse(di, control=NULL))
+	    if(isArr) paste("dimension", deparse(di, control = NULL))
 	    else paste("length", le), " and precision",
 	    if(onePr) paste("", r.pr[1]) else paste0("s ", r.pr[1],"..",r.pr[2]),
 	    "\n", sep = "")
     if(missing(nest.lev)) nest.lev <- 0
     ## maybe add a formatNum() which adds "  " as give.head=TRUE suppresses all
     utils:::str.default(as.numeric(object),
-			give.head=FALSE, nest.lev = nest.lev+1, ...)
+			give.head = FALSE, nest.lev = nest.lev+1, ...)
     ##                   max.level = NA, vec.len = strO$vec.len, digits.d = strO$digits.d,
     ## nchar.max = 128, give.attr = TRUE, give.head = TRUE, give.length = give.head,
     ## width = getOption("width"), nest.lev = 0, indent.str = paste(rep.int(" ",

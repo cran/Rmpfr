@@ -13,6 +13,7 @@
 %
 %\VignetteIndexEntry{Rmpfr}
 %\VignetteDepends{Rmpfr}
+%\VignetteDepends{gmp}
 \SweaveOpts{engine=R,eps=FALSE,pdf=TRUE,width=7,height=4,strip.white=true,keep.source=TRUE}
 
 %% an abstract and keywords
