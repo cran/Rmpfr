@@ -149,15 +149,15 @@ mpfrMath2setMeth.y.x <- function(fname, Csub) {
 	      is.character(Csub ), length(Csub ) == 1)
 
     setMethod(fname, signature(y = "mpfr", x = "mpfr"),
-	      function(y, x)
-	      new("mpfr", .Call(Csub, y, x)))
+	      function(y, x) new("mpfr", .Call(Csub, y, x)))
+    setMethod(fname, signature(y = "mpfr", x = "numeric"),
+	      function(y, x) new("mpfr", .Call(Csub, y, .mpfr(x, 128L))))
+    setMethod(fname, signature(y = "numeric", x = "mpfr"),
+	      function(y, x) new("mpfr", .Call(Csub, .mpfr(y, 128L), x)))
     setMethod(fname, signature(y = "mpfr", x = "ANY"),
-	      function(y, x)
-	      new("mpfr", .Call(Csub, y, as(x, "mpfr"))))
+	      function(y, x) new("mpfr", .Call(Csub, y, as(x, "mpfr"))))
     setMethod(fname, signature(y = "ANY", x = "mpfr"),
-	      function(y, x)
-	      new("mpfr", .Call(Csub, as(y, "mpfr"), x)))
-
+	      function(y, x) new("mpfr", .Call(Csub, as(y, "mpfr"), x)))
 
     setMethod(fname, signature(y = "mpfrArray", x = "mpfrArray"),
 	      function(y, x) {
@@ -170,14 +170,16 @@ mpfrMath2setMeth.y.x <- function(fname, Csub) {
 	      function(y, x) {
 		  if(length(y) %% length(x) != 0)
 		      stop("length of first argument (array) is not multiple of the second argument's one")
-		  y@.Data[] <- .Call(Csub, y, as(x, "mpfr"))
+		  y@.Data[] <- .Call(Csub, y, if(is.numeric(x))
+				     .mpfr(x, 128L) else as(x, "mpfr"))
 		  y
 	      })
     setMethod(fname, signature(y = "ANY", x = "mpfrArray"),
 	      function(y, x) {
 		  if(length(x) %% length(y) != 0)
 		      stop("length of second argument (array) is not multiple of the first argument's one")
-		  x@.Data[] <- .Call(Csub, as(y, "mpfr"), x)
+		  x@.Data[] <- .Call(Csub, if(is.numeric(y))
+				     .mpfr(y, 128L) else as(y, "mpfr"), x)
 		  x
 	      })
 
@@ -192,14 +194,15 @@ mpfrMath2setMeth.a.b <- function(fname, Csub) {
 	      is.character(Csub ), length(Csub ) == 1)
 
     setMethod(fname, signature(a = "mpfr", b = "mpfr"),
-	      function(a, b)
-	      new("mpfr", .Call(Csub, a, b)))
+	      function(a, b) new("mpfr", .Call(Csub, a, b)))
+    setMethod(fname, signature(a = "mpfr", b = "numeric"),
+	      function(a, b) new("mpfr", .Call(Csub, a, .mpfr(b, 128L))))
+    setMethod(fname, signature(a = "numeric", b = "mpfr"),
+	      function(a, b) new("mpfr", .Call(Csub, .mpfr(a, 128L), b)))
     setMethod(fname, signature(a = "mpfr", b = "ANY"),
-	      function(a, b)
-	      new("mpfr", .Call(Csub, a, as(b, "mpfr"))))
+	      function(a, b) new("mpfr", .Call(Csub, a, as(b, "mpfr"))))
     setMethod(fname, signature(a = "ANY", b = "mpfr"),
-	      function(a, b)
-	      new("mpfr", .Call(Csub, as(a, "mpfr"), b)))
+	      function(a, b) new("mpfr", .Call(Csub, as(a, "mpfr"), b)))
 
 
     setMethod(fname, signature(a = "mpfrArray", b = "mpfrArray"),
@@ -213,14 +216,16 @@ mpfrMath2setMeth.a.b <- function(fname, Csub) {
 	      function(a, b) {
 		  if(length(a) %% length(b) != 0)
 		      stop("length of first argument (array) is not multiple of the second argument's one")
-		  a@.Data[] <- .Call(Csub, a, as(b, "mpfr"))
+		  a@.Data[] <- .Call(Csub, a, if(is.numeric(b))
+				     .mpfr(b, 128L) else as(b, "mpfr"))
 		  a
 	      })
     setMethod(fname, signature(a = "ANY", b = "mpfrArray"),
 	      function(a, b) {
 		  if(length(b) %% length(a) != 0)
 		      stop("length of second argument (array) is not multiple of the first argument's one")
-		  b@.Data[] <- .Call(Csub, as(a, "mpfr"), b)
+		  b@.Data[] <- .Call(Csub, if(is.numeric(a))
+				     .mpfr(a, 128L) else as(a, "mpfr"), b)
 		  b
 	      })
 

@@ -29,7 +29,7 @@
     SEXP d_R    = ALLOC_SLOT(_V_, Rmpfr_d_Sym,   INTSXP, R_mpfr_nr_ints); \
     /* the integer vector which makes up the mantissa: */		\
     int *dd = INTEGER(d_R),						\
-        *ex = INTEGER(exp_R) /* the one for the exponent */
+	*ex = INTEGER(exp_R) /* the one for the exponent */
 
 /*------------------------*/
 #if GMP_NUMB_BITS == 32
@@ -65,7 +65,7 @@
 # define R_mpfr_GET_DVEC(i)						\
     r->_mpfr_d[i] = (mp_limb_t)(RIGHT_HALF(dd[2*i]) | LEFT_SHIFT(dd[2*i+1]));	\
     R_mpfr_dbg_printf("dd[%d:%d]= (%10lu,%10lu) -> r..d[i=%d]= 0x%lx\n", \
-             2*i,2*i+1, dd[2*i],dd[2*i+1], i,r->_mpfr_d[i])
+	     2*i,2*i+1, dd[2*i],dd[2*i+1], i,r->_mpfr_d[i])
 
 # define R_mpfr_FILL_EXP				\
     R_mpfr_dbg_printf("_exp = 0x%lx\n",r->_mpfr_exp);	\
@@ -75,7 +75,7 @@
 # define R_mpfr_GET_EXP							\
     r->_mpfr_exp = (mpfr_exp_t) (RIGHT_HALF(ex[0]) | LEFT_SHIFT(ex1));	\
     R_mpfr_dbg_printf("ex[0:1]= (%10lu,%10lu) -> _exp = 0x%lx\n",	\
-                      ex[0],ex1, r->_mpfr_exp)
+		      ex[0],ex1, r->_mpfr_exp)
 
 /*------------------------*/
 #else
@@ -89,7 +89,7 @@
     /* now fill the slots of val */		\
     INTEGER(prec_R)[0] = (int)r->_mpfr_prec;	\
     INTEGER(sign_R)[0] = (int)r->_mpfr_sign;	\
-    R_mpfr_FILL_EXP; 				\
+    R_mpfr_FILL_EXP;				\
     /* the full *vector* of limbs : */		\
     for(i=0; i < nr_limbs; i++) {		\
 	R_mpfr_FILL_DVEC(i);			\
@@ -183,7 +183,7 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
   -- Function: int mpfr_set_q (mpfr_t ROP, mpq_t OP, mpfr_rnd_t RND)
 
 --> would want functions
-        SEXP mpz2mpfr1_(mpz_t x, int i_prec, mpfr_rnd_t rnd);
+	SEXP mpz2mpfr1_(mpz_t x, int i_prec, mpfr_rnd_t rnd);
 	SEXP mpz2mpfr1 (SEXP x, SEXP prec, SEXP rnd_mode);
 	SEXP mpz2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode);
     {and the same for 'q' instead of 'z'}
@@ -280,14 +280,14 @@ SEXP d2mpfr(SEXP x, SEXP prec)
 void R_asMPFR(SEXP x, mpfr_ptr r)
 {
     SEXP prec_R = GET_SLOT(x, Rmpfr_precSym);
-    SEXP sign_R = GET_SLOT(x, Rmpfr_signSym);
+    // SEXP sign_R = GET_SLOT(x, Rmpfr_signSym);// only used once
     SEXP exp_R  = GET_SLOT(x, Rmpfr_expSym);
     SEXP d_R    = GET_SLOT(x, Rmpfr_d_Sym);
 
     int x_prec = INTEGER(prec_R)[0],
 	nr_limbs = N_LIMBS(x_prec), i;
     int *dd = INTEGER(d_R),/* the vector which makes up the mantissa */
-        *ex = INTEGER(exp_R), ex1; /* the one for the exponent */
+	*ex = INTEGER(exp_R), ex1; /* the one for the exponent */
 
     if(length(d_R) != R_mpfr_nr_ints)
 	error("nr_limbs(x_prec)= nr_limbs(%d)= %d : length(<d>) == %d != R_mpfr_nr_ints == %d",
@@ -300,7 +300,7 @@ void R_asMPFR(SEXP x, mpfr_ptr r)
     } else ex1 = ex[1];
 
     mpfr_set_prec(r, (mpfr_prec_t) x_prec);
-    r->_mpfr_sign = (mpfr_sign_t) INTEGER(sign_R)[0];
+    r->_mpfr_sign = (mpfr_sign_t) INTEGER(GET_SLOT(x, Rmpfr_signSym))[0];
     R_mpfr_GET_EXP;
     /* the full *vector* of limbs : */
     for(i=0; i < nr_limbs; i++) {
@@ -351,7 +351,7 @@ SEXP print_mpfr(SEXP x, SEXP digits)
 	R_asMPFR(VECTOR_ELT(D, i), r);
 /* #if MPFR_VERSION >= MPFR_VERSION_NUM(2,4,0) */
 
-/* 	Rprintf */
+/*	Rprintf */
 /* #else  /\* requires R_Outputfile  from  R's Interfaces.h  ___Unix-alike only__ *\/ */
 	mpfr_out_str (R_Outputfile, 10, use_x_digits ? 0 : asInteger(digits),
 		      r, MPFR_RNDD);
@@ -454,10 +454,10 @@ SEXP mpfr2str(SEXP x, SEXP digits) {
 
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
 
+#ifdef __Rmpfr_FIRST_TRY_FAILS__
 /* Observing memory problems, e.g., see ../tests/00-bug.R.~3~
  * Originally hoped it was solvable via  R_alloc() etc, but it seems the problem is
  * deeper and I currently suspect a problem/bug in MPFR library's  mpfr_get_str(..) */
-#ifdef __Rmpfr_FIRST_TRY_FAILS__
 	ch = mpfr_get_str(NULL, exp_ptr, B,
 			  (size_t) n_dig, R_i, MPFR_RNDN);
 #else

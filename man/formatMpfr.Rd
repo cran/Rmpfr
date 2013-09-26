@@ -9,14 +9,15 @@
   \code{mpfr} method of the generic \code{\link{format}} function.
 
   The \code{formatN()} methods for \code{\linkS4class{mpfr}} numbers
-  renders them differently than e.g., their double precision equivalents.
+  renders them differently than their double precision equivalents, by
+  appending \code{"_M"}.
 }
 \usage{
 formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
-           showNeg0 = TRUE,
-           big.mark = "", big.interval = 3L,
-           small.mark = "", small.interval = 5L, decimal.mark = ".",
-           zero.print = NULL, drop0trailing = FALSE, ...)
+	   showNeg0 = TRUE,
+	   big.mark = "", big.interval = 3L,
+	   small.mark = "", small.interval = 5L, decimal.mark = ".",
+	   zero.print = NULL, drop0trailing = FALSE, ...)
 \S3method{formatN}{mpfr}(x, drop0trailing = TRUE, \dots)
 }
 \arguments{
@@ -40,11 +41,12 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
     \code{\link{prettyNum}} and that help page explains the details.}
   \item{\dots}{further arguments passed to or from other methods.}
 }
-% \details{
-% %%  ~~ If necessary, more details than the description above ~~
-% }
 \value{
-  a character vector of the same length as \code{x}.
+  a character vector or array, say \code{cx}, of the same length as
+  \code{x}.  Since Rmpfr version 0.5-3 (2013-09), if \code{x} is an
+  \code{\linkS4class{mpfrArray}}, then \code{cx} is a character
+  \code{\link{array}} with the same \code{\link{dim}} and
+  \code{\link{dimnames}} as \code{x}.
 }
 \references{
   The MPFR manual's description of \samp{mpfr_get_str()} which is the
@@ -80,4 +82,3 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
 }
 \keyword{character}
 \keyword{print}
-

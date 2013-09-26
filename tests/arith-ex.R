@@ -6,6 +6,15 @@ all.EQ <- function(x,y, tolerance = 2^-98, ...) # very small tol. for MPFR
     all.equal(x, y, tolerance=tolerance, ...)
 warningI <- function(...) warning(..., immediate. = TRUE)
 
+## Check that we got the "which.*" methods also from "bigq":
+bcl <- c("ANY", "bigq", "bigz", "mpfr")
+##if(packageVersion("gmp") >= "0.5-8") {
+stopifnot(identical(bcl,
+		    sort(unlist(findMethods("which.max")@signatures))),
+	  identical(bcl,
+		    sort(unlist(findMethods("which.min")@signatures))))
+##}
+
 options(warn = 1)# warnings *immediately*
 (doExtras <- Rmpfr:::doExtras())
 eps2 <-   2 * .Machine$double.eps
@@ -87,14 +96,12 @@ mZ <- mpfr(Z, 64)
 stopifnot(Z == mZ, mZ == Z)
 
 checkPmin(x, nx)
-if(packageVersion("gmp") >= "0.5-5") {
     cat("checking pmin(. bigq ): ")
     ## FIXME checkPmin(x, qx); cat("[Ok]\n")
     ##
     print( base::pmin(Z, Z, max(Z)) )# via  gmp:: rep.bigz(x, length.out = *)
     cat("checking pmin(. bigz ) : ")
     checkPmin(Z); cat("[Ok]\n") # via gmp:: all.equal.bigz()
-}
 
 stopifnot(all.equal( round(x, 10),  round(nx, 10)),
           all.equal(signif(x, 10), signif(nx, 10)))

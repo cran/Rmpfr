@@ -650,8 +650,7 @@ str.mpfr <- function(object, nest.lev, give.head = TRUE, ...) {
 	    "\n", sep = "")
     if(missing(nest.lev)) nest.lev <- 0
     ## maybe add a formatNum() which adds "  " as give.head=TRUE suppresses all
-    utils:::str.default(as.numeric(object),
-			give.head = FALSE, nest.lev = nest.lev+1, ...)
+    str(as.numeric(object), give.head = FALSE, nest.lev = nest.lev+1, ...)
     ##                   max.level = NA, vec.len = strO$vec.len, digits.d = strO$digits.d,
     ## nchar.max = 128, give.attr = TRUE, give.head = TRUE, give.length = give.head,
     ## width = getOption("width"), nest.lev = 0, indent.str = paste(rep.int(" ",

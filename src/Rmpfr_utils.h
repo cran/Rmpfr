@@ -27,6 +27,17 @@
 #define _(String) (String)
 #endif
 
+#if (MPFR_VERSION < MPFR_VERSION_NUM(3,0,0))
+/* define back-compatibility types:*/
+# define MPFR_RNDD GMP_RNDD
+# define MPFR_RNDN GMP_RNDN
+# define MPFR_RNDU GMP_RNDU
+# define MPFR_RNDZ GMP_RNDZ
+
+# define mpfr_exp_t mp_exp_t
+
+#endif
+
 /*----------------------------------------*/
 
 #ifdef _in_Rmpfr_init_

@@ -46,14 +46,20 @@ mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
     else new("mpfr", ml)
 }
 
+.mpfr <- function(x, precBits)
+    new("mpfr", .Call(d2mpfr1_list, x, precBits, "N"))
+.mpfr. <- function(x, precBits, rnd.mode)
+    new("mpfr", .Call(d2mpfr1_list, x, precBits, rnd.mode))
+
+
 ##' to be used in our own low-level R programming
 .d2mpfr1 <- function(x, precBits) .Call(d2mpfr1, x, precBits, "N")
 setAs("numeric", "mpfr1", ## use default precision of 128 bits
       function(from) .Call(d2mpfr1, from, 128L, "N"))# <- round to [N]earest
-setAs("numeric", "mpfr", function(from) mpfr(from, 128L))
-setAs("integer", "mpfr", function(from) mpfr(from,  32L))
-setAs("raw",     "mpfr", function(from) mpfr(from,   8L))
-setAs("logical", "mpfr", function(from) mpfr(from,   2L))
+setAs("numeric", "mpfr", function(from) .mpfr(from, 128L))
+setAs("integer", "mpfr", function(from) .mpfr(from,  32L))
+setAs("raw",     "mpfr", function(from) .mpfr(from,   8L))
+setAs("logical", "mpfr", function(from) .mpfr(from,   2L))
 ## TODO?  base=16 for "0x" or "0X" prefix -- but base must have length 1 ..
 setAs("character", "mpfr", function(from) mpfr(from))
 
@@ -160,7 +166,7 @@ formatMpfr <-
 		rr <- r[iNeg]
 		rr[isMin] <- substring(rr[isMin], 2)
 		r[iNeg] <- paste0(c("","-")[1+isMin], "0.",
-                                  nZeros(-ex[iNeg]), rr)
+				  nZeros(-ex[iNeg]), rr)
 	    }
 	    else {
 		r[iNeg] <- paste0("0.", nZeros(-ex[iNeg]), r[iNeg])
@@ -169,12 +175,14 @@ formatMpfr <-
 	if(any(iPos)) ## "xy.nnnn" :
 	    r[iPos] <- patch(r[iPos], (hasMinus + Ex+1L)[iPos])
     }
-    prettyNum(r, big.mark = big.mark, big.interval = big.interval,
-	      small.mark = small.mark,
-	      small.interval = small.interval,
-	      decimal.mark = decimal.mark,
-	      zero.print = zero.print, drop0trailing = drop0trailing,
-	      preserve.width = if (trim) "individual" else "common")
+    r <- prettyNum(r, big.mark = big.mark, big.interval = big.interval,
+		   small.mark = small.mark,
+		   small.interval = small.interval,
+		   decimal.mark = decimal.mark,
+		   zero.print = zero.print, drop0trailing = drop0trailing,
+		   preserve.width = if (trim) "individual" else "common")
+    if(is.null(d <- dim(x))) r
+    else array(r, dim=d, dimnames = dimnames(x))
 }
 setMethod("format", "mpfr", formatMpfr)
 

@@ -1,0 +1,3 @@
+#! /bin/sh
+rm -f src/Makevars
+# as we create it from Makevars.in

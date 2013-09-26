@@ -201,7 +201,7 @@ m6
 which(m6 == 3, arr.ind = TRUE) # |-->  (1, 2)
 ## Coercion back to "vector": Both of these work:
 stopifnot(identical(as(m6, "mpfr"), v6),
-          identical(as.vector(m6), v6)) # < but this is a "coincidence"
+	  identical(as.vector(m6), v6)) # < but this is a "coincidence"
 
 S2 <- m6[,-3] # 2 x 2
 S3 <- rbind(m6, c(1:2,10)) ; s3 <- asNumeric(S3)
@@ -230,5 +230,10 @@ stopifnot(identical(aa[i3], asNumeric(AA[i3])))
 CA <- AA; ca <- aa
 ca[i3] <- ca[i3] ^ 3
 CA[i3] <- CA[i3] ^ 3
+
+## scale():
+S2. <- scale(S2)
+stopifnot(all.equal(abs(as.vector(S2.)), rep(sqrt(1/mpfr(2, 128)), 4),
+		    tol = 1e-30))
 }
 \keyword{classes}

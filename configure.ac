@@ -64,6 +64,12 @@ AC_CHECK_LIB(gmp, __gmpz_init, ,
 AC_CHECK_LIB(mpfr, mpfr_init, ,
     [AC_MSG_ERROR([MPFR Library not found, see README])])
 
+dnl not yet: now have check+compatibility for old Rmpfr in
+dnl	src/Rmpfr_utils.h
+dnl	~~~~~~~~~~~~~~~~~
+dnl AC_CHECK_LIB(mpfr, mpfr_digamma, ,
+dnl    [AC_MSG_ERROR([MPFR Library must be at least version 3.0.0, see README])])
+
 AC_SUBST(PKG_CPPFLAGS)
 AC_SUBST(PKG_CFLAGS)
 AC_SUBST(PKG_LDFLAGS)

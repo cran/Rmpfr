@@ -29,6 +29,7 @@
 %
 \alias{coerce,mpfr,character-method}
 \alias{coerce,mpfr,numeric-method}
+\alias{coerce,mpfr,bigz-method}
 \alias{coerce,mpfr,integer-method}
 \alias{coerce,mpfr1,numeric-method}
 \alias{coerce,mpfr1,mpfr-method}
@@ -101,6 +102,9 @@
 \alias{tcrossprod,array_or_vector,mpfr-method}
 \alias{tcrossprod,mpfr,array_or_vector-method}
 
+\alias{which.min,mpfr-method}
+\alias{which.max,mpfr-method}
+
 \alias{show,mpfr-method}
 \alias{show,mpfr1-method}
 \alias{print.mpfr1}
@@ -146,13 +150,29 @@
   \describe{
     \item{abs}{\code{signature(x = "mpfr")}: ... }
 
+    \item{lbeta}{\code{signature(a = "ANY", b = "mpfrArray")}, is
+      \eqn{\log(|B(a,b)|)}{log(abs(B(a,b)))} where \eqn{B(a,b)} is the
+      Beta function, \code{beta(a,b)}.}
     \item{beta}{\code{signature(a = "mpfr", b = "ANY")},}
-    \item{lbeta}{\code{signature(a = "ANY", b = "mpfrArray")},}
     \item{beta}{\code{signature(a = "mpfr", b = "mpfr")}, \dots, etc:
       Compute the beta function \eqn{B(a,b)}, using high precision,
       building on internal \code{\link{gamma}} or \code{\link{lgamma}}.
       See the help for \R's base function \code{\link[base]{beta}} for
-      more.}
+      more.  Currently, there, \eqn{a,b \ge 0}{a,b >= 0} is required.
+      Here, we provide (non-\code{\link{NaN}}) for all numeric \code{a, b}.
+
+      When either \eqn{a}, \eqn{b}, or \eqn{a+b} is a negative
+      \emph{integer}, \eqn{\Gamma(.)} has a pole there and is undefined
+      (\code{NaN}).  However the Beta function can be defined there as
+      \dQuote{limit}, in some cases.  Following other software such as
+      SAGE, Maple or Mathematica, we provide finite values in these
+      cases.  However, note that these are not proper limits
+      (two-dimensional in \eqn{(a,b)}), but useful for some
+      applications.  E.g., \eqn{B(a,b)} is defined as zero when
+      \eqn{a+b} is a negative integer, but neither \eqn{a} nor \eqn{b} is.
+      Further, if \eqn{a > b > 0} are integers, \eqn{B(-a,b)= B(b,-a)}
+      can be seen as \eqn{(-1)^b * B(a-b+1,b)}.
+    }
     \item{dim<-}{\code{signature(x = "mpfr")}: Setting a dimension
       \code{\link{dim}} on an \code{"mpfr"} object makes it into an object
       of class \code{"\linkS4class{mpfrArray}"} or (more specifically)
@@ -252,6 +272,8 @@
       \code{\link{character}} strings, \code{\link{numeric}}, \code{\link{integer}},
       \code{\link{logical}}, and even \code{\link{raw}}.  Note however,
       that \code{\link{mpfr}(., precBits, base)} is more flexible.}
+    \item{coerce}{\code{signature(from = "mpfr", to = "bigz")}: coerces
+      to biginteger, see \code{\link[gmp]{bigz}} in package \pkg{gmp}.}
     \item{coerce}{\code{signature(from = "mpfr", to = "numeric")}: ... }
     \item{coerce}{\code{signature(from = "mpfr", to = "character")}: ... }
 
@@ -260,6 +282,11 @@
 
     \item{t}{\code{signature(x = "mpfr")}: makes \code{x} into an \eqn{n
 	\times 1}{n x 1} \code{\linkS4class{mpfrMatrix}}.}
+
+    \item{which.min}{\code{signature(x = "mpfr")}: gives the index of
+	the first minimum, see \code{\link{which.min}}.}
+    \item{which.max}{\code{signature(x = "mpfr")}: gives the index of
+	the first maximum, see \code{\link{which.max}}.}
   }
 }
 \author{Martin Maechler}
@@ -325,9 +352,15 @@ stopifnot(all(diff(sort(p)) >= 0),
    identical(rank (p), rank (np)),
    all.equal(sapply(1:9, function(Typ) quantile(np, type=Typ, names=FALSE)),
       sapply(lapply(1:9, function(Typ) quantile( p, type=Typ, names=FALSE)),
-             function(x) as.numeric(log(x))),
+	     function(x) as.numeric(log(x))),
       tol = 1e-3),# quantiles: interpolated in orig. <--> log scale
  TRUE)
 
+m0 <- mpfr(numeric(), 99)
+stopifnot(identical(which.min(m0), integer(0)),
+	  identical(which.max(m0), integer(0)),
+	  max(m0) == mpfr(-Inf, 53), # hmm, the 53 is not a feature
+	  min(m0) == mpfr(+Inf, 53), #	 (ditto)
+	  sum(m0) == 0, prod(m0) == 1)
 }
 \keyword{classes}

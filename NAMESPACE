@@ -5,15 +5,26 @@ useDynLib(Rmpfr, .registration=TRUE)
 ## cheap, somewhat experimental -- hence the "."
 export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr)
 
+## try to import all we need, but not more
+importFrom("methods", setClass, setClassUnion, setMethod, setOldClass,
+	   setValidity, slot, "slot<-",
+	   getDataPart, setDataPart, getClass, getClassDef,
+	   callGeneric, as, is, extends,
+	   new, validObject,
+	   signature, representation, prototype)
+
 importFrom("utils", str)
 importFrom("stats", stats__pnorm = pnorm)# import *and* rename !
+importClassesFrom("gmp", "bigz", "bigq")
 importFrom("gmp"
-           , asNumeric
+           , asNumeric, .as.char.bigz, ..as.bigz
            , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
-           , biginteger_as, biginteger_as_character# <- .Call() them
 	   ## more to come
            , is.whole, formatN # because we add own S3 methods
 	   )
+if(packageVersion("gmp") >= "0.5.8")
+    importFrom("gmp", is.matrixZQ, #-> R/gmp-convert.R
+               which.min, which.max)# the generics
 ##------------------------------------------------------------------------------
 
 exportClasses("mpfr1", "mpfr"
@@ -29,7 +40,7 @@ exportClasses("mpfr1", "mpfr"
               , "mNumber"
 )
 
-export(
+export(.mpfr, .mpfr.
        ## ".Arith.codes"
        ## , ".Arith.mpfr.num"
        ## , ".Arith.num.mpfr"
@@ -42,15 +53,15 @@ export(
        ## , ".Summary.codes"
        ## , ".abs.mpfr"
        ## , ".dimCheck"
-       ## , ".getPrec"
-       ".getSign"
+       , ".getPrec"
+       , ".getSign"
        ## , ".mA.subAssign"
        ## , ".matmult.R"
        ## , ".mpfr.debug"
-       ## , ".mpfr.negative"
+       , ".mpfr.negative"
        ## , ".mpfr.negative.R"
        ## , ".mpfr.repl"
-       ## , ".mpfr.sign"
+       , ".mpfr.sign"
        ## , ".mpfr.subset"
        , ".mpfr2str"
        ## , ".mpfrA.subset"
@@ -142,6 +153,7 @@ exportMethods(
               , "show", "unique"
               , "colSums", "colMeans"
               , "rowSums", "rowMeans"
+              , "which.min", "which.max"
 )
 
 
@@ -151,6 +163,7 @@ S3method(as.array, mpfr)
 S3method(as.matrix, mpfr)
 
 S3method(determinant, mpfrMatrix)
+S3method(scale, mpfrMatrix)
 
 S3method(diff, mpfr)
 S3method(str,  mpfr)

@@ -12,7 +12,7 @@ storage.mode(.Summary.codes) <- "integer"
 setMethod("Summary", "mpfr",
 	  function(x, ..., na.rm=FALSE) {
 	      iop <- .Summary.codes[.Generic]
-	      r <- .Call(Summary_mpfr, c(x, ...), na.rm, iop)
+	      r <- .Call(Summary_mpfr, if(length(x)) c(x, ...) else x, na.rm, iop)
 	      if(iop <= 5)
 		  new("mpfr", r)
 	      else ## any, all :
@@ -21,3 +21,7 @@ setMethod("Summary", "mpfr",
 
 ## "mean": based on sum() :
 setMethod("mean", "mpfr", function(x, ...) sum(x, ...)/length(x))
+
+## FIXME: can do this considerably faster in C:
+setMethod("which.max", "mpfr", function(x) which.max(x == max(x)))
+setMethod("which.min", "mpfr", function(x) which.max(x == min(x)))

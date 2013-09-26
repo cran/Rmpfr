@@ -84,7 +84,8 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
     r
 }
 
-## This is  such that  print.integrate() calls the correct format() method
+## This is  such that  print.integrate() calls our format(<mpfr>) method
 ## (and do *not* hide it via S3method() in NAMESPACE):
+print.integrate <- getS3method("print","integrate")# from 'stats' possibly not exported
 environment(print.integrate) <- environment()
 setMethod(show, "integrate", function(object) print.integrate(object))

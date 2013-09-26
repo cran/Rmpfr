@@ -91,10 +91,6 @@ setClassUnion("array_or_vector",
 ## However (FIXME?), the above is too large: "matrix" extends "vector"
 ## and that has "character", "list", ...
 
-## S3 classes from package gmp --- to be used in signatures {together with "mpfr"}:
-setOldClass("bigz")
-setOldClass("bigq")
-
 ## For this class, we want to define  '...' methods for cbind & rbind :
 ## FIXME(?): "array_or_vector" also contains "character"
 ##         (and even if it wouldn't, a "matrix" could have "character" entries!)

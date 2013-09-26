@@ -1,16 +1,21 @@
 #### Conversions   bigz  <-> mpfr   // also bigq <--> mpfr
 
+if(packageVersion("gmp") < "0.5.8")## <-> ../NAMESPACE
+    is.matrixZQ <- function(x) !is.null(attr(x, "nrow"))
+
 ## The following code is experimental, hence the "." :
 
-if(!is.na(r <- suppressWarnings(packageDescription("gmp",
-                                                   fields="Version")))
-   && package_version(r) >= 0.5) {
-
 ### FIXME: we go via character.. which is not really efficient.
-### Directly in C, we'd need both Rmpfr and gmp's  C code (!)
-### TODO(?:  gmp should "export" its C++ API ( -> inst/include/*.hh )
-### and we should add  'LinkingTo: gmp' to DESCRIPTION and
-###  then use C++ with "C" { ...} for those parts
+## ------  rather "should" use  MPFR Functions
+## int mpfr_set_z (mpfr_t ROP, mpz_t OP, mpfr_rnd_t RND)
+## int mpfr_set_q (mpfr_t ROP, mpq_t OP, mpfr_rnd_t RND)
+##
+## Set the value of ROP from OP, rounded toward the given direction RND.
+##
+## Directly in C, we'd need both Rmpfr and gmp's  C code (!)
+## TODO(?:  gmp should "export" its C++ API ( -> inst/include/*.hh )
+## and we should add  'LinkingTo: gmp' to DESCRIPTION and
+##  then use C++ with "C" { ...} for those parts
 .bigz2mpfr <- function(x, precB = NULL) {
     stopifnot(inherits(x, "bigz"))
     ..bigz2mpfr(x, precB)
@@ -20,24 +25,33 @@ if(!is.na(r <- suppressWarnings(packageDescription("gmp",
     ## precB: 4 == log2(16) = log(base)
 {
     b <- 16L
-    cx <- .Call(biginteger_as_character, x, b)
+    cx <- .as.char.bigz(x, b)
     if(is.null(precB)) precB <- 4L*nchar(cx)
-    new("mpfr", .Call(str2mpfr1_list, cx, precB, b, "N"))
+    if(is.matrixZQ(x))
+	new("mpfrMatrix", .Call(str2mpfr1_list, cx, precB, b, "N"),
+	    Dim = dim(x))# "bigz" has no dimnames
+    else
+	new("mpfr", .Call(str2mpfr1_list, cx, precB, b, "N"))
 }
 setAs("bigz", "mpfr", function(from) ..bigz2mpfr(from))
 
 
+## FIXME: rather should use MPFR -- Function :
+## ----   int mpfr_get_z (mpz_t ROP, mpfr_t OP, mpfr_rnd_t RND)
+## Convert OP to a `mpz_t', after rounding it with respect to RND.  ....
+## FIXME(2): should 'gmp' change as.bigz into an S3 generic, so this becomes S3 method?
 as.bigz.mpfr <-
 .mpfr2bigz <- function(x, mod=NA) {
     if(is.null(mod)) mod <- NA_integer_
     stopifnot(is(x, "mpfr"),
 	      is.na(mod) || (length(mod) == 1L && is.numeric(mod)))
     dx <- dim(x)
+### FIXME or rather  roundMpfr()  [or even round "RND" as in mpfr_get_z() above] ??
     cx <- format(trunc(x), drop0trailing=TRUE)
     dim(cx) <- dx ## needed?? {should *not* be, as in base R!}
-    ## .Call(biginteger_as, cx, mod)
-    .Call(biginteger_as, cx, mod)
+    ..as.bigz(cx, mod)
 }
+setAs("mpfr", "bigz", function(from) .mpfr2bigz(from))
 
 
 ## Fast, no-checking (and not exported) version:
@@ -58,5 +72,6 @@ as.bigz.mpfr <-
 }
 setAs("bigq", "mpfr", function(from) ..bigq2mpfr(from))
 
-
-}# only if gmp ..
+## TODO(?)  "mpfr" ->  "bigq"
+## a) in the spirit  MASS::fractions()    or
+## b) "native" MPFR "support" -- not yet available: has mpfr_get_z() but not get_q()

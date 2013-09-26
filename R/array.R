@@ -9,10 +9,10 @@ setMethod("dimnames", "mpfrArray", function(x) x@Dimnames)
 mpfr2array <- function(x, dim, dimnames=NULL, check=FALSE) {
     if(check) stopifnot(extends((clx <- class(x)), "mpfr"))
     if(is.numeric(dim) && all(dim == (iv <- as.integer(dim)))) {
-        rnk <- length(iv)
+	rnk <- length(iv)
 	if(check) {
 	    cl <- if(rnk == 2) "mpfrMatrix" else "mpfrArray"
-            if(extends(clx, "mpfrArray")) x <- as(x, "mpfr")# drop 'Dim', 'Dimnames'
+	    if(extends(clx, "mpfrArray")) x <- as(x, "mpfr")# drop 'Dim', 'Dimnames'
 	    if(is.null(dimnames))
 		new(cl, x, Dim = iv)
 	    else new(cl, x, Dim = iv, Dimnames = dimnames)
@@ -39,7 +39,7 @@ setMethod("dim<-", signature(x = "mpfr", value = "ANY"),
 
 
 mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
-                      rnd.mode = c('N','D','U','Z'))
+		      rnd.mode = c('N','D','U','Z'))
 {
     dim <- as.integer(dim)
     rnd.mode <- toupper(rnd.mode)
@@ -48,12 +48,12 @@ mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
     ml <- .Call(d2mpfr1_list, x, precBits, rnd.mode)
     vl <- prod(dim)
     if (length(x) != vl) {
-        if (vl > .Machine$integer.max)
-            stop("'dim' specifies too large an array")
-        ml <- rep(ml, length.out = vl)
+	if (vl > .Machine$integer.max)
+	    stop("'dim' specifies too large an array")
+	ml <- rep(ml, length.out = vl)
     }
     new(if(length(dim) == 2) "mpfrMatrix" else "mpfrArray",
-        ml, Dim = dim,
+	ml, Dim = dim,
 	Dimnames = if(is.null(dimnames)) vector("list", length(dim))
 		   else dimnames)
 }
@@ -92,7 +92,7 @@ setMethod("t", "mpfr", t.mpfr <-
 	  function(x) { # t(<n-vector>) |-->  {1 x n} matrix
 	      r <- new("mpfrMatrix")
 	      r@Dim <- c(1L, length(x))
-              ## faster than  { r@.Data <- x@.Data ; r } :
+	      ## faster than  { r@.Data <- x@.Data ; r } :
 	      setDataPart(r, getD(x), check=FALSE)
 	  })
 
@@ -106,7 +106,7 @@ setMethod("aperm", signature(a="mpfrArray"), aperm.mpfrArray <-
 	      a@Dim <- d[perm]
 	      a@Dimnames <- a@Dimnames[perm]
 	      ii <- c(aperm(array(1:prod(d), dim=d), perm=perm, resize=FALSE))
-              ## faster than  { a@.Data <- a@.Data[ ii ] ; a } :
+	      ## faster than  { a@.Data <- a@.Data[ ii ] ; a } :
 	      setDataPart(a, getD(a)[ ii ], check=FALSE)
 	  })
 
@@ -152,14 +152,16 @@ print.mpfrArray <- function(x, digits = NULL, drop0trailing = FALSE,
     cl <- class(x)
     p0 <- function(...) paste(..., sep="")
     cat(p0("'",cl,"'"), "of dim(.) = ",
-        p0("(",paste(x@Dim, collapse=", "),")"),
-        ch.prec, "\n")
+	p0("(",paste(x@Dim, collapse=", "),")"),
+	ch.prec, "\n")
     if(n >= 1) {
-        ## FIXME: really need a 'format' method for mpfrArrays
-        ## -----  which properly alings columns !!
-        fx <- format(x, digits=digits, drop0trailing=drop0trailing)
-        dim(fx) <- dim(x)
-        dimnames(fx) <- dimnames(x)
+	## FIXME: really need a 'format' method for mpfrArrays
+	## -----  which properly alings columns !!
+
+	## Build character array fx, and print that
+	fx <- formatMpfr(x, digits=digits, drop0trailing=drop0trailing)
+	dim(fx) <- dim(x)
+	dimnames(fx) <- dimnames(x)
 	print(fx, ..., right=right, quote = FALSE)
     }
     invisible(x)
@@ -267,11 +269,11 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	    for(i in 1:nrx) {
 		for (k in 0L:(ncy - 1L))
 		    z[i + k * nrx] <-
-                        ## sum(x[i + j * nrx] * y[1L+ j + k * nry])
-                        new("mpfr",
-                            .Call(R_mpfr_sumprod,
-                                  x[i + j * nrx], y[1L+ j + k * nry],
-                                  precBits, alternating=FALSE))
+			## sum(x[i + j * nrx] * y[1L+ j + k * nry])
+			new("mpfr",
+			    .Call(R_mpfr_sumprod,
+				  x[i + j * nrx], y[1L+ j + k * nry],
+				  precBits, alternating=FALSE))
 	    }
 	}
 	else	    #/* zero-extent operations should return zeroes */
@@ -287,11 +289,11 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	    for(i in 0L:(ncx - 1L)) {
 		for (k in 0L:(ncy - 1L))
 		    z[1L +i + k * ncx] <-
-                        ## sum(x[j + i * nrx] * y[j + k * nry])
-                        new("mpfr",
-                            .Call(R_mpfr_sumprod,
-                                  x[j + i * nrx], y[j + k * nry],
-                                  precBits, alternating=FALSE))
+			## sum(x[j + i * nrx] * y[j + k * nry])
+			new("mpfr",
+			    .Call(R_mpfr_sumprod,
+				  x[j + i * nrx], y[j + k * nry],
+				  precBits, alternating=FALSE))
 
 	    }
 	} else
@@ -307,11 +309,11 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 		j <- 0L:(ncx - 1L)
 		for (k in 0L:(nry - 1L))
 		    z[i + k * nrx] <-
-                        ## sum(x[i + j * nrx] * y[1L +k + j * nry])
-                        new("mpfr",
-                            .Call(R_mpfr_sumprod,
-                                  x[i + j * nrx], y[1L +k + j * nry],
-                                  precBits, alternating=FALSE))
+			## sum(x[i + j * nrx] * y[1L +k + j * nry])
+			new("mpfr",
+			    .Call(R_mpfr_sumprod,
+				  x[i + j * nrx], y[1L +k + j * nry],
+				  precBits, alternating=FALSE))
 
 	    }
 	else
@@ -375,39 +377,39 @@ setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
 .mpfrA.subset <- function(x,i,j, ..., drop) {
     nA <- nargs()
     if(getOption("verbose"))
-        message(sprintf("nargs() == %d  mpfrArray indexing ... ", nA))
+	message(sprintf("nargs() == %d  mpfrArray indexing ... ", nA))
 
     r <- getD(x) # the data part, a list()
     if(nA == 2) ## A[i]
-        return(new("mpfr", r[i]))
+	return(new("mpfr", r[i]))
     ## else: nA != 2 : nA > 2 -
     dim(r) <- (dx <- dim(x))
     dimnames(r) <- dimnames(x)
     r <- r[i,j, ..., drop=drop]
     if(drop && is.null(dim(r)))
-        new("mpfr", r)
+	new("mpfr", r)
     else {
-        D <- if(is.null(dr <- dim(r))) # ==> drop is FALSE; can this happen?
-            rep.int(1L, length(r)) else dr
-        x@Dim <- D
-        x@Dimnames <- if(is.null(dn <- dimnames(r)))
-            vector("list", length(D)) else dn
+	D <- if(is.null(dr <- dim(r))) # ==> drop is FALSE; can this happen?
+	    rep.int(1L, length(r)) else dr
+	x@Dim <- D
+	x@Dimnames <- if(is.null(dn <- dimnames(r)))
+	    vector("list", length(D)) else dn
 	if(length(D) == 2 && class(x) != "mpfrMatrix")
 	    ## low-level "coercion" from mpfrArray to *Matrix :
 	    attr(x,"class") <- getClass("mpfrMatrix")@className
-        attributes(r) <- NULL
-        setDataPart(x, r, check=FALSE)
+	attributes(r) <- NULL
+	setDataPart(x, r, check=FALSE)
     }
 }
 
 ## "["
 setMethod("[", signature(x = "mpfrArray", i = "ANY", j = "ANY", drop = "ANY"),
-          .mpfrA.subset)
+	  .mpfrA.subset)
 
 ## this signature needs a method here, or it triggers the one for "mpfr"
 setMethod("[", signature(x = "mpfrArray", i = "ANY", j = "missing",
-                         drop = "missing"),
-          .mpfrA.subset)
+			 drop = "missing"),
+	  .mpfrA.subset)
 
 
 .mA.subAssign <- function(x,i,j,..., value, n.a, isMpfr)
@@ -465,7 +467,7 @@ rm(it,jt)
 
 setMethod("diag", signature(x = "mpfrMatrix"),
 	  function(x, nrow, ncol) {
-              n <- min(dim(x)); i <- seq_len(n); x[cbind(i,i)] })
+	      n <- min(dim(x)); i <- seq_len(n); x[cbind(i,i)] })
 
 setMethod("diag<-", signature(x = "mpfrMatrix"),
 	  function(x, value) {
@@ -498,8 +500,8 @@ setMethod("cbind", "Mnumber",
 
 		  stop("cbind(...) of 'complex' and 'mpfr' objects is not implemented")
 		  ## give at least warning !!
-              }
-              ## else
+	      }
+	      ## else
 	      L <- function(a) if(is.numeric(n <- nrow(a))) n else length(a)
 	      W <- function(a) if(is.numeric(n <- ncol(a))) n else 1L
 	      ## the number of rows of the result : {for now require integer}
@@ -554,8 +556,8 @@ setMethod("rbind", "Mnumber",
 		  stop("rbind(...) of 'complex' and 'mpfr' objects is not implemented")
 		  ## give at least warning !!
 	      }
-              ## else
- 	      L <- function(a) if(is.numeric(n <- nrow(a))) n else 1L
+	      ## else
+	      L <- function(a) if(is.numeric(n <- nrow(a))) n else 1L
 	      W <- function(a) if(is.numeric(n <- ncol(a))) n else length(a)
 	      ## the number of rows of the result : {for now require integer}
 	      NR <- sum(lengths <- vapply(args, L, integer(1)))
@@ -610,7 +612,7 @@ applyMpfr <- function(X, MARGIN, FUN, ...)
     dl <- length(dim(X))
     if(!dl) stop("dim(X) must have a positive length")
 ##-     if(is.object(X))
-##- 	X <- if(dl == 2L) as.matrix(X) else as.array(X)
+##-	X <- if(dl == 2L) as.matrix(X) else as.array(X)
     ## now record dim as coercion can change it
     ## (e.g. when a data frame contains a matrix).
     d <- dim(X)
@@ -620,11 +622,11 @@ applyMpfr <- function(X, MARGIN, FUN, ...)
     ## Extract the margins and associated dimnames
 
     if (is.character(MARGIN)) {
-        if(is.null(dnn <- names(dn))) # names(NULL) is NULL
-           stop("'X' must have named dimnames")
-        MARGIN <- match(MARGIN, dnn)
-        if (any(is.na(MARGIN)))
-            stop("not all elements of 'MARGIN' are names of dimensions")
+	if(is.null(dnn <- names(dn))) # names(NULL) is NULL
+	   stop("'X' must have named dimnames")
+	MARGIN <- match(MARGIN, dnn)
+	if (any(is.na(MARGIN)))
+	    stop("not all elements of 'MARGIN' are names of dimensions")
     }
     s.call <- ds[-MARGIN]
     s.ans  <- ds[MARGIN]
@@ -635,39 +637,39 @@ applyMpfr <- function(X, MARGIN, FUN, ...)
     ## dimnames(X) <- NULL
 
     array <- function(data, dim = length(data), dimnames = NULL) {
-        dim(data) <- dim
-        if(!is.null(dimnames)) dimnames(data) <- dimnames
-        data
+	dim(data) <- dim
+	if(!is.null(dimnames)) dimnames(data) <- dimnames
+	data
     }
 
     ## do the calls
 
     d2 <- prod(d.ans)
     if(d2 == 0L) {
-        ## arrays with some 0 extents: return ``empty result'' trying
-        ## to use proper mode and dimension:
-        ## The following is still a bit `hackish': use non-empty X
-        newX <- array(vector(typeof(X), 1L), dim = c(prod(d.call), 1L))
-        ans <- FUN(if(length(d.call) < 2L) newX[,1] else
-                   array(newX[, 1L], d.call, dn.call), ...)
-        return(if(is.null(ans)) ans else if(length(d.ans) < 2L) ans[1L][-1L]
-               else array(ans, d.ans, dn.ans))
+	## arrays with some 0 extents: return ``empty result'' trying
+	## to use proper mode and dimension:
+	## The following is still a bit `hackish': use non-empty X
+	newX <- array(vector(typeof(X), 1L), dim = c(prod(d.call), 1L))
+	ans <- FUN(if(length(d.call) < 2L) newX[,1] else
+		   array(newX[, 1L], d.call, dn.call), ...)
+	return(if(is.null(ans)) ans else if(length(d.ans) < 2L) ans[1L][-1L]
+	       else array(ans, d.ans, dn.ans))
     }
     ## else
     newX <- aperm(X, c(s.call, s.ans))
     dim(newX) <- c(prod(d.call), d2)
     ans <- vector("list", d2)
     if(length(d.call) < 2L) {# vector
-        if (length(dn.call)) dimnames(newX) <- c(dn.call, list(NULL))
-        for(i in 1L:d2) {
-            tmp <- FUN(newX[,i], ...)
-            if(!is.null(tmp)) ans[[i]] <- tmp
-        }
+	if (length(dn.call)) dimnames(newX) <- c(dn.call, list(NULL))
+	for(i in 1L:d2) {
+	    tmp <- FUN(newX[,i], ...)
+	    if(!is.null(tmp)) ans[[i]] <- tmp
+	}
     } else
        for(i in 1L:d2) {
-           tmp <- FUN(array(newX[,i], d.call, dn.call), ...)
-           if(!is.null(tmp)) ans[[i]] <- tmp
-        }
+	   tmp <- FUN(array(newX[,i], d.call, dn.call), ...)
+	   if(!is.null(tmp)) ans[[i]] <- tmp
+	}
 
     ## answer dims and dimnames
 
@@ -678,8 +680,8 @@ applyMpfr <- function(X, MARGIN, FUN, ...)
     if(!ans.list)
 	ans.list <- any(unlist(lapply(ans, length)) != l.ans)
     if(!ans.list && length(ans.names)) {
-        all.same <- vapply(ans, function(x) identical(names(x), ans.names), NA)
-        if (!all(all.same)) ans.names <- NULL
+	all.same <- vapply(ans, function(x) identical(names(x), ans.names), NA)
+	if (!all(all.same)) ans.names <- NULL
     }
     len.a <- if(ans.list) d2 else length(ans <- unlistMpfr(ans))
     if(length(MARGIN) == 1L && len.a == d2) {
@@ -689,8 +691,8 @@ applyMpfr <- function(X, MARGIN, FUN, ...)
     if(len.a == d2)
 	return(array(ans, d.ans, dn.ans))
     if(len.a && len.a %% d2 == 0L) {
-        if(is.null(dn.ans)) dn.ans <- vector(mode="list", length(d.ans))
-        dn.ans <- c(list(ans.names), dn.ans)
+	if(is.null(dn.ans)) dn.ans <- vector(mode="list", length(d.ans))
+	dn.ans <- c(list(ans.names), dn.ans)
 	return(array(ans, c(len.a %/% d2, d.ans),
 		     if(!all(vapply(dn.ans, is.null, NA))) dn.ans))
     }
@@ -719,7 +721,7 @@ setMethod("rowMeans", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
 
 ## Cut'n'paste from  ~/R/Pkgs/Matrix/R/Auxiliaries.R {FIXME? load Matrix:::mkDet}
 mkDet <- function(d, logarithm = TRUE, ldet = sum(log(abs(d))),
-                  sig = -1L+2L*as.integer(prod(sign(d)) >= 0))
+		  sig = -1L+2L*as.integer(prod(sign(d)) >= 0))
 {		# sig: -1 or +1 (not 0 !)
     modulus <- if (logarithm) ldet else exp(ldet)
     attr(modulus, "logarithm") <- logarithm
@@ -731,33 +733,33 @@ mkDet <- function(d, logarithm = TRUE, ldet = sum(log(abs(d))),
 ## S3 method instead of S4, as  base::determinant is S3 generic
 determinant.mpfrMatrix <-
     function(x, logarithm = TRUE, asNumeric = (d[1] > 3),
-             precBits = max(.getPrec(x)), ...)
+	     precBits = max(.getPrec(x)), ...)
 {
     d <- x@Dim
     if(d[1] != d[2]) stop("'x' must ba a square matrix")
     if((n <- d[1]) == 0) determinant(matrix(1,0,0), logarithm=logarithm)
     else if(n == 1)
-        mkDet(x[1], logarithm=logarithm)
+	mkDet(x[1], logarithm=logarithm)
     else { ## n x n,	for  n >= 2
-        if(asNumeric)
-            return(determinant(asNumeric(x), logarithm=logarithm, ...))
-        ## else use recursive (Care: horribly slow for non-small n!)
-        Det <- function(x, n = dim(x)[1]) {
-            if(n == 1) x[1]
-            else if(n == 2) x[1]*x[4] - x[2]*x[3]
-            else {
-                a <- mpfr(numeric(n), precBits=3L) # dummy to fill
-                n1 <- n-1L
-                for(i in seq_len(n)) {
-                    a[i] <- Det(x[-i,-1], n=n1)
-                }
-                ## sum(x[,1] * a),  faster :
-                new("mpfr",
-                    .Call(R_mpfr_sumprod, x[,1], a,
-                          precBits, alternating=TRUE))
-            }
-        }
-        mkDet(Det(x, n=n), logarithm=logarithm)
+	if(asNumeric)
+	    return(determinant(asNumeric(x), logarithm=logarithm, ...))
+	## else use recursive (Care: horribly slow for non-small n!)
+	Det <- function(x, n = dim(x)[1]) {
+	    if(n == 1) x[1]
+	    else if(n == 2) x[1]*x[4] - x[2]*x[3]
+	    else {
+		a <- mpfr(numeric(n), precBits=3L) # dummy to fill
+		n1 <- n-1L
+		for(i in seq_len(n)) {
+		    a[i] <- Det(x[-i,-1], n=n1)
+		}
+		## sum(x[,1] * a),  faster :
+		new("mpfr",
+		    .Call(R_mpfr_sumprod, x[,1], a,
+			  precBits, alternating=TRUE))
+	    }
+	}
+	mkDet(Det(x, n=n), logarithm=logarithm)
     }
 }
 
@@ -776,8 +778,12 @@ setMethod("kronecker", signature(X = "mpfrMatrix", Y = "mpfrMatrix"),
 	  function (X, Y, FUN = "*", make.dimnames = FALSE, ...)
       {
 	  ydim <- Y@Dim
-          rprec <- max(.getPrec(X),.getPrec(Y))
-          xx <- .......
-          mpfr2array(xx, dim = X@Dim * ydim)
+	  rprec <- max(.getPrec(X),.getPrec(Y))
+	  xx <- .......
+	  mpfr2array(xx, dim = X@Dim * ydim)
       })
 }
+
+scale.mpfrMatrix <- scale.default
+## essential, so that colMeans() is using "our" colMeans :
+environment(scale.mpfrMatrix) <- environment()# = the "Rmpfr" namespace

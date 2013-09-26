@@ -8,12 +8,15 @@
 #include "Rmpfr_utils.h"
 #include "Syms.h"
 
+//Dbg: #define DEBUG_Rmpfr
 #ifdef DEBUG_Rmpfr
 /* ONLY for debugging  !! */
+# include <R_ext/Utils.h>
+//-> void R_CheckUserInterrupt(void);
 # ifndef WIN32
 #  include <Rinterface.h>
 # endif
-#define R_PRT(_X_) mpfr_out_str (R_Outputfile, 10, 0, _X_, MPFR_RNDD)
+# define R_PRT(_X_) mpfr_out_str (R_Outputfile, 10, 0, _X_, MPFR_RNDD)
 #endif
 
 int my_mpfr_beta (mpfr_t ROP, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND);
@@ -24,60 +27,209 @@ int my_mpfr_poch  (mpfr_t ROP, long n,    mpfr_t X, mpfr_rnd_t RND);
 int my_mpfr_round (mpfr_t ROP, long prec, mpfr_t X, mpfr_rnd_t RND);
 /* argument order above must match the one of mpfr_jn() etc .. */
 
+/* MM: for debugging, use
+  gcc -I/u/maechler/R/D/r-patched/F19-64-inst/include  -I/usr/local/include -fpic  -g -O3 -pedantic -Wall --std=gnu99 -DDEBUG_Rmpfr -Wcast-align -Wclobbered  -c utils.c -o utils.o
+*/
 /*------------------------------------------------------------------------*/
-int my_mpfr_beta (mpfr_t R, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND)
+int my_mpfr_beta (mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
 {
-    /* NOTA BENE: When called, R is typically *identical* to X
-     *            ==> can use  R  only at the very end! */
+    mpfr_prec_t p_a = mpfr_get_prec(a), p_b = mpfr_get_prec(b);
+    if(p_a < p_b) p_a = p_b;// p_a := max(p_a, p_b)
+    if(mpfr_get_prec(R) < p_a)
+	mpfr_prec_round(R, p_a, RND);// so prec(R) = max( prec(a), prec(b) )
     int ans;
-    mpfr_t s,t;
-    mpfr_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
-    if(p_X < p_Y) p_X = p_Y;
-    mpfr_init2(s, p_X);
-    mpfr_init2(t, p_X);
-    /* FIXME: check each 'ans' below, and return when not ok ... */
-    ans = mpfr_gamma(s, X, RND);
-    ans = mpfr_gamma(t, Y, RND);
-    ans = mpfr_mul(s, s, t, RND); /* s = gamma(X) * gamma(Y) */
+    mpfr_t s; mpfr_init2(s, p_a);
+#ifdef DEBUG_Rmpfr
+    R_CheckUserInterrupt();
+    int cc = 0;
+#endif
+
+    /* "FIXME": check each 'ans' below, and return when not ok ... */
+    ans = mpfr_add(s, a, b, RND);
+
+    if(mpfr_integer_p(s) && mpfr_sgn(s) <= 0) { // (a + b) is integer <= 0
+	if(!mpfr_integer_p(a) && !mpfr_integer_p(b)) {
+	    // but a,b not integer ==> R =  finite / +-Inf  = 0 :
+	    mpfr_set_zero (R, +1);
+	    mpfr_clear (s);
+	    return ans;
+	}// else: sum is integer; at least one {a,b} integer ==> both integer
+
+	int sX = mpfr_sgn(a), sY = mpfr_sgn(b);
+	if(sX * sY < 0) { // one negative, one positive integer
+	    // ==> special treatment here :
+	    if(sY < 0) // ==> sX > 0; swap the two
+		mpfr_swap(a, b);
+	    // now have --- a < 0 < b <= |a|  integer ------------------
+	    /*              ================  and in this case:
+	       B(a,b) = (-1)^b  B(1-a-b, b) = (-1)^b B(1-s, b)
+
+		      = (1*2*..*b) / (-s-1)*(-s-2)*...*(-s-b)
+	    */
+	    /* where in the 2nd form, both numerator and denominator have exactly
+	     * b integer factors. This is attractive {numerically & speed wise}
+	     * for 'small' b */
+#define b_large 100
+#ifdef DEBUG_Rmpfr
+	    Rprintf(" my_mpfr_beta(<neg int>): s = a+b= "); R_PRT(s);
+	    Rprintf("\n   a = "); R_PRT(a);
+	    Rprintf("\n   b = "); R_PRT(b); Rprintf("\n");
+	    if(cc++ > 999) { mpfr_set_zero (R, +1); mpfr_clear (s); return ans; }
+#endif
+	    unsigned long b_ = 0;// -Wall
+	    Rboolean
+		b_fits_ulong = mpfr_fits_ulong_p(b, RND),
+		small_b = b_fits_ulong &&  (b_ = mpfr_get_ui(b, RND)) < b_large;
+	    if(small_b) {
+#ifdef DEBUG_Rmpfr
+		Rprintf("   b <= b_large = %d...\n", b_large);
+#endif
+		//----------------- small b ------------------
+		// use GMP big integer arithmetic:
+		mpz_t S; mpz_init(S); mpfr_get_z(S, s, RND); // S := s
+		mpz_sub_ui (S, S, (unsigned long) 1); // S = s - 1 = (a+b-1)
+		/* binomial coefficient choose(N, k) requires k a 'long int';
+		 * here, b must fit into a long: */
+		mpz_bin_ui (S, S, b_); // S = choose(S, b) = choose(a+b-1, b)
+		mpz_mul_ui (S, S, b_); // S = S*b =  b * choose(a+b-1, b)
+		// back to mpfr: R = 1 / S  = 1 / (b * choose(a+b-1, b))
+		mpfr_set_ui(s, (unsigned long) 1, RND);
+		mpfr_div_z(R, s, S, RND);
+		mpz_clear(S);
+	    }
+	    else { // b is "large", use direct B(.,.) formula
+#ifdef DEBUG_Rmpfr
+		Rprintf("   b > b_large = %d...\n", b_large);
+#endif
+		// a := (-1)^b :
+		// there is no  mpfr_si_pow(a, -1, b, RND);
+		int neg; // := 1 ("TRUE") if (-1)^b = -1, i.e. iff  b is odd
+		if(b_fits_ulong) { // (i.e. not very large)
+		    neg = (b_ % 2); // 1 iff b_ is odd,  0 otherwise
+		} else { // really large b; as we know it is integer, can still..
+		    // b2 := b / 2
+		    mpfr_t b2; mpfr_init2(b2, p_a);
+		    mpfr_div_2ui(b2, b, 1, RND);
+		    neg = !mpfr_integer_p(b2); // b is odd, if b/2 is *not* integer
+#ifdef DEBUG_Rmpfr
+		    Rprintf("   really large b; neg = ('b is odd') = %d\n", neg);
+#endif
+		}
+		// s' := 1-s = 1-a-b
+		mpfr_ui_sub(s, 1, s, RND);
+#ifdef DEBUG_Rmpfr
+		Rprintf("  neg = %d\n", neg);
+		Rprintf("  s' = 1-a-b = "); R_PRT(s);
+		Rprintf("\n  -> calling B(s',b)\n");
+#endif
+		// R := B(1-a-b, b) = B(s', b)
+		if(small_b) {
+		    my_mpfr_beta (R, s, b, RND);
+		} else {
+		    my_mpfr_lbeta (R, s, b, RND);
+		    mpfr_exp(R, R, RND); // correct *if* beta() >= 0
+		}
+#ifdef DEBUG_Rmpfr
+		Rprintf("  R' = beta(s',b) = "); R_PRT(R); Rprintf("\n");
+#endif
+		// Result = (-1)^b  B(1-a-b, b) = +/- s'
+		if(neg) mpfr_neg(R, R, RND);
+	    }
+	    mpfr_clear(s);
+	    return ans;
+	}
+   }
+
+    ans = mpfr_gamma(s, s, RND);  /* s = gamma(a + b) */
+#ifdef DEBUG_Rmpfr
+    Rprintf("my_mpfr_beta(): s = gamma(a+b)= "); R_PRT(s);
+    Rprintf("\n   a = "); R_PRT(a);
+    Rprintf("\n   b = "); R_PRT(b);
+#endif
+
+    ans = mpfr_gamma(a, a, RND);
+    ans = mpfr_gamma(b, b, RND);
+    ans = mpfr_mul(b, b, a, RND); /* b' = gamma(a) * gamma(b) */
 
 #ifdef DEBUG_Rmpfr
-    Rprintf("my_mpfr_beta(): t = gamma(Y)= "); R_PRT(t);
-    Rprintf("\n   s = G(X) * G(Y) = ");        R_PRT(s); Rprintf("\n");
-    Rprintf("\n   X = "); R_PRT(X);
-    Rprintf("\n   Y = "); R_PRT(Y);
+    Rprintf("\n    G(a) * G(b) = "); R_PRT(b); Rprintf("\n");
 #endif
-    ans = mpfr_add(X, X, Y, RND);
-    ans = mpfr_gamma(Y, X, RND);  /* Y. = gamma(X + Y) */
-#ifdef DEBUG_Rmpfr
-    Rprintf("\n  X. = X + Y =  "); R_PRT(X);
-    Rprintf("\n  Y. = gamma(X.)= "); R_PRT(Y);
-    Rprintf("\n");
-#endif
-    ans = mpfr_div(R, s, Y, RND);
+
+    ans = mpfr_div(R, b, s, RND);
     mpfr_clear (s);
-    mpfr_clear (t);
     /* mpfr_free_cache() must be called in the caller !*/
     return ans;
 }
 
-int my_mpfr_lbeta(mpfr_t R, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND)
+int my_mpfr_lbeta(mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
 {
+    mpfr_prec_t p_a = mpfr_get_prec(a), p_b = mpfr_get_prec(b);
+    if(p_a < p_b) p_a = p_b;// p_a := max(p_a, p_b)
+    if(mpfr_get_prec(R) < p_a)
+	mpfr_prec_round(R, p_a, RND);// so prec(R) = max( prec(a), prec(b) )
     int ans;
-    mpfr_t s,t;
-    mpfr_prec_t p_X = mpfr_get_prec(X), p_Y = mpfr_get_prec(Y);
-    if(p_X < p_Y) p_X = p_Y;
-    mpfr_init2(s, p_X);
-    mpfr_init2(t, p_X);
-    /* FIXME: check each 'ans' below, and return when not ok ... */
-    ans = mpfr_lngamma(s, X, RND);
-    ans = mpfr_lngamma(t, Y, RND);
-    ans = mpfr_add(s, s, t, RND); /* s = lgamma(X) + lgamma(Y) */
-    ans = mpfr_add(X, X, Y, RND);
-    ans = mpfr_lngamma(Y, X, RND);/* Y = lgamma(X + Y) */
-    ans = mpfr_sub(R, s, Y, RND);
+    mpfr_t s;
+    mpfr_init2(s, p_a);
+
+    /* "FIXME": check each 'ans' below, and return when not ok ... */
+    ans = mpfr_add(s, a, b, RND);
+
+    if(mpfr_integer_p(s) && mpfr_sgn(s) <= 0) { // (a + b) is integer <= 0
+	if(!mpfr_integer_p(a) && !mpfr_integer_p(b)) {
+	    // but a,b not integer ==> R = ln(finite / +-Inf) = ln(0) = -Inf :
+	    mpfr_set_inf (R, -1);
+	    mpfr_clear (s);
+	    return ans;
+	}// else: sum is integer; at least one integer ==> both integer
+
+	int sX = mpfr_sgn(a), sY = mpfr_sgn(b);
+	if(sX * sY < 0) { // one negative, one positive integer
+	    // ==> special treatment here :
+	    if(sY < 0) // ==> sX > 0; swap the two
+		mpfr_swap(a, b);
+	    /* now have --- a < 0 < b <= |a|  integer ------------------
+	     *              ================
+	     * --> see my_mpfr_beta() above */
+	    unsigned long b_ = 0;// -Wall
+	    Rboolean
+		b_fits_ulong = mpfr_fits_ulong_p(b, RND),
+		small_b = b_fits_ulong &&  (b_ = mpfr_get_ui(b, RND)) < b_large;
+	    if(small_b) {
+		//----------------- small b ------------------
+		// use GMP big integer arithmetic:
+		mpz_t S; mpz_init(S); mpfr_get_z(S, s, RND); // S := s
+		mpz_sub_ui (S, S, (unsigned long) 1); // S = s - 1 = (a+b-1)
+		/* binomial coefficient choose(N, k) requires k a 'long int';
+		 * here, b must fit into a long: */
+		mpz_bin_ui (S, S, b_); // S = choose(S, b) = choose(a+b-1, b)
+		mpz_mul_ui (S, S, b_); // S = S*b =  b * choose(a+b-1, b)
+
+		// back to mpfr: R = log(|1 / S|) =  - log(|S|)
+		mpz_abs(S, S);
+		mpfr_set_z(s, S, RND); // <mpfr> s :=  |S|
+		mpfr_log(R, s, RND);   // R := log(s) = log(|S|)
+		mpfr_neg(R, R, RND);   // R = -R = -log(|S|)
+		mpz_clear(S);
+	    }
+	    else { // b is "large", use direct B(.,.) formula
+		// a := (-1)^b -- not needed here, neither 'neg': want log( |.| )
+		// s' := 1-s = 1-a-b
+		mpfr_ui_sub(s, 1, s, RND);
+		// R := log(|B(1-a-b, b)|) = log(|B(s', b)|)
+		my_mpfr_lbeta (R, s, b, RND);
+	    }
+	    mpfr_clear(s);
+	    return ans;
+	}
+    }
+
+    ans = mpfr_lngamma(s, s, RND); // s = lngamma(a + b)
+    ans = mpfr_lngamma(a, a, RND);
+    ans = mpfr_lngamma(b, b, RND);
+    ans = mpfr_add (b, b, a, RND); // b' = lngamma(a) + lngamma(b)
+    ans = mpfr_sub (R, b, s, RND);
+
     mpfr_clear (s);
-    mpfr_clear (t);
-    /* mpfr_free_cache() must be called in the caller !*/
     return ans;
 }
 
@@ -315,18 +467,18 @@ SEXP _FNAME(SEXP x, SEXP y) {				\
     int nx = length(xD), ny = length(yD), i,		\
 	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);	\
     SEXP val = PROTECT(allocVector(VECSXP, n));		\
-    mpfr_t x_i, y_i;					\
-    mpfr_init(x_i); /* with default precision */	\
-    mpfr_init(y_i); /* with default precision */	\
+    mpfr_t R, x_i, y_i;					\
+    mpfr_init(R); /* with default precision */		\
+    mpfr_init(x_i); mpfr_init(y_i);			\
 							\
     for(i=0; i < n; i++) {				\
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);		\
 	R_asMPFR(VECTOR_ELT(yD, i % ny), y_i);		\
-	_MPFR_NAME(x_i, x_i, y_i, MPFR_RNDN);		\
-	SET_VECTOR_ELT(val, i, MPFR_as_R(x_i));		\
+	_MPFR_NAME(R, x_i, y_i, MPFR_RNDN);		\
+	SET_VECTOR_ELT(val, i, MPFR_as_R(R));		\
     }							\
 							\
-    mpfr_clear (x_i); mpfr_clear (y_i);			\
+    mpfr_clear(R); mpfr_clear(x_i); mpfr_clear(y_i);	\
     mpfr_free_cache();					\
     UNPROTECT(3);					\
     return val;						\
@@ -354,7 +506,7 @@ SEXP _FNAME(SEXP x, SEXP y) {						\
     PROTECT(xD = GET_SLOT(x, Rmpfr_Data_Sym));	nprot++;		\
     nx = length(xD);							\
     n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);			\
-    PROTECT(val = allocVector(VECSXP, n)); 	nprot++;		\
+    PROTECT(val = allocVector(VECSXP, n));	nprot++;		\
     mpfr_init(x_i); /* with default precision */			\
 									\
     for(i=0; i < n; i++) {						\
@@ -374,4 +526,3 @@ R_MPFR_2_Num_Long_Function(R_mpfr_yn, mpfr_yn)
 R_MPFR_2_Num_Long_Function(R_mpfr_choose, my_mpfr_choose)
 R_MPFR_2_Num_Long_Function(R_mpfr_poch, my_mpfr_poch)
 R_MPFR_2_Num_Long_Function(R_mpfr_round, my_mpfr_round)
-
