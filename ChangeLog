@@ -1,3 +1,8 @@
+2013-10-21  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-4, released to CRAN, 2013-10-22
+	Now again depends on 'methods' (instead of just importing).
+
 2013-05-04  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/mpfr.R (.mat2ind): from a proposal by Serguei Sokol,

@@ -1,7 +1,6 @@
-4b5aec487d597f896ca6fcd554ae9a7d *ChangeLog
-9dc99158c0ce26ca715e3f64feec1b7c *DESCRIPTION
-a283cc568767a80358a53233a15fb9df *Done
-257f8b40c1de3e8f0566ae6f480358cb *NAMESPACE
+df6d0869c10e43ebaca0ae9f67111025 *ChangeLog
+bdddec2392dafa643892ad3ac98bcbd3 *DESCRIPTION
+f46f34763872dba7375a4fb2c2a60c2f *NAMESPACE
 66da56d10499395865bf077b260ed905 *R/AllClasses.R
 4590af328c1eb4280fad7b885b1aaf98 *R/Arith.R
 3d807e34fefac162da182a63c78bbd0c *R/Consts.R
@@ -18,8 +17,8 @@ d30bafc5dd3b9d16322b49e7ffb849bd *R/optimizers.R
 71f4999e4c74db039b1d1c9e14878043 *R/unirootR.R
 420afadecf9bcfc1d7dcc55cb46d00dc *R/zzz.R
 0bb6d872efc40e0067b671e04cfa440a *README
-24bb25337b4cac4e26c95e51c1ec5cc7 *TODO
-7d7f2723e52ad2f1cd1768c951b5128f *build/vignette.rds
+093d016b46254ce45dec413d863482eb *TODO
+10a2854f7392669988dc42328a17005e *build/vignette.rds
 2d92b8ce8343ac4b6029d6a1d03059f7 *cleanup
 08ebafbc9bcdf095b79d89123848b73a *configure
 651cc7d3d3b7a8598b39a97d053be821 *configure.ac
@@ -27,13 +26,13 @@ d30bafc5dd3b9d16322b49e7ffb849bd *R/optimizers.R
 da3fe1f9afd8af15f7f8c2291231501c *demo/hjkMpfr.R
 167db203ff72ac5de5263a7f99f4c399 *inst/doc/Maechler_useR_2011-abstr.R
 ca4d6c443c917a2b41766aa538ac5987 *inst/doc/Maechler_useR_2011-abstr.Rnw
-0bdd97ca49f4b200230763df5792ae90 *inst/doc/Maechler_useR_2011-abstr.pdf
+51a4b1e0ef7ecab0b48b5c232d5e027d *inst/doc/Maechler_useR_2011-abstr.pdf
 714f0a0462a4794112b8b742e536d0c1 *inst/doc/Rmpfr-pkg.R
 51f24fb62043ac4084e7ddb5b191c2a6 *inst/doc/Rmpfr-pkg.Rnw
-f6c7e81704fe5aa3667461ad1c0c35ac *inst/doc/Rmpfr-pkg.pdf
+e62660442d12ff64552ce23424cb8a58 *inst/doc/Rmpfr-pkg.pdf
 c36600479d9fda90d91be7809df3439b *inst/doc/log1mexp-note.R
 9bd87ccea001741a9555acf6df4ea31a *inst/doc/log1mexp-note.Rnw
-57361791006c2b1bfa3f08e327d4dc0e *inst/doc/log1mexp-note.pdf
+8c1f168aa64a01fbceb769e8e2f7e6a4 *inst/doc/log1mexp-note.pdf
 bd912d8dfdedd08c8647a5f29e76484d *man/Bernoulli.Rd
 c3979496475afd749f9a8727cbf3923b *man/Bessel_mpfr.Rd
 e66c83bf74d08c17c71abe49562f440b *man/Mnumber-class.Rd
@@ -80,7 +79,7 @@ fa101e12120f94ae9e256b8a20bd144a *tests/bit-repr.R
 6adbfcf57d944c7278fb295208eed8ed *tests/bit-repr.Rout.save
 718eb8ac0458bf2ed57fb794481d70ea *tests/create.R
 50fc11ec67062f5b893195dccf7cd794 *tests/matrix-ex.R
-006b47cf6d68f95f8a6a8a59b5976569 *tests/special-fun-ex.R
+388e97aca5ad9d6dcdc1884d33144146 *tests/special-fun-ex.R
 ca4d6c443c917a2b41766aa538ac5987 *vignettes/Maechler_useR_2011-abstr.Rnw
 51f24fb62043ac4084e7ddb5b191c2a6 *vignettes/Rmpfr-pkg.Rnw
 5601e5d65eba942c21215326cac87da6 *vignettes/Rmpfr.bib

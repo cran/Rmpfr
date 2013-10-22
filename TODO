@@ -1,13 +1,14 @@
-URGENT or "DO first" :
+		-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
+* Very Short Term
 
-19) outer() now works  always ? {as rep() now S3 dispatches
+** TODO 19) outer() now works  always ? {as rep() now S3 dispatches
     ---> need systematic checks *AND* docu changes!
 
-17b)  see 'Ops' in R/Arith.R  ,  Rmpfr:::.Math.codes,  and
+** TODO 17b) see 'Ops' in R/Arith.R  ,  Rmpfr:::.Math.codes,  and
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
 
-21) What's the exponent range -- can we change it? - --> Need R interface to
+** TODO 21) What's the exponent range -- and possibly change it --> Need R interface to
 
    — Function: int mpfr_set_emin (mpfr_exp_t exp)
    — Function: int mpfr_set_emax (mpfr_exp_t exp)
@@ -25,15 +26,9 @@ URGENT or "DO first" :
       in src/utils.c
       	 ~~~~~~~~~~~
 
-
-
-
-
----------------------------- compare to ./Done ------------------------
-
-2)
- - Now have working  "mpfrMatrix", dim(.) <- ..; t(), %*%, crossprod()...
-
+* Short or Mid Term
+*** TODO Split this section into  Short | Mid  (?)
+** TODO 2) Now have working  "mpfrMatrix", dim(.) <- ..; t(), %*%, crossprod()...
  -  <mpfr> %*% <mpfr>    should work the same as with numeric vectors
  -  <mpfr> %*% t(<mpfr>)  ditto
 
@@ -48,7 +43,6 @@ URGENT or "DO first" :
  [No longer sure if this is true :]
  For this, we must ensure that the methods are used, instead of the
  .Primitive  base functions :
-
  One way: --> see ~/R/MM/NUMERICS/bessel-large-x.R
                   --------------------------------
   ## really interesting is  bI(x., nu)  {for "mpfr" argument}:
@@ -61,22 +55,22 @@ URGENT or "DO first" :
   environment(`dimnames<-`) <- as.environment("package:Rmpfr")
   environment(which) <- as.environment("package:Rmpfr")
 
-5) I'd like seq() methods, but that seems currently impossible because of
+** TODO 5) I'd like seq() methods, but that seems currently impossible because of
    a "design infelicity" in base::seq.default  --- ???? E-mail to R-core ??
    --> R/mpfr.R
 
-6) It is "wrong" that the class "Mnumber" also extends "character", "list";
+** TODO 6) It is "wrong" that the class "Mnumber" also extends "character", "list";
    but it's not clear we can find better definitions, see R/AllClasses.R
 
-7) Add tests for hypot() & atan2() to tests/special-fun-ex.R
+** TODO 7) Add tests for hypot() & atan2() to tests/special-fun-ex.R
 
-8) round(x, .) & signif(x, .) currently return "mpfr" numbers of the same precision.
+** TODO 8) round(x, .) & signif(x, .) currently return "mpfr" numbers of the same precision.
    That *looks* ugly.
    Potentially add a swith 'keepPrec = FALSE' -- i.e. by default *reduce*
    precision to "match" 'digits' argument.
 
-9) median(mpfr(1:4, 60)) now fails, but mean(.) and quantile() both work.
-   ------ The infelicity could be seen in the way namespaces work :
+** TODO 9) median(mpfr(1:4, 60)) now fails, but mean(.) and quantile() both work.
+           ------ The infelicity could be seen in the way namespaces work :
    median.default() calls the correct sort() on "mpfr", but calls the *wrong*
    base::mean() instead of mean() {which is S4 by then} ....
    all would be fine if  base::mean() was *already* S4 generic ....
@@ -84,48 +78,48 @@ URGENT or "DO first" :
    package-load time, but would prefer a cleaner solution.
    ---> talk to Luke and John (and ??) about that
 
-11) format() method for "mpfrArray" (and hence "mpfrMatrix") which nicely
+** TODO 11) format() method for "mpfrArray" (and hence "mpfrMatrix") which nicely
     and correctly *jointly* formats and aligns  columns !
     drop0trailing is not really sensible there
 
-16) psigamma(x, n)  {and  digamma(), trigamma() aliases}
+** TODO 16) psigamma(x, n)  {and  digamma(), trigamma() aliases}
     --> experiments in ~/R/MM/Pkg-ex/Rmpfr/psigamma.R )
     Note that since, MPFR 3.0.0, there is a digamma(); .. which we now interface to
 
-18) ifelse()  fails ... maybe I should mask it
+** TODO 18) ifelse()  fails ... maybe I should mask it
              {or "fix it" via assign*() in base ?? -- they will love that!}
     or provide ifelse2() -- a fast simplified version ?
 
 
-22) *do* test rank(), sort(), order() : we claim they work in man/mpfr-class.Rd
+** TODO 22) *do* test rank(), sort(), order() : we claim they work in man/mpfr-class.Rd
     quantile() should work from R 2.15.1 (June 2012) on       ~~~~~~~~~~~~~~~~~
 
-24) Bernoulli(): we use builtin zeta(); alternatively, use *exact*
+** TODO 24) Bernoulli(): we use builtin zeta(); alternatively, use *exact*
      rationals from 'gmp', using "bigq" (and "bigz") -- and R code from ~/R/Pkgs/copula/R/special-func.R
-25) mpfr(<mpfr>, ...) should work: return argument unchanged *if* precision
+** TODO 25) mpfr(<mpfr>, ...) should work: return argument unchanged *if* precision
     and rounding mode are ok; otherwise use roundMpfr() *BUT* that needs an
     additional rnd.mode  argument -- as mpfr
-26) (?) Revert the decision to *not* care about rounding mode in Ops/function,
+** TODO 26) (?) Revert the decision to *not* care about rounding mode in Ops/function,
     and rather expose that as in mpfr(), e.g., in R/Math.R  roundMpfr
     -- see  MPFR_RNDN in src/utils.c and others; --> use src/convert.c  R_rnd2MP()
     -- and all the SEXP functions get an additional   SEXP rnd_mode
        argument, the same as   SEXP d2mpfr1() in src/convert.c has already.
 
 
-27) sapply(), vapply() etc do not work with mpfr --- show workaround
+** TODO 27) sapply(), vapply() etc do not work with mpfr --- show workaround
     e.g. from ~/R/MM/Pkg-ex/Rmpfr/Dutang_test_v6.R
 	 res.mpfr <- lapply(1:length(n), function(i) binomsum.mpfr.MM(n[i], f, n0, precBits=precBits[i], ...))
 	 sapply(res.mpfr, as, "double")
 
 
-29) Our sum() should use   mpfr_sum() :
+** TODO 29) Our sum() should use   mpfr_sum() :
    mpfr_sum (mpfr_t ROP, mpfr_ptr const TAB[], unsigned long int N, mpfr_rnd_t RND)
 
-31) Use ./LUP.R  to compute the lu() decomposition of an mpfrMatrix
+** TODO 31) Use ./LUP.R  to compute the lu() decomposition of an mpfrMatrix
     ---> use this for determinant() for larger (n >= 4 ?) dimensions!
 
 
-50) For *complex* arithmetic, build interface to the  "MPC" library
+** TODO 50) For *complex* arithmetic, build interface to the  "MPC" library
    ---> http://www.multiprecision.org/mpc -- which is LGPL and itself
    builds on MPFR and GMP.
    Ubuntu now has 'libmpc-dev' (!)  {but there's no '*-doc' package yet;
@@ -135,3 +129,87 @@ URGENT or "DO first" :
       to take each src/*.c file and mechanically  s/mpfr/mpc/  producing a
       mpc version of that;
       then "the same" for the R interface code.
+
+* Accomplished
+
+** DONE 1) R: character -> mpfr   "3.14159265358979323846264" -> mpfr
+
+** DONE 3) "Arith" and "Compare" methods currently ``lose dim + dimnames''
+   for "mpfrArray" (& "mpfrMatrix")
+
+  The solution is a bit tedious because the Ops do recycling pretty
+  generously for vectors,
+  but pretty stringently when one of the operands is a matrix.
+
+  If the other part is a matrix their dim() must be identical,
+  if just a vector, its length must be a divisor of  length(<matrix>)
+
+** DONE 10b) a factorialMPFR() which automatically uses full precision for
+    integer-valued argument, notably using MPFR's mpfr_fac_ui; see also end
+    of man/mpfr-class.Rd
+
+** DONE 13) all the NOT_YET in src/Ops.c are implemented, *apart* from trigamma()
+    --> TODO 16)
+
+** DONE 14) Want to *change*  'precBits' of existing MPFR numbers;
+    MPFR has  mpfr_set_prec(X, PREC)  but that sets the value to NaN.
+    Manual:  "In case you want to keep the previous value stored in X, use
+               `mpfr_prec_round' instead."
+
+   --> fulfilled via  roundMpfr(x, precBits)
+
+
+
+** DONE 15) beta(.,.) and lbeta(.,.) .. using  my_mpfr_beta() in C.
+   Interestingly, the speedup is not dramatical
+    (50% for length 200; 300% for length 1)
+
+** DONE 4) format() got more (optional) arguments, along the format.default()
+   example.
+   Note that an option to "round() after decimal" should not be needed,
+   rather  format(round(..), digits= ., drop0trailing=TRUE) does work.
+
+
+** DONE 12) crossprod(), tcrossprod() (and more?) methods for "mpfrMatrix".
+
+** DONE 10) chooseMpfr(a,n) is now implemented --- *NOT* based on gamma(),
+    but rather n.
+
+** DONE 11b) No longer --- problem were missing  mpfr_clear() statements in src/utils.c :
+    format(<mpfr>) --> .mpfr2str() -> C mpfr2str()  still suffers from a
+    memory bug, inspite of my efforts in src/convert.c
+    I think this is the MPFR library just allocating memory that's in use
+    by R, but it seems hard to prove and or fix that.
+
+
+** DONE 17a) as(1, "mpfr") & TRUE : no longer gives infinite recursion error
+
+** DONE 17a) Write a 'Rmpfr-package' help page that mentions that we have *many*
+     Math etc functions, including  gamma, digamma, ....  {which are not
+     quickly visible on the help pages now}.
+
+
+** DONE 20) integrateR( ... rel.tol, verbose= TRUE) :
+    the precision of the output should be increased a bit,
+    (still depending  on rel.tol !)
+
+** DONE 22) apply(<mpfrArray>, .) --> S4 method
+
+** DONE 23) quantile(<mpfr>)  does not work ---- but will from R 2.15.1 with better quantile.default()
+    Reason: in stats::quantile.default(),
+      ifelse(h == 0, qs[i], (1 - h) * qs[i] + h * x[hi[i]])
+    produces a list of 'mpfr1' instead a real 'mpfr' vector.
+    -> Fixed in ~/R/D/r-devel/R/src/library/stats/R/quantile.R
+
+** DONE 23x) sumBinomMpfr()  accept  f.x
+
+** DONE 28) determinant() and hence det() "fail" (with a reasonable error message).
+    Easy: go via asNumeric(.) with a  warning() that can be suppressed
+    Standard R uses LAPACK's  LU() decomposition.  Would be cool to have
+    that in C (using MPFR).
+    Alternatively, do it for 2x2 and via recursion mxm for small m.
+    (but it is *really* inefficient: complexity  \propto  m! )
+
+** DONE 30) pmin() and pmax(), for simple cases pmin(x,n) are now, 2013-02, quite "fast",
+        (see also --> ~/R/MM/Pkg-ex/Rmpfr/SLOW-pmin.R)
+

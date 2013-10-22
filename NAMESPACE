@@ -5,13 +5,20 @@ useDynLib(Rmpfr, .registration=TRUE)
 ## cheap, somewhat experimental -- hence the "."
 export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr)
 
+## Radical(but gets all): import("methods")
 ## try to import all we need, but not more
-importFrom("methods", setClass, setClassUnion, setMethod, setOldClass,
+importFrom("methods", coerce, "coerce<-",
+           setClass, setClassUnion, setMethod, setOldClass,
 	   setValidity, slot, "slot<-",
 	   getDataPart, setDataPart, getClass, getClassDef,
 	   callGeneric, as, is, extends,
 	   new, validObject,
-	   signature, representation, prototype)
+	   signature, representation, prototype
+           ## as we define methods for them:
+           , show
+           , Arith, Compare, Logic, Math, Math2, Ops, Summary
+           ## needed implicitly [or "bug" ..]:
+           , loadMethod)
 
 importFrom("utils", str)
 importFrom("stats", stats__pnorm = pnorm)# import *and* rename !

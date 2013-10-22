@@ -176,6 +176,18 @@ stopifnot( beta(ab[,"a"], ab[,"b"]) == 0,
 	  lbeta(ab[,"a"], ab[,"b"]) == -Inf)
 ## was  NaN  in Rmpfr <= 0.5-2
 
+stopifnot(all.equal(6 * beta(mpfr(1:3,99), -3.), c(-2,1,-2), tol=1e-20))
+## add more checks, notably for b (> 0)  above and below the "large_b" in
+## ../src/utils.c :
+bb <- beta(mpfr(1:23, 128), -23)
+stopifnot(all.equal(bb, Bi1(1:23, -23), tol=1e-7))
+                                        # Bi1() does not get high prec for small b
+## can be written via rationals:  N / D :
+bn <- c(330, -360, 468, -728, 1365, -3120, 8840, -31824,
+        151164, -1007760, 10581480, -232792560)
+bn <- c(rev(bn[-1]), bn)
+bd <- 24* as.bigz(2 * 3 * 5 * 7 * 11) * 13 * 17 * 19 * 23
+stopifnot(all.equal(bb, as(bn/bd,"mpfr"), tol=0))
 
 stopifnot(all.equal(6 * beta(mpfr(1:3,	99), -3.),
 			     c(-2,1,-2),	    tol=1e-20),
