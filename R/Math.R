@@ -40,7 +40,12 @@ if(FALSE) ## here are the individual function
       "lgamma" =   40,
       "gamma" =    41,
       "digamma" =  42,
-      "trigamma" = 43)
+      "trigamma" = 43,
+	## R >= 3.1.0 :
+      "cospi" =    47,
+      "sinpi" =    48,
+      "tanpi" =    49
+        )
 
 .Math.gen <- getGroupMembers("Math")
 
@@ -50,7 +55,7 @@ if(FALSE) ## here are the individual function
     c(.Math.codes,
       "trunc" = 0, "atan" = 25, # "abs" has own method!
       "log" = 13, "log2" = 14, "log10" = 15,
-      "cummax" = 51, "cummin" = 52, "cumprod" = 53, "cumsum" = 54,
+      "cummax" = 71, "cummin" = 72, "cumprod" = 73, "cumsum" = 74,
       ## These are *NOT* in R's  Math group, but 1-argument math functions
       ## available in the mpfr - library:
       "erf" = 101, "erfc" = 102, "zeta" = 104, "Eint" = 106, "Li2" = 107,
@@ -84,6 +89,21 @@ setMethod("sign", "mpfr", .mpfr.sign)
 }
 setMethod("abs", "mpfr",
 	  function(x) .Call(Rmpfr_abs, x))
+
+## Simple methods for "complex" numbers, just so "they work"
+setMethod("Re",  "mpfr", function(z) z)
+setMethod("Im",  "mpfr", function(z) 0*z)
+setMethod("Conj","mpfr", function(z) z)
+setMethod("Mod", "mpfr", function(z) abs(z))
+setMethod("Arg", "mpfr", function(z) {
+    prec <- .getPrec(z)
+    r <- mpfr(0, prec)
+    neg <- !mpfr.is.0(z) & .getSign(z) == -1
+    r[neg] <- Const("pi", prec = prec[neg])
+    r
+})
+
+
 
 ## Note that  factorial() and lfactorial() automagically work through  [l]gamma()
 ## but for the sake of "exact for integer"

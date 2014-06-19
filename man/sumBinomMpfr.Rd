@@ -92,9 +92,9 @@ system.time(res.R   <- sumBin.all.R(n.set, f = sqrt)) ## instantaneous..
 system.time(resMpfr <- sumBin.all  (n.set, f = sqrt)) ## ~ 0.6 seconds
 \dontshow{
 stopifnot(
-    all.equal(resMpfr[1:10], res.R[1:10], tol=1e-12),
-    all.equal(resMpfr[1:20], res.R[1:20], tol=1e-9 ),
-    all.equal(resMpfr[1:30], res.R[1:30], tol=1e-6 ))
+    all.equal(resMpfr[1:10], res.R[1:10], tolerance=1e-12),
+    all.equal(resMpfr[1:20], res.R[1:20], tolerance=1e-9 ),
+    all.equal(resMpfr[1:30], res.R[1:30], tolerance=1e-6 ))
 }
 matplot(n.set, cbind(res.R, resMpfr), type = "l", lty=1,
         ylim = extendrange(resMpfr, f = 0.25), xlab = "n",

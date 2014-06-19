@@ -47,10 +47,10 @@ extern       int R_mpfr_debug_;
 #endif
 
 /* A version of Rprintf() .. but only printing when .. is 'TRUE' :*/
-static R_INLINE void R_mpfr_dbg_printf(const char *format, ...)
+static R_INLINE void R_mpfr_dbg_printf(int dbg_level, const char *format, ...)
 {
     va_list(ap);
-    if(R_mpfr_debug_) {
+    if(R_mpfr_debug_ && R_mpfr_debug_ >= dbg_level) {
 	Rprintf("mpfr.debug[%d]: ", R_mpfr_debug_);
 	va_start(ap, format);
 	REvprintf(format, ap);
@@ -76,6 +76,18 @@ static R_INLINE int R_mpfr_nr_limbs(mpfr_t r)
 	nr = d/mp_bits_per_limb;
     if (d % mp_bits_per_limb) nr++;
     return nr;
+}
+
+// Note: "in theory" we could set precBits > INT_MAX, but currently not in Rmpfr:
+static R_INLINE void R_mpfr_check_prec(int prec)
+{
+    if(prec == NA_INTEGER)
+	error("Precision(bit) is NA (probably from coercion)");
+    if(prec < MPFR_PREC_MIN)
+	error("Precision(bit) = %d < %ld (= MPFR_PREC_MIN)", prec, (long)MPFR_PREC_MIN);
+    if(prec > MPFR_PREC_MAX)
+	error("Precision(bit) = %d > %ld (= MPFR_PREC_MAX)", prec, (long)MPFR_PREC_MAX);
+    return;
 }
 
 #define R_mpfr_prec(x) INTEGER(GET_SLOT(x, Rmpfr_precSym))[0]
@@ -116,7 +128,6 @@ SEXP print_mpfr1(SEXP x, SEXP digits);
 SEXP Rmpfr_minus(SEXP x);
 SEXP Rmpfr_abs(SEXP x);
 SEXP Math_mpfr(SEXP x, SEXP op);
-SEXP Math_mpfr(SEXP x, SEXP op);
 SEXP Arith_mpfr(SEXP x, SEXP y, SEXP op);
 SEXP Arith_mpfr_i(SEXP x, SEXP y, SEXP op);
 SEXP Arith_i_mpfr(SEXP x, SEXP y, SEXP op);
@@ -143,6 +154,9 @@ SEXP MPFR_as_R(mpfr_t r);
 SEXP R_mpfr_set_debug(SEXP I);
 SEXP R_mpfr_set_default_prec(SEXP prec);
 SEXP R_mpfr_get_default_prec(void);
+SEXP R_mpfr_get_erange(SEXP kind);
+SEXP R_mpfr_set_erange(SEXP kind, SEXP val);
+SEXP R_mpfr_prec_range(SEXP ind);
 SEXP R_mpfr_get_version(void);
 
 

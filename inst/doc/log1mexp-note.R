@@ -251,6 +251,14 @@ mtext(with(as.list(sysInf),
 ###################################################
 ### code chunk number 19: uniroot-x1
 ###################################################
+## Find x0, such that  exp(x) =.= g(x) for x < x0 :
+f0 <- function(x) { x <- exp(x) - log1p(exp(x))
+                   x[x==0] <- -1 ; x }
+u0 <- uniroot(f0, c(-100, 0), tol=1e-13)
+str(u0, digits=10)
+x0 <- u0[["root"]] ## -36.39022698 --- note that ~= \log(\eps_C)
+all.equal(x0, -52.5 * log(2), tol=1e-13)
+
 ## Find x1, such that  x + exp(-x) =.= g(x) for x > x1 :
 f1 <- function(x) { x <- (x + exp(-x)) - log1p(exp(x))
                    x[x==0] <- -1 ; x }

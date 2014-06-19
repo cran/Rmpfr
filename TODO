@@ -1,6 +1,5 @@
 		-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
 * Very Short Term
-
 ** TODO 19) outer() now works  always ? {as rep() now S3 dispatches
     ---> need systematic checks *AND* docu changes!
 
@@ -8,23 +7,6 @@
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
 
-** TODO 21) What's the exponent range -- and possibly change it --> Need R interface to
-
-   — Function: int mpfr_set_emin (mpfr_exp_t exp)
-   — Function: int mpfr_set_emax (mpfr_exp_t exp)
-
-       Set the smallest and largest exponents allowed for a floating-point variable. Return a non-zero value when exp is not in the range accepted by the implementation (in that case the smallest or largest exponent is not changed), and zero otherwise. If the user changes the exponent range, it is her/his responsibility to check that all current floating-point variables are in the new allowed range (for example using mpfr_check_range), otherwise the subsequent behavior will be undefined, in the sense of the ISO C standard.
-
-   — Function: mpfr_exp_t mpfr_get_emin_min (void)
-   — Function: mpfr_exp_t mpfr_get_emin_max (void)
-   — Function: mpfr_exp_t mpfr_get_emax_min (void)
-   — Function: mpfr_exp_t mpfr_get_emax_max (void)
-
-       Return the minimum and maximum of the exponents allowed for mpfr_set_emin and mpfr_set_emax respectively. These values are implementation dependent, thus a program using mpfr_set_emax(mpfr_get_emax_max()) or mpfr_set_emin(mpfr_get_emin_min()) may not be portable.
-
- ---> model this analogous to   SEXP R_mpfr_get_default_prec(void)
-      in src/utils.c
-      	 ~~~~~~~~~~~
 
 * Short or Mid Term
 *** TODO Split this section into  Short | Mid  (?)
@@ -193,6 +175,20 @@
     the precision of the output should be increased a bit,
     (still depending  on rel.tol !)
 
+** DONE 21) What's the exponent range -- and possibly change it: R interface
+   in R/mpfr.R via  .mpfr.erange()  [and .mpfr.erange(.) <- v ]
+   to
+   - Function: mpfr_exp_t mpfr_get_emin (void)
+   - Function: mpfr_exp_t mpfr_get_emax (void)
+
+   - Function: int mpfr_set_emin (mpfr_exp_t exp)
+   - Function: int mpfr_set_emax (mpfr_exp_t exp)
+
+   - Function: mpfr_exp_t mpfr_get_emin_min (void)
+   - Function: mpfr_exp_t mpfr_get_emin_max (void)
+   - Function: mpfr_exp_t mpfr_get_emax_min (void)
+   - Function: mpfr_exp_t mpfr_get_emax_max (void)
+
 ** DONE 22) apply(<mpfrArray>, .) --> S4 method
 
 ** DONE 23) quantile(<mpfr>)  does not work ---- but will from R 2.15.1 with better quantile.default()
@@ -212,4 +208,5 @@
 
 ** DONE 30) pmin() and pmax(), for simple cases pmin(x,n) are now, 2013-02, quite "fast",
         (see also --> ~/R/MM/Pkg-ex/Rmpfr/SLOW-pmin.R)
+
 

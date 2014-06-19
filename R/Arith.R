@@ -170,25 +170,33 @@ setMethod("Arith", signature(e1 = "mpfrArray", e2 = "mpfr"),
 	  })
 
 
-## "macro-like	encapsulation"
+## "macro-like	encapsulation" -- using .Call(<registered>, *) for checks
 .Arith.num.mpfr <- function(x,y, FUN) {
-    ff <- if(is.integer(x)) Arith_i_mpfr else Arith_d_mpfr
-    .Call(ff, x,y, .Arith.codes[FUN])
+    if(is.integer(x))
+	.Call(Arith_i_mpfr, x,y, .Arith.codes[FUN])
+    else
+	.Call(Arith_d_mpfr, x,y, .Arith.codes[FUN])
 }
 
 .Arith.mpfr.num <- function(x,y, FUN) {
-    ff <- if(is.integer(y)) Arith_mpfr_i else Arith_mpfr_d
-    .Call(ff, x, y, .Arith.codes[FUN])
+    if(is.integer(y))
+	.Call(Arith_mpfr_i, x,y, .Arith.codes[FUN])
+    else
+	.Call(Arith_mpfr_d, x,y, .Arith.codes[FUN])
 }
 
 .Compare.num.mpfr <- function(x,y, FUN) {
-    ff <- if(is.integer(x)) Compare_mpfr_i else Compare_mpfr_d
-    .Call(ff, y, x, .Compare.codesRev[FUN])
+    if(is.integer(x))
+	.Call(Compare_mpfr_i, y,x, .Compare.codesRev[FUN])
+    else
+	.Call(Compare_mpfr_d, y,x, .Compare.codesRev[FUN])
 }
 
 .Compare.mpfr.num <- function(x,y, FUN) {
-    ff <- if(is.integer(y)) Compare_mpfr_i else Compare_mpfr_d
-    .Call(ff, x, y, .Compare.codes[FUN])
+    if(is.integer(y))
+	.Call(Compare_mpfr_i, x,y, .Compare.codes[FUN])
+    else
+	.Call(Compare_mpfr_d, x,y, .Compare.codes[FUN])
 }
 
 setMethod("Arith", signature(e1 = "array", e2 = "mpfr"),# incl "mpfrArray"

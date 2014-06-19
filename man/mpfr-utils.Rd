@@ -14,7 +14,7 @@
   typically not called by the user.  In some case the may come handy.
 }
 \usage{
-getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA)
+getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L)
 getD(x)
 mpfr_default_prec(prec)
 \S3method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE,
@@ -25,8 +25,9 @@ toNum(from)
 mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 }
 \arguments{
-  \item{x, from}{an \R object of class \code{"\linkS4class{mpfr}"}, or
-    \code{"\linkS4class{mpfrArray}"}, respectively.}
+  \item{x, from}{typically, an \R object of class \code{"\linkS4class{mpfr}"}, or
+    \code{"\linkS4class{mpfrArray}"}, respectively.  For
+    \code{getPrec()}, any number-like \R object, or \code{\link{NULL}}.}
   \item{base}{(only when \code{x} is \code{\link{character}}) the base
     with respect to which \code{x[i]} represent numbers; \code{base}
     \eqn{b} must fulfill \eqn{2 \le b \le 36}{2 <= b <= 36}.}
@@ -35,6 +36,8 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
     precision be returned.  Should typically be kept at default \code{TRUE}.}
   \item{is.mpfr}{logical indicating if \code{\link{class}(x)} is already
     known to be \code{"mpfr"}; typically should be kept at default, \code{NA}.}
+  \item{bigq.}{for \code{getPrec()}, the precision to use for a big
+    rational (class \code{"bigq"}); if not specified gives warning when used.}
   \item{prec}{a positive integer, or missing.}
   \item{drop0trailing}{logical indicating if trailing \code{"0"}s should
     be omitted.}
@@ -56,7 +59,9 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 }
 \value{
   \code{getPrec(x)} returns a \code{\link{integer}} vector of the same
-  length as \code{x}.
+  length as \code{x} when that is positive, whereas \code{getPrec(NULL)}
+  returns \code{mpfr_default_prec()}, see below.
+  % the current MPFR default precision, see   \code{mpfr_default_prec()}
   If you need to \emph{change} the precision of \code{x}, i.e., need
   something like \dQuote{setPrec}, use \code{\link{roundMpfr}()}.
 

@@ -22,9 +22,10 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
 }
 \arguments{
   \item{x}{an MPFR number (vector or array).}
-  \item{digits}{how many significant digits are to be used for
-    numeric and complex \code{x}.  The default, \code{NULL}, uses
-    enough digits to represent the full precission.}
+  \item{digits}{how many significant digits are to be used.  The
+    default, \code{NULL}, uses enough digits to represent the full
+    precision, often one or two digits more than \dQuote{you} would
+    expect.}
   \item{trim}{logical; if \code{FALSE}, numbers are right-justified to a
     common width: if \code{TRUE} the leading blanks for justification
     are suppressed.}

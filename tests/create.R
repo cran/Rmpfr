@@ -100,3 +100,9 @@ z[3] <- Const("pi",200)
 z[15:17] <- 1/mpfr(10:12, 100)
 stopifnot(all.equal(z[1:4], c(0,0,pi,0), tol = 1e-15), validObject(z),
 	  all.equal(z[13:17], c(NaN,NaN, 1/(10:12)), tol = 1e-15))
+
+## These seg.faulted (each via different R -> C interface) in the past:
+assertError <- tools::assertError
+assertError( pp <- Const("pi", prec   = 1e11) )
+assertError( mpfr("123.456",  precBits= 1e11) )
+assertError( mpfr(as.bigz(3), precBits= 1e11) )

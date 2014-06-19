@@ -7,7 +7,7 @@ options(SweaveHooks= list(fig=function() par(mar=c(5.1, 4.1, 1.1, 2.1))),
         width = 75,
         digits = 7, # <-- here, keep R's default!
         prompt = "R> ",
-        continue=" ")
+        continue="   ")
 Sys.setenv(LANGUAGE = "en")
 if(.Platform$OS.type != "windows")
   Sys.setlocale("LC_MESSAGES","C")
@@ -190,7 +190,7 @@ if(mpfrVersion() >= "2.4.0")
 getOption("SweaveHooks")[["fig"]]()
 curve(erf, -3,3, col = "red", ylim = c(-1,2))
 curve(erfc, add = TRUE, col = "blue")
-abline(h=0, v=0, lty=3)
+abline(h=0, v=0, lty=3); abline(v=c(-1,1), lty=3, lwd=.8, col="gray")
 legend(-3,1, c("erf(x)", "erfc(x)"), col = c("red","blue"), lty=1)
 
 

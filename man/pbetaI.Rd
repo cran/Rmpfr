@@ -74,7 +74,7 @@ rErr(pbeta(x, a, b, lower=FALSE), Ip)
 rErr(pbeta(x, a, b, log = TRUE),  lp)
 rErr(pbeta(x, a, b, lower=FALSE, log = TRUE),  lIp)
 
-a.EQ <- function(..., tol=1e-15) all.equal(..., tol=tol)
+a.EQ <- function(..., tol=1e-15) all.equal(..., tolerance=tol)
 stopifnot(
   a.EQ(pp,  pbeta(x, a, b)),
   a.EQ(lp,  pbeta(x, a, b, log.p=TRUE)),

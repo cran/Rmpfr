@@ -79,6 +79,12 @@
 \alias{log,mpfr-method}
 \alias{factorial,mpfr-method}
 \alias{sign,mpfr-method}
+% "Complex" (cheap methods for "real"s):
+\alias{Re,mpfr-method}
+\alias{Im,mpfr-method}
+\alias{Mod,mpfr-method}
+\alias{Arg,mpfr-method}
+\alias{Conj,mpfr-method}
 
 \alias{format,mpfr-method}
 \alias{is.finite,mpfr-method}
@@ -114,9 +120,11 @@
   \bold{F}loatingpoint numbers with \bold{R}eliable arithmetic.
 
   For the high-level user, \code{"mpfr"} objects should behave
-  as standard \R's \code{\link{numeric}} \emph{vectors}, just with
-  prespecified (typically high) precision.
-
+  as standard \R's \code{\link{numeric}} \emph{vectors}. They would just
+  print differently and use the prespecified (typically high) precision
+  instead of the double precision of \sQuote{traditional} \R numbers
+  (with \code{\link{class}(.) == "numeric"} and
+  \code{\link{typeof}(.) == "double"}).
 }
 \section{Objects from the Class}{
   Objects are typically created by \code{\link{mpfr}(<number>, precBits)}.
@@ -257,6 +265,13 @@
     \item{log}{\code{signature(x = "mpfr")}: ... }
     \item{show}{\code{signature(object = "mpfr")}: ... }
     \item{sign}{\code{signature(x = "mpfr")}: ... }
+
+    \item{Re, Im}{\code{signature(z = "mpfr")}: simply return \code{z}
+      or \code{0} (as \code{"mpfr"} numbers of correct precision), as mpfr
+      numbers are \sQuote{real} numbers.}
+    \item{Arg, Mod, Conj}{\code{signature(z = "mpfr")}: these are
+      trivial for our \sQuote{real} mpfr numbers, but defined to work
+      correctly when used in \R code that also allows complex number input.}
 
     \item{all.equal}{\code{signature(target = "mpfr", current = "mpfr")},}
     \item{all.equal}{\code{signature(target = "mpfr", current = "ANY")}, and}

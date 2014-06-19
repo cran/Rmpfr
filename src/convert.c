@@ -35,12 +35,12 @@
 #if GMP_NUMB_BITS == 32
 /*                  ---- easy : a gmp-limb is an int <--> R */
 # define R_mpfr_FILL_DVEC(i)					\
-    R_mpfr_dbg_printf("r..d[i=%d] = 0x%lx\n",i,r->_mpfr_d[i]);	\
+    R_mpfr_dbg_printf(2,"r..d[i=%d] = 0x%lx\n",i,r->_mpfr_d[i]); \
     dd[i] = (int) r->_mpfr_d[i]
 
 # define R_mpfr_GET_DVEC(i)					\
     r->_mpfr_d[i] = (mp_limb_t) dd[i];				\
-    R_mpfr_dbg_printf("dd[%d] = %10lu -> r..d[i=%d]= 0x%lx\n",	\
+    R_mpfr_dbg_printf(2,"dd[%d] = %10lu -> r..d[i=%d]= 0x%lx\n", \
 		      i, dd[i], i,r->_mpfr_d[i])
 
 # define R_mpfr_FILL_EXP ex[0] = (int)r->_mpfr_exp
@@ -55,26 +55,26 @@
 
 # define RIGHT_HALF(_LONG_) ((long long)(_LONG_) & 0x00000000FFFFFFFF)
 /*					  1  4	 8|  4	 8 */
-# define LEFT_SHIFT(_LONG_) (((long long)(_LONG_)) << 32)
+# define LEFT_SHIFT(_LONG_) (((unsigned long long)(_LONG_)) << 32)
 
-# define R_mpfr_FILL_DVEC(i)					\
-    R_mpfr_dbg_printf("r..d[i=%d] = 0x%lx\n",i,r->_mpfr_d[i]);	\
-    dd[2*i]  = (int) RIGHT_HALF(r->_mpfr_d[i]);			\
+# define R_mpfr_FILL_DVEC(i)						\
+    R_mpfr_dbg_printf(2,"r..d[i=%d] = 0x%lx\n",i,r->_mpfr_d[i]);	\
+    dd[2*i]  = (int) RIGHT_HALF(r->_mpfr_d[i]);				\
     dd[2*i+1]= (int) (r->_mpfr_d[i] >> 32)
 
 # define R_mpfr_GET_DVEC(i)						\
-    r->_mpfr_d[i] = (mp_limb_t)(RIGHT_HALF(dd[2*i]) | LEFT_SHIFT(dd[2*i+1]));	\
-    R_mpfr_dbg_printf("dd[%d:%d]= (%10lu,%10lu) -> r..d[i=%d]= 0x%lx\n", \
+    r->_mpfr_d[i] = (mp_limb_t)(RIGHT_HALF(dd[2*i]) | LEFT_SHIFT(dd[2*i+1])); \
+    R_mpfr_dbg_printf(2,"dd[%d:%d]= (%10lu,%10lu) -> r..d[i=%d]= 0x%lx\n", \
 	     2*i,2*i+1, dd[2*i],dd[2*i+1], i,r->_mpfr_d[i])
 
 # define R_mpfr_FILL_EXP				\
-    R_mpfr_dbg_printf("_exp = 0x%lx\n",r->_mpfr_exp);	\
+    R_mpfr_dbg_printf(2,"_exp = 0x%lx\n",r->_mpfr_exp);	\
     ex[0] = (int) RIGHT_HALF(r->_mpfr_exp);		\
     ex[1] = (int) (r->_mpfr_exp >> 32)
 
 # define R_mpfr_GET_EXP							\
     r->_mpfr_exp = (mpfr_exp_t) (RIGHT_HALF(ex[0]) | LEFT_SHIFT(ex1));	\
-    R_mpfr_dbg_printf("ex[0:1]= (%10lu,%10lu) -> _exp = 0x%lx\n",	\
+    R_mpfr_dbg_printf(2,"ex[0:1]= (%10lu,%10lu) -> _exp = 0x%lx\n",	\
 		      ex[0],ex1, r->_mpfr_exp)
 
 /*------------------------*/
@@ -112,6 +112,8 @@ SEXP d2mpfr1_(double x, int i_prec, mpfr_rnd_t rnd)
 {
     mpfr_t r;
     int nr_limbs = N_LIMBS(i_prec), i;
+
+    R_mpfr_check_prec(i_prec);
 
     R_mpfr_MPFR_2R_init(val);
 
@@ -224,11 +226,12 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 
     if(!isString(x))     { PROTECT(x    = coerceVector(x,    STRSXP)); nprot++; }
     if(!isInteger(prec)) { PROTECT(prec = coerceVector(prec, INTSXP)); nprot++; }
-
     iprec = INTEGER(prec);
 
     for(int i = 0; i < n; i++) {
-	mpfr_set_prec(r_i, (mpfr_prec_t) iprec[i % np]);
+	int prec_i = iprec[i % np];
+	R_mpfr_check_prec(prec_i);
+	mpfr_set_prec(r_i, (mpfr_prec_t) prec_i);
 	int ierr = mpfr_set_str(r_i, CHAR(STRING_ELT(x, i % nx)), ibase, rnd);
 	if(ierr) {
 	    if (!strcmp("NA", CHAR(STRING_ELT(x, i % nx))))

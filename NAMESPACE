@@ -21,10 +21,16 @@ importFrom("methods", coerce, "coerce<-",
            , loadMethod)
 
 importFrom("utils", str)
-importFrom("stats", stats__pnorm = pnorm)# import *and* rename !
+importFrom("stats"  # import *and* rename -- we extend these :
+	   ,stats__pnorm  = pnorm
+	   ,stats__dnorm  = dnorm
+	   ,stats__dpois  = dpois
+	   ,stats__dbinom = dbinom
+	   )
+
 importClassesFrom("gmp", "bigz", "bigq")
 importFrom("gmp"
-           , asNumeric, .as.char.bigz, ..as.bigz
+           , asNumeric, as.bigz, .as.char.bigz, ..as.bigz
            , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
 	   ## more to come
            , is.whole, formatN # because we add own S3 methods
@@ -60,8 +66,9 @@ export(.mpfr, .mpfr.
        ## , ".Summary.codes"
        ## , ".abs.mpfr"
        ## , ".dimCheck"
-       , ".getPrec"
-       , ".getSign"
+       , .getPrec
+       , .getSign
+       , .mpfr.erange, ".mpfr.erange<-", .mpfr.maxPrec, .mpfr.minPrec
        ## , ".mA.subAssign"
        ## , ".matmult.R"
        ## , ".mpfr.debug"
@@ -86,12 +93,13 @@ export(.mpfr, .mpfr.
        , "apply" ## <- we make it S4 generic
        , "as.vector"
        , "atan2"
-       , "beta" , "lbeta"
+       , "beta", "lbeta"
        ## S3 "c.mpfr"
        , "cbind"
        , "chooseMpfr", "chooseMpfr.all", "sumBinomMpfr"
        , "crossprod"
-       , "erf" , "erfc"
+       , "dbinom", "dpois", "dnorm"
+       , "erf", "erfc"
        , "factorial"
        , "factorialMpfr"
        , "format"
@@ -115,7 +123,6 @@ export(.mpfr, .mpfr.
        , "pmax", "pmin"
        , "pnorm"
        , "pochMpfr"
-       , "print.integrate"
        , "rbind"
        , "roundMpfr"
        , "seqMpfr"
@@ -145,6 +152,7 @@ exportMethods(
 	      "Summary",
 
               "abs", "log", "sign"
+              , "Re", "Im", "Mod", "Arg", "Conj"
               , "all.equal", "aperm"
               , "as.vector", "as.integer", "as.numeric"
               , "coerce", "coerce<-"
@@ -181,9 +189,11 @@ S3method(formatN, mpfr)
 S3method(print, mpfr)
 S3method(print, mpfr1)
 S3method(print, mpfrArray)
+S3method(print, integrateR)
 
 ## useful, to have  base::outer() work automatically:
 S3method(rep, mpfr)
 S3method(t, mpfr)
 S3method(t, mpfrMatrix)
 S3method(aperm, mpfrArray)
+

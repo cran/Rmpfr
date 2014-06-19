@@ -20,9 +20,14 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 	## This is "approximate" (and too large, typically); but if it's
 	## too small, t[.] will be extended automatically:
 	ord <- max(1, min(25, ceiling(-log2(rel.tol))))
+        if(verbose) cat("ord =", ord,"will be the *maximal* order\n")
     }
-    else
+    else {
 	stopifnot(ord >= 0)
+	if(verbose) cat(sprintf(
+	    " ord = %d; ==> evaluating integrand at 2^(ord+1)-2 = %d locations\n",
+	    ord, 2^(ord+1)-2))
+    }
 
 ### Bauer(1961)  "Algorithm 60 -- Romberg Integration" Comm.ACM 4(6), p.255
     m <- le <- upper - lower # 'l'
@@ -37,18 +42,15 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 	}
     }
     t1 <- (ff(lower) + ff(upper))/2
-    t <- rep(t1, ord+1)## {should work for "mpfr" numbers too}
+    t <- rep(t1, ord+1)## <- must work for "mpfr" numbers
     one <- 1 + 0*t1 # for "mpfr"
 
     r. <- t[1]*le
     n <- 1 # 'n'(Bauer) = 2^n (Romberg Algo)
-    if(verbose) { ## FIXME -- cannot use more than 16 for "g" printing
-        ## In "mpfr" case, this is "bad" -> rather use format(.)
-        ## with higher number of digits
-        prDigs <- min(16, 2 + ceiling(-log10(rel.tol)))
-        ## FIXME: prDigs <- max(10, 2 + ceiling(-log10(rel.tol)))
-        FORM <- paste("n=%2d, 2^n=%9.0f | I = %-", formatC(5+prDigs),
-                      ".*g, abs.err = %12g\n", sep="")
+    if(verbose) { ## In "mpfr" case, cannot use sprintf("%g");
+	## ==> rather use format(.) with higher number of digits
+	prDigs <- max(10, min(50, 2 + ceiling(-log10(rel.tol))))
+	FORM <- paste0("n=%2d, 2^n=%9.0f | I = %",(5+prDigs), "s, abs.err =%14s\n")
     }
     for(h in seq_len(ord)) {
 	if(verbose >= 2) print(le* t[1:h], digits = 20)
@@ -64,28 +66,43 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 	}
         r <- t[1]*le
         aErr <- abs(r - r.)
+	if(verbose)
+	    cat(sprintf(FORM, h, 2*n, format(r, digits = prDigs),
+			format(aErr, digits = max(7, getOption("digits")))))
 	if(useTol) { ## check if we converged
-	    converged <- (aErr < min(abs(r)*rel.tol, abs.tol))
-            if(verbose)
-                cat(sprintf(FORM, h, 2*n, prDigs, r, aErr))
-	    if(converged)
+	    if(converged <- (aErr < min(abs(r)*rel.tol, abs.tol)))
 		break
 	}
         r. <- r
-	n <- 2*n
+	n <- 2*n # == 2^h
     }
     if(useTol && !converged) {
-        msg <- paste("no convergence up to order ", ord)
+	relE <- format(aErr/abs(r), digits=getOption("digits"))
+	msg <- paste0("no convergence up to order ", ord,
+		      "; last relative change = ", relE, "\n",
+                      "Consider setting 'ord = <n>' (e.g. = ", ord+1,").")
 	warning(msg)
     } else msg <- "OK"
-    r <- list(value = r., abs.error = aErr, subdivisions = 2*n+1,
+    r <- list(value = r, abs.error = aErr, subdivisions = 2*n+1,
               "message" = msg, call = match.call())
-    class(r) <- "integrate"
+    class(r) <- c("integrateR", "integrate")
     r
 }
 
 ## This is  such that  print.integrate() calls our format(<mpfr>) method
 ## (and do *not* hide it via S3method() in NAMESPACE):
-print.integrate <- getS3method("print","integrate")# from 'stats' possibly not exported
-environment(print.integrate) <- environment()
-setMethod(show, "integrate", function(object) print.integrate(object))
+## print.integrate <- getS3method("print","integrate")# from 'stats' possibly not exported
+## environment(print.integrate) <- environment()
+## setMethod(show, "integrate", function(object) print.integrate(object))
+
+print.integrateR <- function (x, digits = max(3, getOption("digits")-2), ...)
+{
+    if(x[["message"]] != "OK")
+        cat("Non-convergence message ", sQuote(x$message), "\n", sep = "")
+    ## The "Ok" message:
+    cat(format(x$value, digits = digits),
+       " with absolute error < ", format(x$abs.error, digits=digits),
+       "\n", sep = "")
+    invisible(x)
+}
+setMethod(show, "integrateR", function(object) print.integrateR(object))

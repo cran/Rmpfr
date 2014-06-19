@@ -4,7 +4,6 @@
 \alias{Li2}
 \alias{erf}
 \alias{erfc}
-\alias{pnorm}
 \title{Special Mathematical Functions (MPFR)}
 \description{
   Special Mathematical Functions, supported by the MPFR Library.
@@ -16,11 +15,9 @@ Li2(x)
 
 erf(x)
 erfc(x)
-pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) }
+}
 \arguments{
-  \item{x, q,mean,sd}{a \code{\link{numeric}} or \code{\linkS4class{mpfr}} vector.}
-  \item{lower.tail, log.p}{logical, see \code{\link[stats:Normal]{pnorm}} (or other
-    \code{p*()} functions).}
+  \item{x}{a \code{\link{numeric}} or \code{\linkS4class{mpfr}} vector.}
 }
 \details{
   \code{zeta(x)} computes Riemann's Zeta function
@@ -36,8 +33,9 @@ pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) }
 
   \code{erf(x)} and \code{erfc(x)} are the error, respectively
   \bold{c}omplementary error function which are both reparametrizations
-  of \code{pnorm}, \code{erf(x) = 2*pnorm(sqrt(2)*x)} and
-  \code{erfc(x) = 2* pnorm(sqrt(2)*x, lower=FALSE)}.
+  of \code{\link{pnorm}}, \code{erf(x) = 2*pnorm(sqrt(2)*x)} and
+  \code{erfc(x) = 2* pnorm(sqrt(2)*x, lower=FALSE)},
+  and hence \pkg{Rmpfr} provides its own version of \code{\link{pnorm}}.
 }
 \value{
   A vector of the same length as \code{x}, of class \code{\linkS4class{mpfr}}.

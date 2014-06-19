@@ -54,8 +54,59 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 	    }
 	}
 	rr
-    } else stop("invalid arguments (q,mean,sd)")
+    } else stop("(q,mean,sd) must be numeric or \"mpfr\"")
 }#{pnorm}
+
+dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
+    if(is.numeric(x) && is.numeric(mean) && is.numeric(sd))
+	stats__dnorm(x, mean, sd, log=log)
+    else if((x.mp <- is(x, "mpfr")) |
+	    (m.mp <- is(mean, "mpfr")) |
+	    (s.mp <- is(sd, "mpfr"))) {
+	## stopifnot(length(log) == 1)
+	prec <- pmax(53, getPrec(x), getPrec(mean), getPrec(sd))
+	if(!x.mp) x <- mpfr(x, prec)
+	x <- (x - mean) / sd
+	twopi <- 2*Const("pi", prec)
+	if(!s.mp) sd <- mpfr(sd, prec)
+	## f(x) =  1/(sigma*sqrt(2pi)) * exp(-1/2 x^2)
+	if(log) ## log( f(x) ) = -[ log(sigma) + log(2pi)/2 + x^2 / 2]
+	    -(log(sd) + (log(twopi) + x*x)/2)
+	else exp(-x^2/2) / (sd*sqrt(twopi))
+    } else stop("invalid arguments (x,mean,sd)")
+}
+
+dpois <- function (x, lambda, log = FALSE) {
+    if(is.numeric(x) && is.numeric(lambda)) ## standard R
+	stats__dpois(x, lambda, log=log)
+    else if((l.mp <- is(lambda, "mpfr")) | (x.mp <- is(x, "mpfr"))) {
+	prec <- pmax(53, getPrec(lambda), getPrec(x))
+	if(!l.mp) lambda <- mpfr(lambda, prec)
+	if(!x.mp) x <- mpfr(x, prec)
+	if(log)	 -lambda  + x*log(lambda) - lfactorial(x)
+	else exp(-lambda) * lambda^x	  /  factorial(x)
+    } else
+	stop("(x,lambda) must be numeric or \"mpfr\"")
+}
+
+dbinom <- function (x, size, prob, log = FALSE) {
+    if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) ## standard R
+	stats__dbinom(x, size, prob, log=log)
+    else if((s.mp <- is(size, "mpfr")) |
+	    (p.mp <- is(prob, "mpfr")) |
+	    (x.mp <- is(x,    "mpfr"))) {
+	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
+	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
+	if(!s.mp) size <- mpfr(size, prec)
+	if(!p.mp) prob <- mpfr(prob, prec)
+	if(!x.mp)    x <- mpfr(x, prec)
+	## n:= size, p:= prob,	compute	 P(x) = choose(n, x) p^x (1-p)^(n-x)
+	C.nx <- chooseMpfr(size, x)
+	if(log) log(C.nx) + x*log(prob) + (size-x)*log1p(-prob)
+	else C.nx * prob^x * (1-prob)^(size-x)
+    } else
+	stop("(x,size, prob) must be numeric or \"mpfr\"")
+}## {dbinom}
 
 
 
@@ -266,22 +317,29 @@ hypot <- function(x,y) {
 
 ## The Beta(a,b)  Cumulative Probabilities are exactly computable for *integer* a,b:
 pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
-		   precBits = NULL) {
-    stopifnot(is.whole(shape1), is.whole(shape2),
-	      length(shape1) == 1, length(shape2) == 1,
+		   precBits = NULL)
+{
+    stopifnot(length(shape1) == 1, length(shape2) == 1,
+	      is.whole(shape1), is.whole(shape2),
+	      shape1 >= 0, shape2 >= 0,
 	      length(lower.tail) == 1, length(log.p) == 1,
 	      0 <= q, q <= 1, ncp == 0,
 	      is.null(precBits) ||
 	      (is.numeric(precBits) && is.whole(precBits) && precBits >= 2))
-    a <- as.integer(shape1)
-    b <- as.integer(shape2)
-    n <- a+b-1L # = a+b-1
-    pr.x <- getPrec(q)
+    ## Care for too large (a,b) and "integer overflow".
+    ## NB:  below have 0:(b - 1) or 0:(a - 1)
+    max.ab <- 2^20
+    if(is.na(a <- as.integer(shape1)) || (!lower.tail && a > max.ab))
+        stop("a = shape1 is too large for 'lower.tail=FALSE' and the current algorithm")
+    if(is.na(b <- as.integer(shape2)) || (lower.tail && b > max.ab))
+        stop("b = shape2 is too large for 'lower.tail=TRUE' and the current algorithm")
+    n <- a + b - 1L
+    pr.x <- getPrec(q, bigq. = 256L)
     if(is.null(precBits)) {
         aq <- abs(as.numeric(q))
         mq <- if(any(po <- aq > 0)) min(aq[po]) else 1 # ==> log = 0
         ## -n*log(|x|): such that 1 - |x|^n does not completely cancel
-	precBits <- max(128L, pr.x, -n*log(mq))
+	precBits <- max(128L, pr.x, -as.numeric(n)*log(mq))
     }
     if(pr.x < precBits || !is(q, "mpfr"))
 	q <- mpfr(q, precBits=precBits)

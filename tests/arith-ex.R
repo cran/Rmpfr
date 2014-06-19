@@ -208,5 +208,3 @@ stopifnot(
 
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
-
-if(!interactive()) warnings()

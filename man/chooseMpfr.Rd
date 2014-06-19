@@ -79,7 +79,7 @@ stopifnot(pochMpfr(a, 10) == px,
           px[1] ==prod(mpfr(100:109, 100)))# used to fail
 
 (c1 <- chooseMpfr(1000:997, 60)) # -> automatic "correct" precision
-stopifnot(all.equal(c1, choose(1000:997, 60), tol=1e-12))
+stopifnot(all.equal(c1, choose(1000:997, 60), tolerance=1e-12))
 
 ## --- Experimenting & Checking
 n.set <- c(1:10, 20, 50:55, 100:105, 200:203, 300:303, 500:503,
@@ -94,7 +94,7 @@ for(i.n in seq_along(n.set)) {
   C1[i.n] <- system.time(c.c <- chooseMpfr.all(n) )[1]
   C2[i.n] <- system.time(c.2 <- chooseMpfr(n, 1:n))[1]
   stopifnot(is.whole(c.c), c.c == c.2,
-            if(n > 60) TRUE else all.equal(c.c, choose(n, 1:n), tol = 1e-15))
+            if(n > 60) TRUE else all.equal(c.c, choose(n, 1:n), tolerance = 1e-15))
   cat(" [Ok]\n")
 }
 matplot(n.set, cbind(C1,C2), type="b", log="xy",

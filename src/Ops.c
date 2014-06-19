@@ -56,16 +56,16 @@ SEXP Math_mpfr(SEXP x, SEXP op)
 
     SEXP val = PROTECT(allocVector(VECSXP, n));
     mpfr_t R_i, cum;
-    Rboolean is_cum = (51 <= i_op && i_op <= 54);
+    Rboolean is_cum = (71 <= i_op && i_op <= 74);
 
     mpfr_init(R_i); /* with default precision */
     if(is_cum) { // cummax, cumsum, ...
 	mpfr_init(cum);
 	switch(i_op) {
-	case 51: /* cummax */  mpfr_set_inf(cum, -1);/* := -Inf */; break;
-	case 52: /* cummin */  mpfr_set_inf(cum, +1);/* := +Inf */; break;
-	case 53: /* cumprod */ mpfr_set_d(cum, 1., MPFR_RNDZ);/* := 1 */; break;
-	case 54: /* cumsum */  mpfr_set_d(cum, 0., MPFR_RNDZ);/* := 0 */; break;
+	case 71: /* cummax */  mpfr_set_inf(cum, -1);/* := -Inf */; break;
+	case 72: /* cummin */  mpfr_set_inf(cum, +1);/* := +Inf */; break;
+	case 73: /* cumprod */ mpfr_set_d(cum, 1., MPFR_RNDZ);/* := 1 */; break;
+	case 74: /* cumsum */  mpfr_set_d(cum, 0., MPFR_RNDZ);/* := 0 */; break;
 	}
     }
     for(i=0; i < n; i++) {
@@ -124,10 +124,89 @@ SEXP Math_mpfr(SEXP x, SEXP op)
 #endif
 	case 43: /* trigamma */ NOT_YET; break;
 
-	case 51: /* cummax */ mpfr_max(cum, cum, R_i, MPFR_RNDN); break;
-	case 52: /* cummin */ mpfr_min(cum, cum, R_i, MPFR_RNDN); break;
-	case 53: /* cumprod*/ mpfr_mul(cum, cum, R_i, MPFR_RNDN); break;
-	case 54: /* cumsum */ mpfr_add(cum, cum, R_i, MPFR_RNDN); break;
+	case 47: /* cospi */ {
+	    mpfr_prec_t i_prec = mpfr_get_prec(R_i);
+	    mpfr_t tmp;
+	    mpfr_init2(tmp, i_prec);
+	    mpfr_abs(R_i, R_i, MPFR_RNDN); // R_i :=  | R_i |
+	    mpfr_set_si(tmp, (long) 2, MPFR_RNDN); // tmp := 2
+	    // R_i := R_i mod 2 :
+	    mpfr_fmod(R_i, R_i, tmp, MPFR_RNDN);
+
+	    if(mpfr_cmp_d(R_i, 0.5) == 0 || mpfr_cmp_d(R_i, 1.5) == 0)
+		mpfr_set_zero(R_i, +1);
+	    else if(mpfr_cmp_si(R_i, (long) 1) == 0)
+		mpfr_set_si(R_i, (long) -1, MPFR_RNDN);
+	    else if(mpfr_cmp_si(R_i, (long) 0) == 0)
+		mpfr_set_si(R_i, (long)  1, MPFR_RNDN);
+	    else { // otherwise return  cos(pi * x):
+		mpfr_const_pi (tmp, MPFR_RNDN);
+		mpfr_mul(R_i, R_i, tmp, MPFR_RNDN);
+		mpfr_cos(R_i, R_i, MPFR_RNDN);
+	    }
+	    break;
+	}
+
+	case 48: /* sinpi */  {
+	    mpfr_prec_t i_prec = mpfr_get_prec(R_i);
+	    mpfr_t tmp;
+	    mpfr_init2(tmp, i_prec);
+	    mpfr_set_si(tmp, (long) 2, MPFR_RNDN); // tmp := 2
+	    // R_i := R_i mod 2 :
+	    mpfr_fmod(R_i, R_i, tmp, MPFR_RNDN);
+	    // map (-2,2) --> (-1,1] :
+	    if(mpfr_cmp_si(R_i, (long) -1) <= 0)
+		mpfr_add(R_i, R_i, tmp, MPFR_RNDN);
+	    else if(mpfr_cmp_si(R_i, (long) 1) > 0)
+		mpfr_sub(R_i, R_i, tmp, MPFR_RNDN);
+
+	    if(mpfr_integer_p(R_i)) // x = 0 or 1 : ==> sin(pi*x) = 0
+		mpfr_set_zero(R_i, +1);
+	    else if(mpfr_cmp_d(R_i, 0.5) == 0)
+		mpfr_set_si(R_i, (long) 1, MPFR_RNDN);
+	    else if(mpfr_cmp_d(R_i, -0.5) == 0)
+		mpfr_set_si(R_i, (long) -1, MPFR_RNDN);
+	    else { // otherwise return  sin(pi * x):
+		mpfr_const_pi (tmp, MPFR_RNDN);
+		mpfr_mul(R_i, R_i, tmp, MPFR_RNDN);
+		mpfr_sin(R_i, R_i, MPFR_RNDN);
+	    }
+	    break;
+	}
+
+	case 49: /* tanpi */  {
+	    mpfr_prec_t i_prec = mpfr_get_prec(R_i);
+	    mpfr_t tmp;
+	    mpfr_init2(tmp, i_prec);
+	    mpfr_set_si(tmp, (long) 1, MPFR_RNDN); // tmp := 1
+	    // R_i := R_i mod 1 :
+	    mpfr_fmod(R_i, R_i, tmp, MPFR_RNDN);
+	    // map (-1,1) --> (-1/2, 1/2] :
+	    if(mpfr_cmp_d(R_i, (double) -0.5) <= 0)
+		mpfr_add(R_i, R_i, tmp, MPFR_RNDN);
+	    else if(mpfr_cmp_d(R_i, (double) 0.5) > 0)
+		mpfr_sub(R_i, R_i, tmp, MPFR_RNDN);
+
+	    if(mpfr_zero_p(R_i)) // x = 0 : ==> tan(pi*x) = 0
+		mpfr_set_zero(R_i, +1);
+	    else if(mpfr_cmp_d(R_i, 0.5) == 0)
+		mpfr_set_si(R_i, (long) 1, MPFR_RNDN);
+	    else if(mpfr_cmp_d(R_i, -0.5) == 0)
+		mpfr_set_si(R_i, (long) -1, MPFR_RNDN);
+	    else {
+		// otherwise return  tan(pi * x):
+		mpfr_const_pi (tmp, MPFR_RNDN);
+		mpfr_mul(R_i, R_i, tmp, MPFR_RNDN);
+		mpfr_tan(R_i, R_i, MPFR_RNDN);
+	    }
+	    break;
+	}
+
+
+	case 71: /* cummax */ mpfr_max(cum, cum, R_i, MPFR_RNDN); break;
+	case 72: /* cummin */ mpfr_min(cum, cum, R_i, MPFR_RNDN); break;
+	case 73: /* cumprod*/ mpfr_mul(cum, cum, R_i, MPFR_RNDN); break;
+	case 74: /* cumsum */ mpfr_add(cum, cum, R_i, MPFR_RNDN); break;
 
 /*---   more functions from the  mpfr - library but not in R "Math" : ---*/
 	case 101: mpfr_erf (R_i, R_i, MPFR_RNDN); break;

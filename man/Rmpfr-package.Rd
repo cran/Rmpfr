@@ -6,9 +6,10 @@
 \description{
   Rmpfr provides S4 classes and methods for arithmetic
   including transcendental ("special") functions for arbitrary
-  precision floating point numbers.  To this end, it interfaces to
-  the LGPL'ed MPFR (Multiple Precision Floating-Point Reliable)
-  Library which itself is based on the GMP (GNU Multiple Precision) Library.
+  precision floating point numbers, here often called \dQuote{mpfr -
+    numbers}.  To this end, it interfaces to the LGPL'ed MPFR (Multiple
+  Precision Floating-Point Reliable) Library which itself is based on
+  the GMP (GNU Multiple Precision) Library.
 }
 \details{
   \tabular{ll}{
@@ -35,38 +36,37 @@ methods for mathematical functions, including
 \code{\link{gamma}}, \code{\link{digamma}}, etc, namely, all of \R's (S4)
 \code{Math} group (with the only exception of \code{\link{trigamma}}),
 see the list in the examples.
-Additionally also \code{\link{pnorm}} and the \dQuote{error function},
-and more, see the list in \code{\link{zeta}}.
+Additionally also \code{\link{pnorm}}, the \dQuote{error function},
+and more, see the list in \code{\link{zeta}}, and
+further note the first vignette (below).
 
-Further note the first vignette.
 %% MM: could try more systematically
 
-
 \bold{\emph{Partial} index}:
-\preformatted{
-mpfr                    Create "mpfr" Numbers (Objects)
-mpfrArray               Construct "mpfrArray" almost as by \code{\link{array}()}
-mpfr-class              Class "mpfr" of Multiple Precision Floating Point Numbers
-mpfrMatrix-class        Classes "mpfrMatrix" and "mpfrArray"
-
-Bernoulli               Bernoulli Numbers in Arbitrary Precision
-Bessel_mpfr             Bessel functions of Integer Order in multiple precisions
-c.mpfr                  MPFR Number Utilities
-cbind                   "mpfr" \code{...} - Methods for Functions cbind(), rbind()
-chooseMpfr              Binomial Coefficients and Pochhammer Symbol aka
-                        Rising Factorial
-factorialMpfr           Factorial 'n!'  in Arbitrary Precision
-formatMpfr              Formatting MPFR (multiprecision) Numbers
-getPrec                 Rmpfr - Utilities for Precision Setting, Printing, etc
-hjkMpfr                 Hooke-Jeeves Derivative-Free Minimization R (working for MPFR)
-roundMpfr               Rounding to Binary bits, "mpfr-internally"
-seqMpfr                 "mpfr" Sequence Generation
-sumBinomMpfr            (Alternating) Binomial Sums via Rmpfr
-zeta                    Special Mathematical Functions (MPFR)
-
-integrateR              One-Dimensional Numerical Integration - in pure R
-optimizeR               High Precisione One-Dimensional Optimization
-unirootR                One Dimensional Root (Zero) Finding - in pure R
+\tabular{ll}{
+  \code{\link{mpfr}}              \tab  Create "mpfr" Numbers (Objects) \cr
+  \code{\link{mpfrArray}}         \tab  Construct "mpfrArray" almost as by \code{\link{array}()} \cr
+  \code{\link{mpfr-class}}        \tab  Class "mpfr" of Multiple Precision Floating Point Numbers \cr
+  \code{\link{mpfrMatrix-class}}  \tab  Classes "mpfrMatrix" and "mpfrArray" \cr
+				  \tab \cr
+  \code{\link{Bernoulli}}         \tab  Bernoulli Numbers in Arbitrary Precision \cr
+  \code{\link{Bessel_mpfr}}       \tab  Bessel functions of Integer Order in multiple precisions \cr
+  \code{\link{c.mpfr}}            \tab  MPFR Number Utilities \cr
+  \code{\link{cbind}}             \tab  "mpfr" \code{...} - Methods for Functions cbind(), rbind() \cr
+  \code{\link{chooseMpfr}}        \tab  Binomial Coefficients and Pochhammer Symbol aka \cr
+				  \tab  Rising Factorial \cr
+  \code{\link{factorialMpfr}}     \tab  Factorial 'n!'  in Arbitrary Precision \cr
+  \code{\link{formatMpfr}}        \tab  Formatting MPFR (multiprecision) Numbers \cr
+  \code{\link{getPrec}}           \tab  Rmpfr - Utilities for Precision Setting, Printing, etc \cr
+  \code{\link{roundMpfr}}         \tab  Rounding to Binary bits, "mpfr-internally" \cr
+  \code{\link{seqMpfr}}           \tab  "mpfr" Sequence Generation \cr
+  \code{\link{sumBinomMpfr}}      \tab  (Alternating) Binomial Sums via Rmpfr \cr
+  \code{\link{zeta}}              \tab  Special Mathematical Functions (MPFR) \cr
+				  \tab \cr
+  \code{\link{integrateR}}        \tab  One-Dimensional Numerical Integration - in pure R \cr
+  \code{\link{unirootR}}          \tab  One Dimensional Root (Zero) Finding - in pure R \cr
+  \code{\link{optimizeR}}         \tab  High Precisione One-Dimensional Optimization \cr
+  \code{\link{hjkMpfr}}           \tab  Hooke-Jeeves Derivative-Free Minimization R (working for MPFR) \cr
 }
 
 Further information is available in the following vignettes:

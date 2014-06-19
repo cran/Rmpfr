@@ -36,6 +36,29 @@ mpfr_default_prec <- function(prec) {
     }
 }
 
+.mpfr.minPrec <- function() .Call(R_mpfr_prec_range, 1L)
+.mpfr.maxPrec <- function() .Call(R_mpfr_prec_range, 2L)
+
+## must be sync'ed with enum def. in R_mpfr_get_erange in ../src/utils.c
+.erange.codes <- c("Emin", "Emax",
+                   "min.emin", "max.emin",
+                   "min.emax", "max.emax")
+.erange.codes <- setNames(seq_along(.erange.codes), .erange.codes)
+## FIXME? better function name ??
+.mpfr.erange <- function(kind) {
+    stopifnot(length(kind) == 1, is.character(kind))
+    if(!any(iseq <- kind == names(.erange.codes)))
+        stop("'kind' must be one of ",
+             paste(paste0('"', names(.erange.codes), '"'), collapse=", "))
+    .Call(R_mpfr_get_erange, .erange.codes[[kind]])
+}
+
+`.mpfr.erange<-` <- function(kind = c("Emin", "Emax"), value) {
+    kind <- match.arg(kind)
+    .Call(R_mpfr_set_erange, .erange.codes[[kind]], value)
+}
+
+
 .mpfrVersion <- function() .Call(R_mpfr_get_version)
 mpfrVersion <- function()
     numeric_version(sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*","\\1", .mpfrVersion()))
@@ -68,8 +91,7 @@ if(.Platform$OS.type != "windows") {## No R_Outputfile (in C) on Windows
 getD <- function(x) { attributes(x) <- NULL; x }
 
 ## Get or Set the C-global  'R_mpfr_debug_' variable:
-.mpfr.debug <- function(i = NA)
-    .Call(R_mpfr_set_debug, as.integer(i))
+.mpfr.debug <- function(i = NA) .Call(R_mpfr_set_debug, as.integer(i))
 
 print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE,
 		       right = TRUE, ...) {
@@ -547,7 +569,7 @@ setMethod("seq", c(from = "ANY", to = "ANY", by = "mpfr"), seqMpfr)
     else mpfr_default_prec()
 }
 ## the user version
-getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
+getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L) {
     if(isTRUE(is.mpfr) || is(x,"mpfr"))
 	vapply(getD(x), slot, 1L, "prec")# possibly of length 0
     else if(is.character(x)) ## number of digits --> number of bits
@@ -559,17 +581,22 @@ getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA) {
 	    if(inherits(x,"bigz"))
 		frexpZ(x)$exp
 	    else if(inherits(x,"bigq")) {
-		warning("default precision for 'bigq' arbitrarily chosen as 128")
-		128L
+		if(missing(bigq.)) {
+		    warning("default precision for 'bigq' arbitrarily chosen as", bigq.)
+		    bigq.
+		}
+		else as.integer(bigq.)
 	    }
 	    else 8L
 	} else 8L
     }
     else {
-	if(!doNumeric) stop("must specify 'precBits' for numeric 'x'")
+	if(!doNumeric)
+            stop("No default precision for numeric 'x' when 'doNumeric' is false")
 	## else
 	if(is.integer(x)) 32L
 	else if(is.double(x)) 53L
+	else if(length(x) == 0) mpfr_default_prec()
 	else stop(sprintf("cannot determine 'precBits' for x of type '%s'",
 			  typeof(x)))
     }

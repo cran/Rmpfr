@@ -11,7 +11,8 @@
 \Plaintitle{Arbitrarily Accurate Computation with R---The Rmpfr Package}
 % \Shorttitle{}
 %
-%\VignetteIndexEntry{Rmpfr}
+% The index entry makes it into  build/vignette.rds :
+%\VignetteIndexEntry{Arbitrarily Accurate Computation with R Package Rmpfr}
 %\VignetteDepends{Rmpfr}
 %\VignetteDepends{gmp}
 \SweaveOpts{engine=R,eps=FALSE,pdf=TRUE,width=7,height=4,strip.white=true,keep.source=TRUE}
@@ -20,7 +21,7 @@
 \Abstract{
  The \R\ package \pkg{Rmpfr} allows to use arbitrarily precise numbers
  instead of \R's double precision numbers in many \R\ computations and functions.
-
+ %%
  This is achieved by defining S4 classes of such numbers and vectors,
  matrices, and arrays thereof, where all arithmetic and mathematical
  functions work via the (GNU) MPFR C library, where MPFR is acronym for
@@ -32,9 +33,11 @@
  numerical code with mpfr--numbers instead of simple numbers, and all
  results will automatically be much more accurate.
 
+ %% see subsection{Applications} further below:
  Applications by the package author include testing of Bessel or
- polylog functions and distribution computations, e.g. for stable distributions.
-
+ polylog functions and distribution computations, e.g. for
+ ($\alpha$-)stable distributions and Archimedean Copulas.
+ %%
  In addition, the \pkg{Rmpfr} has been used on the \code{R-help} or
  \code{R-devel} mailing list for high-accuracy computations, e.g., in
  comparison with results from other software, and also in improving
@@ -106,6 +109,7 @@
 \newcommand*{\R}{\proglang{R}}%{\textsf{R}}
 \newcommand*{\Arg}[1]{\texttt{\itshape $\langle$#1$\rangle$}}
 \newcommand*{\eps}{\varepsilon}
+\newcommand*{\CRANpkg}[1]{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
 %% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -121,7 +125,7 @@ options(SweaveHooks= list(fig=function() par(mar=c(5.1, 4.1, 1.1, 2.1))),
         width = 75,
         digits = 7, # <-- here, keep R's default!
         prompt = "R> ",
-        continue=" ")
+        continue="   ")
 Sys.setenv(LANGUAGE = "en")
 if(.Platform$OS.type != "windows")
   Sys.setlocale("LC_MESSAGES","C")
@@ -205,15 +209,16 @@ function with two arguments.
 The package \pkg{Rmpfr} interfaces \R\ to the C (GNU) library
 \begin{quote}
   MPFR, acronym for
-  ``\emph{\textbf{M}ultiple \textbf{P}recision \textbf{F}loating-Point \textbf{R}eliably}''%
-  \nocite{FouLHLPZ:2007}.
+  ``\emph{\textbf{M}ultiple \textbf{P}recision \textbf{F}loating-Point \textbf{R}eliably}''
 \end{quote}
 
-MPFR is Free Software, available under the LGPL license, %\nocite{FousseHLPZ-MPFR:2011},
-see \url{http://mpfr.org/}, and
+MPFR is Free Software, available under the LGPL license, %\nocite{
+see \url{http://mpfr.org/} and \cite{FouLHLPZ:2007} and the
+standard reference to MPFR, \cite{FousseHLPZ-MPFR:2011}.
+%%
 MPFR itself is built on and requires the
 GNU Multiple Precision arithmetic library (GMP), see
-\url{http://gmplib.org/}\nocite{GMP:2011}. It can be obtained from there,
+\url{http://gmplib.org/} and \cite{GMP:2011}. It can be obtained from there,
 or from your operating system vendor.
 
 On some platforms, it is very simple, to install MPFR and GMP, something
@@ -223,8 +228,6 @@ it is sufficient (for \emph{both} libraries) to simply issue
 \begin{verbatim}
    sudo apt-get install libmpfr-dev
 \end{verbatim}
-The standard reference to MPFR is \cite{FousseHLPZ-MPFR:2011}.
-
 
 \section{Arithmetic with mpfr-numbers}
 <<ex1>>=
@@ -419,19 +422,24 @@ if(mpfrVersion() >= "2.4.0")
 \code{erf(x)} is the ``error\footnote{named exactly because of its relation
   to the normal / Gaussian distribution} function'' and \code{erfc(x)} its
 \textbf{c}omplement, \code{erfc(x) := 1 - erf(x)},
-defined es
+defined as
 \begin{equation*}
   \operatorname{erf}(x) = \frac{2}{\sqrt{\pi}}\int_{0}^x e^{-t^2} dt,
 \end{equation*}
 and consequently, both functions simply are reparametrizations
-of \code{pnorm}, \code{erf(x) = 2*pnorm(sqrt(2)*x)} and
+of the cumulative normal, $\Phi(x) = \int_{-\infty}^x \phi(t)\;dt = $\code{pnorm(x)} where
+$\phi$ is the normal density function
+$\phi(t) := \frac{1}{\sqrt{2\pi}}e^{-t^2}$=\code{dnorm(x)}. Namely,
+\code{erf(x) = 2*pnorm(sqrt(2)*x)} and
 \code{erfc(x) = 1 - erf(x) = 2* pnorm(sqrt(2)*x, lower=FALSE)}.
 <<erf-curves, fig=TRUE>>=
 curve(erf, -3,3, col = "red", ylim = c(-1,2))
 curve(erfc, add = TRUE, col = "blue")
-abline(h=0, v=0, lty=3)
+abline(h=0, v=0, lty=3); abline(v=c(-1,1), lty=3, lwd=.8, col="gray")
 legend(-3,1, c("erf(x)", "erfc(x)"), col = c("red","blue"), lty=1)
 @
+\subsection{Applications}
+The CRAN package \CRANpkg{Bessel}
 
 \section{Integration highly precisely}
 Sometimes, important functions are defined as integrals of
@@ -492,9 +500,16 @@ if(require("polynom")) {
 as.numeric(Itrue - c(Im$value, Id$value))
 @
 
-
 \section{Conclusion}
+The \R\ package \pkg{Rmpfr}, available from CRAN since August 2009,
+provides the possibility to run many computations in R with (arbitrarily)
+high accuracy, though typically with substantial speed penalty.
 
-\bibliography{Rmpfr}
+This is particularly important and useful for checking and exploring the
+numerical stability and appropriateness of mathematical formulae that are
+translated to a computer language like \R, often without very careful
+consideration of the limits of computer arithmetic.
+
+\bibliography{Rmpfr,log1mexp}
 
 \end{document}

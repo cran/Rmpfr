@@ -318,7 +318,7 @@ cbind(a.s, ra.s) # comparison of the three approaches
 <<bigpic-do, echo=FALSE>>=
 <<comp-big>>
 capture.and.write(cbind(a.s, ra.s), 8, last = 6)
-@!
+@
 This is revealing: Neither method, log1p or expm1, is uniformly good enough.
 Note that for large $a$, the relative errors evaluate to \code{1}. This
 is because all three double precision methods give 0, \emph{and} that is
@@ -340,6 +340,7 @@ as.numeric(t3.l1e(mpfr(1e-20, 256)))
 % ## -46.0517     -Inf     -Inf
 % as.numeric():
 % ## [1] -46.0517 -46.0517 -46.0517
+both the default and the \code{log1p} method return \code{-Inf},
 so, indeed,  the \code{expm1} method is absolutely needed here.
 
 Figure~\ref{fig:bigpic} visualizes the relative errors of the three methods.
@@ -390,8 +391,8 @@ rect(min(a.), yl[1], max(a.), yl[2],
   \label{fig:bigpic}
 \end{figure}
 In Figure~\ref{fig:zoomin-pic} below, we zoom into the region where all
-methods have about the same (good) accuracy. The region is the
-rectangle defined by the ranges of \code{a.} and \code{ra2}:
+methods have about the same (good) accuracy.
+The region is the rectangle defined by the ranges of \code{a.} and \code{ra2}:
 <<zoomin-show, eval=FALSE>>=
 <<zoomin-comp>>
 @
@@ -496,7 +497,7 @@ $\log(1 - F_L(x)) = \log\frac{1}{1+e^x} = -\log(1 + e^x) = -g(x)$, where
 which has a ``$+"$'' instead of a ``$-$'', compared to $\mathrm{log1mexp}$, and
 is easier to analyze and compute,
 its only problem being large $x$'s where $e^x$ % = \exp x$
-overflows numerically\footnote{Indeed, $\log(1 - F_L(x)) = -g(x)$, for $x=800$,
+overflows numerically.\footnote{Indeed, $\log(1 - F_L(x)) = -g(x)$, for $x=800$,
   \code{plogis(800, lower=FALSE, log.p=TRUE)},
   underflowed to \code{-Inf} in \R, before version 2.15.1 (June 2012) from
   when on (\ref{eq:log1pexp}) has been used.}
@@ -509,12 +510,21 @@ from (\ref{eq:Taylor-log1p}) that
   x + e^{-x} + \O((e^{-x})^2),
 \end{align}
 for $x\to\infty$.
+Note further, that for $x\to-\infty$, we can simplify $g(x)=\log(1 + e^x)$ to $e^x$.
 
 A simple picture quickly reveals how different approximations behave,
 where have used \code{uniroot()} to determine the zero crossing, but will
 use slightly simpler cutoffs $x_1$, $x_2$, in (\ref{eq:log1pexp}) below:
 %% Notation x_1, x_2  are first and 2nd cutoff in equation (10)
 <<uniroot-x1>>=
+## Find x0, such that  exp(x) =.= g(x) for x < x0 :
+f0 <- function(x) { x <- exp(x) - log1p(exp(x))
+                   x[x==0] <- -1 ; x }
+u0 <- uniroot(f0, c(-100, 0), tol=1e-13)
+str(u0, digits=10)
+x0 <- u0[["root"]] ## -36.39022698 --- note that ~= \log(\eps_C)
+all.equal(x0, -52.5 * log(2), tol=1e-13)
+
 ## Find x1, such that  x + exp(-x) =.= g(x) for x > x1 :
 f1 <- function(x) { x <- (x + exp(-x)) - log1p(exp(x))
                    x[x==0] <- -1 ; x }
@@ -543,15 +553,17 @@ is to use
   \label{eq:log1pexp}
   \hat{g}(x) = \mathrm{log1pexp}(x) :=
   \begin{cases}
-    \loglp(\exp(x))     & x \le  x_1 := 18, \\
-    x + \exp(-x))       & x_1 < x \le x_2 := 33.3, \\
+    \exp(x)             & x \le -37 \\
+    \loglp(\exp(x))     & -37 < x \le x_1 := 18, \\
+    x + \exp(-x)        & x_1 < x \le x_2 := 33.3, \\
     x                   & x > x_2,
   \end{cases}
 \end{align}
-where $x_2$ could be replaced by a larger number such as $34$ (and even
-$100$, but not $800$\footnote{The \R{} plot
-  \code{curve(log1p(exp(x)) - x, 33.1, 33.5, n=2\^{}10)}
-  reveals a somewhat fuzzy cutoff $x_1$}).
+where only the cutoff $x_1 = 18$ is important and the other cutoffs just
+save computations.\footnote{see the
+  \R{} plot \code{curve(log1p(exp(x)) - x, 33.1, 33.5, n=2\^{}10)}
+  above, revealing
+  a somewhat fuzzy cutoff $x_1$.}
 %%--- Ok, still do a little analysis --- invisibly mostly (echo=FALSE) here:
 <<def-test-pfuns, echo=FALSE>>=
 t4p.l1e <- function(x)

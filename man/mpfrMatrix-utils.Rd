@@ -54,7 +54,7 @@ S3 <- rbind(m6, c(1:2,10))
 det(S2)
 str(determinant(S2))
 det(S3)
-stopifnot(all.equal(det(S2), det(asNumeric(S2)), tol=1e-15),
-	  all.equal(det(S3), det(asNumeric(S3)), tol=1e-15))
+stopifnot(all.equal(det(S2), det(asNumeric(S2)), tolerance=1e-15),
+	  all.equal(det(S3), det(asNumeric(S3)), tolerance=1e-15))
 }
 \keyword{array}

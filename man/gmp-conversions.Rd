@@ -44,7 +44,7 @@
  S <- gmp::Stirling2(50,10)
  show(S)
  SS <- S * as.bigz(1:3)^128
- stopifnot(all.equal(log2(SS[2]) - log2(S), 128, tol=1e-15),
+ stopifnot(all.equal(log2(SS[2]) - log2(S), 128, tolerance=1e-15),
            identical(SS, .mpfr2bigz(.bigz2mpfr(SS))))
 
  .bigz2mpfr(S)            # 148 bit precision

@@ -17,11 +17,15 @@
 
 SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 {
-/* FIXME: use  enum type for the op codes */
-
+    enum { MAX = 1, MIN, RANGE, PROD, SUM, ANY = 10, ALL } i_op = asInteger(op);
+/* MUST be sync'ed with  ../R/Summary.R
+ *                       ~~~~~~~~~~~~~~ where  .Summary.codes <-
+ * c("max" = 1,  "min" = 2, "range" = 3, "prod" = 4, "sum" = 5,
+ *   "any" = 10, "all" = 11)
+*/
     mpfr_prec_t current_prec = mpfr_get_default_prec();
-    int n = length(x), i_op = asInteger(op),
-	return_list = (i_op <= 5),
+    int n = length(x),
+	return_list = (i_op < ANY),
 	remove_na = asLogical(na_rm), n_valid = 0, i;
 
     SEXP val = R_NilValue;
@@ -37,18 +41,18 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 
     switch(i_op) {
 
-    case 1: /* max */ mpfr_set_inf(Summ, -1);/* := -Inf */; Rmpfr_set(1);
-    case 2: /* min */ mpfr_set_inf(Summ, +1);/* := +Inf */; Rmpfr_set(1);
-    case 3: /* range */
+    case MAX: mpfr_set_inf(Summ, -1);/* := -Inf */; Rmpfr_set(1);
+    case MIN: mpfr_set_inf(Summ, +1);/* := +Inf */; Rmpfr_set(1);
+    case RANGE:
 	mpfr_init(Sum2);
 	mpfr_set_inf(Summ, +1);/* := +Inf for min() */
 	mpfr_set_inf(Sum2, -1);/* := -Inf for max() */
 	Rmpfr_set(2);
-    case 4: /* prod */mpfr_set_d (Summ, 1., MPFR_RNDZ); Rmpfr_set(1);
-    case 5: /* sum */ mpfr_set_d (Summ, 0., MPFR_RNDZ); Rmpfr_set(1);
+    case PROD: mpfr_set_d (Summ, 1., MPFR_RNDZ); Rmpfr_set(1);
+    case SUM: mpfr_set_d (Summ, 0., MPFR_RNDZ); Rmpfr_set(1);
 
-    case 6: /* any */ val = ScalarLogical(FALSE); break;
-    case 7: /* all */ val = ScalarLogical(TRUE);  break;
+    case ANY: val = ScalarLogical(FALSE); break;
+    case ALL: val = ScalarLogical(TRUE);  break;
 
     default:
 	error("invalid op code (%d) in Summary_mpfr", i_op);
@@ -69,26 +73,26 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 		/* should not be needed: R_i *is* NaN already :
 		   mpfr_set_nan(R_i); */
 		switch(i_op) {
-		case 1: /* max */
-		case 2: /* min */
-		case 4: /* prod */
-		case 5: /* sum */
+		case MAX:
+		case MIN:
+		case PROD:
+		case SUM:
 		    SET_VECTOR_ELT(val, 0, xi);
 		    break;
-		case 3: /* range */
+		case RANGE:
 		    SET_VECTOR_ELT(val, 0, xi);
 		    SET_VECTOR_ELT(val, 1, xi);
 		    break;
 		    /*---------------------------------------------*/
-		case 6: /* any */
+		case ANY:
 		    if(*ans == FALSE) *ans = NA_LOGICAL;
 		    break;
-		case 7: /* all */
+		case ALL:
 		    if(*ans == TRUE) *ans = NA_LOGICAL;
 		    break;
 		}
 	    }
-	    if(i_op <= 5) { /* return()  *unless* for  any()/all() : */
+	    if(return_list) { /* return()  *unless* for  any()/all() : */
 		mpfr_free_cache();
 		UNPROTECT(1);
 		return val;
@@ -101,7 +105,7 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 	    if(current_prec < i_prec) /* increase precision */ {
 		current_prec = i_prec;
 		mpfr_prec_round(Summ, i_prec, MPFR_RNDN);
-		if(i_op == 3)
+		if(i_op == RANGE)
 		    mpfr_prec_round(Sum2, i_prec, MPFR_RNDN);
 	    }
 	}
@@ -111,39 +115,39 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 	       precision, even though in some cases the result may
 	       need higher precision */
 
-	case 1: /* max */ mpfr_max(Summ, Summ, R_i, MPFR_RNDN); break;
-	case 2: /* min */ mpfr_min(Summ, Summ, R_i, MPFR_RNDN); break;
-	case 3: /* range */
+	case MAX: mpfr_max(Summ, Summ, R_i, MPFR_RNDN); break;
+	case MIN: mpfr_min(Summ, Summ, R_i, MPFR_RNDN); break;
+	case RANGE:
 	    mpfr_min(Summ, Summ, R_i, MPFR_RNDN);
 	    mpfr_max(Sum2, Sum2, R_i, MPFR_RNDN);
 	    break;
 
-	case 4: /* prod */ mpfr_mul(Summ, Summ, R_i, MPFR_RNDN); break;
-	case 5: /* sum */  mpfr_add(Summ, Summ, R_i, MPFR_RNDN); break;
+	case PROD: mpfr_mul(Summ, Summ, R_i, MPFR_RNDN); break;
+	case SUM:  mpfr_add(Summ, Summ, R_i, MPFR_RNDN); break;
 
-	case 6: /* any */ if(!mpfr_zero_p(R_i)) *ans = TRUE; break;
-	case 7: /* all */ if( mpfr_zero_p(R_i)) *ans = FALSE; break;
+	case ANY: if(!mpfr_zero_p(R_i)) *ans = TRUE; break;
+	case ALL: if( mpfr_zero_p(R_i)) *ans = FALSE; break;
 
 	}
     } /* for(i .. n) */
 
     mpfr_clear (R_i);
     switch(i_op) {
-    case 1: /* max */
-    case 2: /* min */
-    case 4: /* prod */
-    case 5: /* sum */
+    case MAX:
+    case MIN:
+    case PROD:
+    case SUM:
 	SET_VECTOR_ELT(val, 0, MPFR_as_R(Summ));
 	mpfr_clear (Summ);
 	break;
-    case 3: /* range */
+    case RANGE:
 	SET_VECTOR_ELT(val, 0, MPFR_as_R(Summ));
 	SET_VECTOR_ELT(val, 1, MPFR_as_R(Sum2));
 	mpfr_clear (Summ);
 	mpfr_clear (Sum2);
 	break;
-    case 6: /* any */
-    case 7: /* all */
+    case ANY:
+    case ALL:
 	/* nothing to be done */
 	break;
     }

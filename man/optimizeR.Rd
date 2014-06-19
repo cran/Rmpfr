@@ -102,7 +102,7 @@ sol <- optimizeR(sin, 2, 6, tol = 1e-50,
                  precFactor = 3.0, trace = TRUE)
 pi.. <- 2*sol$min/3
 print(pi.., digits=51)
-stopifnot(all.equal(pi.., Const("pi", 256), tol = 10*1e-50))
+stopifnot(all.equal(pi.., Const("pi", 256), tolerance = 10*1e-50))
 
 if(doExtras) { # considerably more expensive
 
