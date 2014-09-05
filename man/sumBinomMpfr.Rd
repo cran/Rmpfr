@@ -7,10 +7,11 @@
   Compute (alternating) binomial sums via high-precision arithmetic.
   If \eqn{sBn(f, n) :=}\code{sumBinomMpfr(n, f)}, (default
   \code{alternating} is true, and \code{n0 = 0}),
-  \deqn{sBn(f,n) = \sum_{k = n0}^n (-1)^(n-k) {n \choose k}\cdot f(k);}{%
-    sBn(f,n) = sum(k = n0:n ; (-1)^(n-k) choose(n,k) * f(k));}
-  if \code{alternating} is false, the \eqn{(-1)^(n-k)} factor is dropped (or
-  replaced by \eqn{1}) above.
+  \deqn{sBn(f,n) = \sum_{k = n0}^n (-1)^(n-k) {n \choose k}\cdot f(k) = \Delta^n f,}{%
+    sBn(f,n) = sum(k = n0:n ; (-1)^(n-k) choose(n,k) * f(k)) = \Delta^n f,}
+  see Details for the \eqn{n}-th forward difference operator
+  \eqn{\Delta^n f}.  If \code{alternating} is false, the
+  \eqn{(-1)^(n-k)} factor is dropped (or replaced by \eqn{1}) above.
 
   Such sums appear in different contexts and are typically challenging,
   i.e., currently impossible, to evaluate reliably as soon as \eqn{n} is

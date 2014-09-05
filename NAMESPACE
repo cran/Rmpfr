@@ -30,9 +30,9 @@ importFrom("stats"  # import *and* rename -- we extend these :
 
 importClassesFrom("gmp", "bigz", "bigq")
 importFrom("gmp"
-           , asNumeric, as.bigz, .as.char.bigz, ..as.bigz
+           , asNumeric, as.bigz, as.bigq, .as.char.bigz, ..as.bigz
            , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
-	   ## more to come
+           , numerator, denominator, frexpZ, chooseZ
            , is.whole, formatN # because we add own S3 methods
 	   )
 if(packageVersion("gmp") >= "0.5.8")
@@ -68,7 +68,7 @@ export(.mpfr, .mpfr.
        ## , ".dimCheck"
        , .getPrec
        , .getSign
-       , .mpfr.erange, ".mpfr.erange<-", .mpfr.maxPrec, .mpfr.minPrec
+       , .mpfr.erange, .mpfr.erange.set, .mpfr.maxPrec, .mpfr.minPrec
        ## , ".mA.subAssign"
        ## , ".matmult.R"
        ## , ".mpfr.debug"
@@ -79,7 +79,8 @@ export(.mpfr, .mpfr.
        ## , ".mpfr.subset"
        , ".mpfr2str"
        ## , ".mpfrA.subset"
-       ## , ".mpfrVersion"
+       , .mpfrVersion, .mpfr.gmp.numbbits
+       , .mpfr2list, mpfrImport, mpfrXport # <- experimental: for a possible save format
        ## , ".packageName"
        ## , ".print.mpfr"
        ## , ".requireCachedGenerics"
@@ -176,6 +177,9 @@ S3method(c, mpfr)
 
 S3method(as.array, mpfr)
 S3method(as.matrix, mpfr)
+## Would break the working of vapply(<mpfr>, FUN)  e.g. in pbetaI():
+## S3method(as.list, mpfr1)
+## S3method(as.list, mpfr)
 
 S3method(determinant, mpfrMatrix)
 S3method(scale, mpfrMatrix)

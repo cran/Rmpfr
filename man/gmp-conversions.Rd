@@ -13,8 +13,8 @@
   \code{\link{mpfr}} numbers.
 }
 \usage{
-.bigz2mpfr(x, precB = NULL)
-.bigq2mpfr(x, precB = NULL)
+.bigz2mpfr(x, precB = NULL, rnd.mode = c('N','D','U','Z','A'))
+.bigq2mpfr(x, precB = NULL, rnd.mode = c('N','D','U','Z','A'))
 .mpfr2bigz(x, mod = NA)
 
 % as(x, "mpfr")
@@ -25,6 +25,9 @@
   \item{precB}{precision in bits for the result.  The default,
     \code{NULL}, means to use the \emph{minimal} precision necessary for
     correct representation.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see details of
+    \code{\link{mpfr}}.}
   \item{mod}{a possible modulus, see \code{\link[gmp]{as.bigz}} in
     package \pkg{gmp}.}
 }

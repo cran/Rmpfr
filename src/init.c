@@ -26,8 +26,8 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(print_mpfr1, 2),
 #endif
 #endif
-    CALLDEF(mpfr2d, 1),
-    CALLDEF(mpfr2i, 1),
+    CALLDEF(mpfr2d, 2),
+    CALLDEF(mpfr2i, 2),
     CALLDEF(mpfr2str, 2),
     CALLDEF(str2mpfr1_list, 4),
 
@@ -55,6 +55,7 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(R_mpfr_set_erange, 2),
     CALLDEF(R_mpfr_prec_range, 1),
     CALLDEF(R_mpfr_get_version, 0),
+    CALLDEF(R_mpfr_get_GMP_numb_bits, 0),
 
     CALLDEF(const_asMpfr, 2),
 
@@ -125,6 +126,7 @@ R_init_Rmpfr(DllInfo *dll)
     RREGDEF(R_mpfr_set_default_prec);
     RREGDEF(R_mpfr_get_default_prec);
     RREGDEF(R_mpfr_get_version);
+    RREGDEF(R_mpfr_get_GMP_numb_bits);
 
     RREGDEF(const_asMpfr);
 
@@ -153,8 +155,10 @@ R_init_Rmpfr(DllInfo *dll)
     Rmpfr_d_Sym = install("d");
     Rmpfr_Data_Sym = install(".Data");
 
+/* not suppressable, hence moved to suppressable R startup code:
     Rprintf("Loading C code of R package 'Rmpfr': GMP using %d bits per limb\n",
 	    GMP_NUMB_BITS);
+*/
 /*     if(GMP_NUMB_BITS != 32) */
 /* 	error("The Rmpfr package currently needs 32-bit limbs"); */
 }

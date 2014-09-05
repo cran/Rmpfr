@@ -7,7 +7,7 @@
   used in arithmetic and mathematical computations with \R.
 }
 \usage{
-mpfr(x, precBits, base = 10, rnd.mode = c("N","D","U","Z"))
+mpfr(x, precBits, base = 10, rnd.mode = c("N","D","U","Z","A"))
 Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
 }
 \arguments{
@@ -44,6 +44,7 @@ Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
       roundTowardPositive in IEEE 754-2008).}
     \item{GMP_RND\bold{D}:}{round toward minus infinity (\dQuote{Down},
       roundTowardNegative in IEEE 754-2008).}
+    \item{GMP_RND\bold{A}:}{round \bold{a}way from zero (new since MPFR 3.0.0).}
   }
   The \sQuote{round to nearest} (\code{"N"}) mode, the default here,
   works as in the IEEE 754 standard: in case the number to be rounded
@@ -53,7 +54,6 @@ Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
   to (10.0)=2 with a precision of two bits, and not to (11.0)=3.  This
   rule avoids the "drift" phenomenon mentioned by Knuth in volume 2 of
   The Art of Computer Programming (Section 4.2.2).
-
 }
 \references{
   The MPFR team. (2009).
@@ -109,10 +109,10 @@ stopifnot(all.equal(mpfr(as.bigq(355,113), 99),
                     mpfr(355, 99) / 113,	tol = 2^-98))
 
 ## look at different "rounding modes":
-sapply(c("N", "D","U","Z"), function(RND)
+sapply(c("N", "D","U","Z","A"), function(RND)
        mpfr(c(-1,1)/5, 20, rnd.mode = RND), simplify=FALSE)
 
-symnum(sapply(c("N", "D","U","Z"),
+symnum(sapply(c("N", "D","U","Z","A"),
               function(RND) mpfr(0.2, prec = 5:15, rnd.mode = RND) < 0.2 ))
 }
 \keyword{classes}

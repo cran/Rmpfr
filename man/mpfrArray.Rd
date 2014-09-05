@@ -8,7 +8,7 @@
 }
 \usage{
 mpfrArray(x, precBits, dim = length(x), dimnames = NULL,
-          rnd.mode = c("N","D","U","Z"))
+          rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{x}{numeric(like) vector, typically of length \code{prod(dim)} or

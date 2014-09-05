@@ -16,22 +16,24 @@ if(packageVersion("gmp") < "0.5.8")## <-> ../NAMESPACE
 ## TODO(?:  gmp should "export" its C++ API ( -> inst/include/*.hh )
 ## and we should add  'LinkingTo: gmp' to DESCRIPTION and
 ##  then use C++ with "C" { ...} for those parts
-.bigz2mpfr <- function(x, precB = NULL) {
+.bigz2mpfr <- function(x, precB = NULL, rnd.mode = c('N','D','U','Z','A')) {
     stopifnot(inherits(x, "bigz"))
-    ..bigz2mpfr(x, precB)
+    ..bigz2mpfr(x, precB, rnd.mode)
 }
 ## Fast, no-checking (and not exported) version:
-..bigz2mpfr <- function(x, precB = NULL)
+..bigz2mpfr <- function(x, precB = NULL, rnd.mode = c('N','D','U','Z','A'))
     ## precB: 4 == log2(16) = log(base)
 {
+    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
+    rnd.mode <- match.arg(rnd.mode)
     b <- 16L
     cx <- .as.char.bigz(x, b)
     if(is.null(precB)) precB <- 4L*nchar(cx)
     if(is.matrixZQ(x))
-	new("mpfrMatrix", .Call(str2mpfr1_list, cx, precB, b, "N"),
+	new("mpfrMatrix", .Call(str2mpfr1_list, cx, precB, b, rnd.mode),
 	    Dim = dim(x))# "bigz" has no dimnames
     else
-	new("mpfr", .Call(str2mpfr1_list, cx, precB, b, "N"))
+	new("mpfr", .Call(str2mpfr1_list, cx, precB, b, rnd.mode))
 }
 setAs("bigz", "mpfr", function(from) ..bigz2mpfr(from))
 
@@ -55,7 +57,9 @@ setAs("mpfr", "bigz", function(from) .mpfr2bigz(from))
 
 
 ## Fast, no-checking (and not exported) version:
-..bigq2mpfr <- function(x, precB = NULL) {
+..bigq2mpfr <- function(x, precB = NULL, rnd.mode = c('N','D','U','Z','A')) {
+    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
+    rnd.mode <- match.arg(rnd.mode)
     N <- numerator(x)
     D <- denominator(x)
     if(is.null(precB)) {
@@ -63,12 +67,12 @@ setAs("mpfr", "bigz", function(from) .mpfr2bigz(from))
         eD <- frexpZ(D)$exp
         precB <- pmax(128L, eN + eD + 1L) # precision of result
     }
-    ..bigz2mpfr(N, precB) / ..bigz2mpfr(D, precB)
+    ..bigz2mpfr(N, precB, rnd.mode) / ..bigz2mpfr(D, precB, rnd.mode)
 }
 
-.bigq2mpfr <- function(x, precB = NULL) {
+.bigq2mpfr <- function(x, precB = NULL, rnd.mode = c('N','D','U','Z','A')) {
     stopifnot(inherits(x, "bigq"))
-    ..bigq2mpfr(x, precB)
+    ..bigq2mpfr(x, precB, rnd.mode)
 }
 setAs("bigq", "mpfr", function(from) ..bigq2mpfr(from))
 

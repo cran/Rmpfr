@@ -318,8 +318,12 @@ SEXP R_mpfr_get_version(void) {
     return mkString(mpfr_get_version());
 }
 
+SEXP R_mpfr_get_GMP_numb_bits(void) {// for diagnosing
+    return ScalarInteger((int)GMP_NUMB_BITS);
+}
+
 /* Set or get the C-global debugging level --
- * only used in R_mpfr_dbg_printf() --> ./Rmpfr_utils.h
+ * currently only used in R_mpfr_dbg_printf() --> ./Rmpfr_utils.h
 */
 SEXP R_mpfr_set_debug(SEXP I)
 {
@@ -363,7 +367,8 @@ SEXP R_mpfr_get_erange(SEXP kind_) {
 	error("invalid kind (code = %d) in R_mpfr_get_erange()", kind);
     }
     R_mpfr_dbg_printf(1,"R_mpfr_get_erange(%d): %ld\n", kind, (long)r);
-    return (kind <= E_max) ? ScalarInteger((int) r) : ScalarReal((double) r);
+    return (kind <= E_max && INT_MIN <= r && r <= INT_MAX) ? ScalarInteger((int) r)
+	: ScalarReal((double) r);
 }
 
 SEXP R_mpfr_set_erange(SEXP kind_, SEXP val) {

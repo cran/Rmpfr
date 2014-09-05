@@ -13,7 +13,7 @@
 \usage{
 integrateR(f, lower, upper, \dots, ord = NULL,
            rel.tol = .Machine$double.eps^0.25, abs.tol = rel.tol,
-           verbose = FALSE)
+           max.ord = 19, verbose = FALSE)
 }
 \arguments{
   \item{f}{an \R function taking a numeric or \code{"mpfr"} first
@@ -21,20 +21,28 @@ integrateR(f, lower, upper, \dots, ord = NULL,
     same length.  Returning a non-finite element will generate an error.
   }
   \item{lower, upper}{the limits of integration.  Currently \emph{must}
-    be finite.  Do use \code{"mpfr"}-numbers to get higher precision,
-    see the examples.}
+    be finite.  Do use \code{"mpfr"}-numbers to get higher than double
+    precision, see the examples.}
   \item{\dots}{additional arguments to be passed to \code{f}.}
   \item{ord}{integer, the order of Romberg integration to be used.  If
-    this is \code{NULL}, as per default, the order is increased until
-    convergence, see \code{rel.tol} and \code{abs.tol}.}
+    this is \code{NULL}, as per default, and either \code{rel.tol} or
+    \code{abs.tol} are specified, the order is increased until
+    convergence.}
   \item{rel.tol}{relative accuracy requested.  The default is 1.2e-4,
     about 4 digits only, see the Note.}
   \item{abs.tol}{absolute accuracy requested.}
+  \item{max.ord}{only used, when neither \code{ord} or one of
+    \code{rel.tol}, \code{abs.tol} are specified:  Stop Romberg
+    iterations after the order reaches \code{max.ord}; may prevent
+    infinite loops or memory explosion.}
   \item{verbose}{logical or integer, indicating if and how much
     information should be printed during computation.}
 }
 \details{
   Note that arguments after \code{\dots} must be matched exactly.
+
+  For convergence, \emph{both} relative and absolute changes must be
+  smaller than \code{rel.tol} and \code{abs.tol}, respectively.
 
   \code{rel.tol} cannot be less than \code{max(50*.Machine$double.eps,
     0.5e-28)} if \code{abs.tol <= 0}.
@@ -112,6 +120,13 @@ integrateR(exp,      0     , 1, rel.tol=1e-15, verbose=TRUE)
 (I.true <- exp(mpfr(1, 200)) - 1)
 ## true absolute error:
 stopifnot(print(as.numeric(I.true - I$value)) < 4e-25)
+
+## Want absolute tolerance check only (=> set 'rel.tol' very high, e.g. 1):
+(Ia <- integrateR(exp, mpfr(0,200), 1, abs.tol = 1e-6, rel.tol=1, verbose=TRUE))
+
+## Set 'ord' (but no  '*.tol') --> Using 'ord'; no convergence checking
+(I <- integrateR(exp, mpfr(0,200), 1,  ord = 13, verbose=TRUE))
+
 }
 \keyword{math}
 \keyword{utilities}

@@ -1,9 +1,12 @@
 ####  Romberg integration in pure R
 ####  ===================    ====== so it can be used with  Rmpfr
 
+## TODO: Lauren K  would like to get return()ed all the intermediate sums as well
+## ----  I agree: but only if  'all.sums = TRUE'
+
 integrateR <- function(f, lower, upper, ..., ord = NULL,
 		       rel.tol = .Machine$double.eps^0.25, abs.tol = rel.tol,
-		       verbose = FALSE)
+		       max.ord = 19, verbose = FALSE)
 {
     stopifnot(length(lower) == 1, length(upper) == 1,
               is.finite(lower), is.finite(upper))
@@ -11,22 +14,27 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
     ff <-
 	## if(verbose) function(x) { cat("f(x), x="); str(x) ; f(x, ...) } else
 	function(x) f(x, ...)
-    ## ord := Romberg order
-    if(useTol <- is.null(ord)) { ## will use rel.tol and abs.tol
-
+    null.ord <- is.null(ord) ## ord := Romberg order
+    has.tol <- !missing(rel.tol) || !missing(abs.tol)# one of them specified
+    if(chkConv <- (null.ord || has.tol)) {
+	## will use rel.tol and abs.tol
 	if (abs.tol <= 0 && rel.tol < max(50 * .Machine$double.eps, 5e-29))
 	    stop("invalid tolerance values")
 	## but need (maximal) order for Bauer's algorithm:
+    }
+    if(null.ord && !has.tol) {
 	## This is "approximate" (and too large, typically); but if it's
 	## too small, t[.] will be extended automatically:
-	ord <- max(1, min(25, ceiling(-log2(rel.tol))))
-        if(verbose) cat("ord =", ord,"will be the *maximal* order\n")
+	ord <- ## == max(3, min(25, ceiling(-log2(rel.tol))))  with default rel.tol
+	    13
+	if(verbose) cat("ord =", ord, "(as no '*.tol' specified)\n")
     }
-    else {
+    useOrd <- !null.ord || !has.tol
+    if(useOrd) {
 	stopifnot(ord >= 0)
 	if(verbose) cat(sprintf(
-	    " ord = %d; ==> evaluating integrand at 2^(ord+1)-2 = %d locations\n",
-	    ord, 2^(ord+1)-2))
+	    " ord = %d; ==> evaluating integrand at %s 2^(ord+1)-2 = %d locations\n",
+	    ord, if(chkConv) "up to" else "", 2^(ord+1)-2))
     }
 
 ### Bauer(1961)  "Algorithm 60 -- Romberg Integration" Comm.ACM 4(6), p.255
@@ -42,7 +50,7 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 	}
     }
     t1 <- (ff(lower) + ff(upper))/2
-    t <- rep(t1, ord+1)## <- must work for "mpfr" numbers
+    t <- rep(t1, if(useOrd) ord+1 else 10)## <- must work for "mpfr" numbers
     one <- 1 + 0*t1 # for "mpfr"
 
     r. <- t[1]*le
@@ -52,13 +60,17 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 	prDigs <- max(10, min(50, 2 + ceiling(-log10(rel.tol))))
 	FORM <- paste0("n=%2d, 2^n=%9.0f | I = %",(5+prDigs), "s, abs.err =%14s\n")
     }
-    for(h in seq_len(ord)) {
-	if(verbose >= 2) print(le* t[1:h], digits = 20)
+    h <- 1L
+    repeat {
+	if(verbose >= 2) {
+	    cat("range(le*t[1:h]):\n\t");
+	    print(format(range(le*t[1:h]), digits=15), quote=FALSE)
+	}
 	u <- 0
 	m <- m/2 # == le/(2*n)
 	## here, we require f(.) to be vectorized:
 	u <- sum(ff(lower+ seq(1, 2*n-1, by=2)*m))
-	t[h+1] <- (u/n + t[h])/2
+	t[h+1L] <- (u/n + t[h])/2
 	f. <- one
 	for(j in h:1) {
 	    f. <- 4*f.
@@ -69,14 +81,16 @@ integrateR <- function(f, lower, upper, ..., ord = NULL,
 	if(verbose)
 	    cat(sprintf(FORM, h, 2*n, format(r, digits = prDigs),
 			format(aErr, digits = max(7, getOption("digits")))))
-	if(useTol) { ## check if we converged
+	if(chkConv) { ## check if we converged: |r - r.| < min(.,.): *both* tolerances must be satisfied
 	    if(converged <- (aErr < min(abs(r)*rel.tol, abs.tol)))
 		break
 	}
+        if((useOrd && h >= ord) || h >= max.ord) break
         r. <- r
 	n <- 2*n # == 2^h
+        h <- h+1L
     }
-    if(useTol && !converged) {
+    if(chkConv && !converged) {
 	relE <- format(aErr/abs(r), digits=getOption("digits"))
 	msg <- paste0("no convergence up to order ", ord,
 		      "; last relative change = ", relE, "\n",

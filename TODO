@@ -1,8 +1,8 @@
 		-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
 * Very Short Term
+** TODO 31) Valgrind problems + leaks: Brian's e-mail 2014-06-19; ~/R/Pkgs/Rmpfr.Rcheck_valgrind/
 ** TODO 19) outer() now works  always ? {as rep() now S3 dispatches
     ---> need systematic checks *AND* docu changes!
-
 ** TODO 17b) see 'Ops' in R/Arith.R  ,  Rmpfr:::.Math.codes,  and
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
@@ -10,6 +10,12 @@
 
 * Short or Mid Term
 *** TODO Split this section into  Short | Mid  (?)
+** TODO 33) We cannot specify the rounding mode in as(.) etc.  Currently use "N"; alternatively
+   could specify a "global" default rounding mode via 'options(Rmpfr.default.rounding)'
+** TODO 34) tests/bit-repr.R : Bits() fails to work with 2^k
+
+** TODO 36) mpfrXport()/*Import() should work for arrays.  Test Windows-portability:
+ -  as save() seems not portable; see ~/R/MM/Pkg-ex/Rmpfr/save-load-ex.R
 ** TODO 2) Now have working  "mpfrMatrix", dim(.) <- ..; t(), %*%, crossprod()...
  -  <mpfr> %*% <mpfr>    should work the same as with numeric vectors
  -  <mpfr> %*% t(<mpfr>)  ditto
@@ -86,21 +92,15 @@
     -- see  MPFR_RNDN in src/utils.c and others; --> use src/convert.c  R_rnd2MP()
     -- and all the SEXP functions get an additional   SEXP rnd_mode
        argument, the same as   SEXP d2mpfr1() in src/convert.c has already.
-
-
 ** TODO 27) sapply(), vapply() etc do not work with mpfr --- show workaround
     e.g. from ~/R/MM/Pkg-ex/Rmpfr/Dutang_test_v6.R
 	 res.mpfr <- lapply(1:length(n), function(i) binomsum.mpfr.MM(n[i], f, n0, precBits=precBits[i], ...))
 	 sapply(res.mpfr, as, "double")
 
-
-** TODO 29) Our sum() should use   mpfr_sum() :
+** TODO 29) Our sum() should use system mpfr_sum() :
    mpfr_sum (mpfr_t ROP, mpfr_ptr const TAB[], unsigned long int N, mpfr_rnd_t RND)
-
 ** TODO 31) Use ./LUP.R  to compute the lu() decomposition of an mpfrMatrix
     ---> use this for determinant() for larger (n >= 4 ?) dimensions!
-
-
 ** TODO 50) For *complex* arithmetic, build interface to the  "MPC" library
    ---> http://www.multiprecision.org/mpc -- which is LGPL and itself
    builds on MPFR and GMP.
@@ -111,6 +111,7 @@
       to take each src/*.c file and mechanically  s/mpfr/mpc/  producing a
       mpc version of that;
       then "the same" for the R interface code.
+
 
 * Accomplished
 
@@ -208,5 +209,7 @@
 
 ** DONE 30) pmin() and pmax(), for simple cases pmin(x,n) are now, 2013-02, quite "fast",
         (see also --> ~/R/MM/Pkg-ex/Rmpfr/SLOW-pmin.R)
+** DONE 32) asNumeric(mpfr(10, 99)^500) gives 1.797693e+308 without warning. Should (warn or) give Inf
+** DONE 35) got mpfrImport(), reading mpfrXport()
 
 

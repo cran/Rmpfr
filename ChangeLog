@@ -1,6 +1,55 @@
+2014-06-23  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/integrate-Romberg.R (integrateR): when 'ord' is specified and
+	one of 'rel.tol' or 'abs.tol', convergence is checked, and if
+	achieved, computations stop earlier.  When 'ord' is NULL (default),
+	and '*.tol' is specified, continue until convergence (or memory
+	explosion). The default (none of these specified) is to try
+	convergence up to 'ord = 13'.
+
+	* DESCRIPTION (Version): 0.5-6
+
+	* R/as.R (mpfr): also allow rounding mode "A" (= "Away from zero")
+	* R/array.R (mpfrArray): as that is supported from MPFR 3.0.0 on
+
+	* R/array.R (toNum): new optional argument 'rnd.mode'
+
+	* man/mpfr.Rd: doku and mini check
+	* src/convert.c (R_rnd2MP): allow "A" as well
+	* src/convert.c (mpfr2d, mpfr2i): extra argument rnd_mode.
+	NOTA BENE: "D" rounding previously, but new default is "N".
+	Consequently, asNumeric(x) etc give 'Inf' instead of 1.797693e+308.
+
+	* R/gmp-convert.R (..bigz2mpfr,...): add 'rnd.mode' argument
+
+
+2014-06-19  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 0.5-5  released to CRAN, 2014-06-19, r190
+
+	* R/integrate-Romberg.R (print.integrateR): own print method: print
+	  _value_ even when warning.
+
+2014-05-19  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* vignettes/log1mexp-note.Rnw: update to log1pexp(); cosmetics
+
+2014-05-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/special-fun.R: pbetaI(a,b) for larger (a,b); new mpfr versions of
+	* man/distr-etc.Rd: dbinom(), dpois(), dnorm()
+
+	* R/mpfr.R (mpfr_default_prec, .mpfr.minPrec, .mpfr.erange, ..):
+	* src/utils.c (R_mpfr_get_default_prec, ...): new functions to
+	get, check, (and partly working) set default exponent ranges and precision.
+
+2014-01-01  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/Ops.c (Math_mpfr): new sinpi(), cospi() for R >= 3.1.0
+
 2013-10-21  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version): 0.5-4, released to CRAN, 2013-10-22
+	* DESCRIPTION (Version): 0.5-4, released to CRAN, 2013-10-22, r173
 	Now again depends on 'methods' (instead of just importing).
 
 2013-05-04  Martin Maechler  <maechler@stat.math.ethz.ch>

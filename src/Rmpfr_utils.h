@@ -14,6 +14,7 @@
 #include <Rversion.h>
 /* for NEW_OBJECT(), GET_SLOT + Rinternals.h : */
 #include <Rdefines.h>
+#include <R_ext/Print.h>
 
 /* must come *after* the above, e.g., for
    mpfr_out_str()  (which needs stdio): */
@@ -33,6 +34,7 @@
 # define MPFR_RNDN GMP_RNDN
 # define MPFR_RNDU GMP_RNDU
 # define MPFR_RNDZ GMP_RNDZ
+// # define MPFR_RNDA GMP_RNDA
 
 # define mpfr_exp_t mp_exp_t
 
@@ -70,12 +72,11 @@ SEXP ALLOC_SLOT(SEXP obj, SEXP nm, SEXPTYPE type, int length)
     return val;
 }
 
+#define N_LIMBS(_PREC_) ceil(((double)_PREC_)/mp_bits_per_limb)
+
 static R_INLINE int R_mpfr_nr_limbs(mpfr_t r)
 {
-    int d = (int)mpfr_get_prec(r),
-	nr = d/mp_bits_per_limb;
-    if (d % mp_bits_per_limb) nr++;
-    return nr;
+    return N_LIMBS(mpfr_get_prec(r));
 }
 
 // Note: "in theory" we could set precBits > INT_MAX, but currently not in Rmpfr:
@@ -91,8 +92,6 @@ static R_INLINE void R_mpfr_check_prec(int prec)
 }
 
 #define R_mpfr_prec(x) INTEGER(GET_SLOT(x, Rmpfr_precSym))[0]
-
-#define N_LIMBS(_PREC_) ceil(((double)_PREC_)/mp_bits_per_limb)
 
 
 #define MISMATCH_WARN							\
@@ -113,8 +112,8 @@ mpfr_rnd_t R_rnd2MP(SEXP rnd_mode);
 SEXP d2mpfr1 (SEXP x, SEXP prec, SEXP rnd_mode);
 SEXP d2mpfr1_(double x, int i_prec, mpfr_rnd_t rnd);
 SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode);
-SEXP mpfr2d(SEXP x);
-SEXP mpfr2i(SEXP x);
+SEXP mpfr2d(SEXP x, SEXP rnd_mode);
+SEXP mpfr2i(SEXP x, SEXP rnd_mode);
 SEXP mpfr2str(SEXP x, SEXP digits);
 SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode);
 
@@ -158,7 +157,7 @@ SEXP R_mpfr_get_erange(SEXP kind);
 SEXP R_mpfr_set_erange(SEXP kind, SEXP val);
 SEXP R_mpfr_prec_range(SEXP ind);
 SEXP R_mpfr_get_version(void);
-
+SEXP R_mpfr_get_GMP_numb_bits(void);
 
 SEXP const_asMpfr(SEXP I, SEXP prec);
 

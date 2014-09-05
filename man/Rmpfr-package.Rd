@@ -19,10 +19,11 @@
     %% Date: \tab 2012-07-07\cr
     SystemRequirements: \tab gmp (>= 4.2.3), mpfr (>= 3.0.0)\cr
                         \tab (\bold{C} (not R!) libraries; must be installed)\cr
-    Depends: \tab methods, gmp (>= 0.5-2), R (>= 2.12.0)\cr
+    Depends: \tab methods, gmp (>= 0.5-8), R (>= 2.12.0)\cr
     Imports: \tab gmp, stats, utils\cr
-    Suggests: \tab MASS, polynom, sfsmisc (>= 1.0-20)\cr
-    SuggestNotes: \tab MASS, polynom, sfsmisc are only needed for vignette\cr
+    Suggests: \tab MASS, polynom, sfsmisc (>= 1.0-20), Matrix\cr
+    SuggestNotes: \tab MASS, polynom, sfsmisc are only needed for
+    vignette; Matrix only because of its test-tools\cr
     URL: \tab http://rmpfr.r-forge.r-project.org/\cr
     License: \tab GPL (>= 2)\cr
     %% Packaged: \tab 2012-07-07 20:33:21 UTC; maechler\cr

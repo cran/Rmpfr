@@ -53,11 +53,15 @@ mpfr_default_prec <- function(prec) {
     .Call(R_mpfr_get_erange, .erange.codes[[kind]])
 }
 
-`.mpfr.erange<-` <- function(kind = c("Emin", "Emax"), value) {
+
+.mpfr.erange.set <- function(kind = c("Emin", "Emax"), value) {
     kind <- match.arg(kind)
+    ## value can be double precision, and need be for "64-bit long"
     .Call(R_mpfr_set_erange, .erange.codes[[kind]], value)
 }
 
+
+.mpfr.gmp.numbbits <- function() .Call(R_mpfr_get_GMP_numb_bits)
 
 .mpfrVersion <- function() .Call(R_mpfr_get_version)
 mpfrVersion <- function()
@@ -582,7 +586,7 @@ getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L) 
 		frexpZ(x)$exp
 	    else if(inherits(x,"bigq")) {
 		if(missing(bigq.)) {
-		    warning("default precision for 'bigq' arbitrarily chosen as", bigq.)
+		    warning("default precision for 'bigq' arbitrarily chosen as ", bigq.)
 		    bigq.
 		}
 		else as.integer(bigq.)

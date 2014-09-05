@@ -1,5 +1,5 @@
 
-R version 3.1.0 Patched (2014-04-28 r65512) -- "Spring Dance"
+R version 3.1.1 Patched (2014-09-03 r66517) -- "Sock it to Me"
 Copyright (C) 2014 The R Foundation for Statistical Computing
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -15,28 +15,8 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> stopifnot(require("Rmpfr"))
-Loading required package: Rmpfr
-Loading required package: gmp
-
-Attaching package: 'gmp'
-
-The following objects are masked from 'package:base':
-
-    %*%, apply, crossprod, matrix, tcrossprod
-
-Loading C code of R package 'Rmpfr': GMP using 64 bits per limb
-
-Attaching package: 'Rmpfr'
-
-The following objects are masked from 'package:stats':
-
-    dbinom, dnorm, dpois, pnorm
-
-The following objects are masked from 'package:base':
-
-    cbind, pmax, pmin, rbind
-
+> stopifnot(suppressPackageStartupMessages(require("Rmpfr")))
+> ## (checking that the 32 / 64 bit  GMP message does *not* show here)
 > 
 > ### Try to look at the internal bit-representation of the limbs
 > 
@@ -51,10 +31,15 @@ The following objects are masked from 'package:base':
 > 
 > Bits <- function(x) {
 +     L <- .limbs(x)# list(length n) each of "k(prec)" 32-bit ints
++     ## NB:  mpfr(2, .) and all mpfr(2^k, .) also have a 'd' ending in NA integer!
++     ##     [reason: after all, R's NA_integer_ is INT_MAX+1 = 2^31 ]
++     ## and  the  mpfr(c(NA,NaN, Inf, -Inf), .)   have *no* NA in 'd' (but all in 'exp'!
++     ## see .mpfr2list() example below
++ 
 +     hasNA <- any(iNA <- sapply(lapply(L, is.na), any)) # iNA: TRUE if there's an NA
 +     ## need to catch them later
 +     CC <- function(ch) paste(ch, collapse="")
-+     hex <- sapply(L, function(I) CC(sprintf("%x", rev(I))))
++     hex <- sapply(L, function(.) CC(sprintf("%x", rev(.))))
 +     if(hasNA) hex[iNA] <- NA_character_
 +     hex <- strsplit(hex, NULL)
 + 
@@ -64,35 +49,53 @@ The following objects are masked from 'package:base':
 +     ## db is  4 x 16  matrix  with col.names "0" "1" .. "9" "a" "b" ... "f"
 + 
 +     ex <- .expo(x)
-+     if(is.matrix(ex))
++     if(is.matrix(ex)) {
 +         ## 64-bit case: exponent is long == two ints
-+         ## -----------  but currently the 2nd int is always 0 (or NA for '0')
++         ## -----------  the 2nd int is in {0, -1, NA} (NA : for 0)
++         ex2 <- ex[2,]
 +         ex <- ex[1,]
++     }
 +     pat <- paste("(", sapply(pmax(0, ex),
 +                              function(n) CC(rep.int(".", n))),
 +                  ")0+$", sep="")
-+     pat <- ifelse(iNA, NA_character_, pat)
++     ## pat <- ifelse(iNA, NA_character_, pat)
++ 
++     getbits <- function(ch) CC(as.vector(db[,ch]))
++ 
++     ## drop trailing zeros (from r[[i]], via pat[i]), keeping correct number:
++     drop0.r <- function(i) sub(pat[i], "\\1", r[[i]])
 + 
 +     if(hasNA) {
-+ 	r <- as.list(iNA)
-+ 	r[!iNA] <- lapply(hex[!iNA], function(ch) CC(as.vector(db[,ch])))
-+ 	r[iNA ] <- NA_character_
-+         ## now keep correct number of trailing zeros :
-+         r[!iNA] <- lapply(which(!iNA), function(i) sub(pat[i], "\\1", r[[i]]))
++         r <- as.list(iNA)
++         r[!iNA] <- lapply(hex[!iNA], getbits)
++         r[!iNA] <- lapply(which(!iNA), drop0.r)
++         ## FIXME this is wrong -- really have powers of 2, and want their (easy) bits :
++         r[iNA ] <- NA_character_
 +         unlist(r)
 +     }
 +     else {
-+ 	r <- lapply(hex, function(ch) CC(as.vector(db[,ch])))
-+         ## now keep correct number of trailing zeros :
-+         sapply(seq_along(r), function(i) sub(pat[i], "\\1", r[[i]]))
++ 	r <- lapply(hex, getbits)
++         sapply(seq_along(r), drop0.r)
 +     }
 + 
 + }
 > 
-> x <- mpfr(c(3:5,11:15, 59, 125:127, 1025), 64)
+> x <- mpfr(r <- c(NA,NaN, Inf, -Inf), 64)
+> stopifnot(identical(asNumeric(x), # mpfr has no NA, just NaN's:
++                     c(NaN,NaN, Inf, -Inf)))
+> 
+> if(FALSE) # platform dependent:
++     ## The "non-finite" mpfr value internals (in 64-bit: 'exp' has NA):
++     str(.mpfr2list(x))
+> 
+> 
+> ## bug in Bits(): all (exact) powers of 2  will show as NA:
+> 
+> x <- mpfr(c(3:5,11:16, 59, 125:128, 1024:1025), 64)
 > x
-13 'mpfr' numbers of precision  64   bits 
- [1]    3    4    5   11   12   13   14   15   59  125  126  127 1025
+16 'mpfr' numbers of precision  64   bits 
+ [1]    3    4    5   11   12   13   14   15   16   59  125  126  127  128 1024
+[16] 1025
 > data.frame(x= as.numeric(x), I(Bits(x)))
       x     Bits.x.
 1     3          11
@@ -103,14 +106,16 @@ The following objects are masked from 'package:base':
 6    13        1101
 7    14        1110
 8    15        1111
-9    59      111011
-10  125     1111101
-11  126     1111110
-12  127     1111111
-13 1025 10000000001
+9    16        <NA>
+10   59      111011
+11  125     1111101
+12  126     1111110
+13  127     1111111
+14  128        <NA>
+15 1024        <NA>
+16 1025 10000000001
 > 
 > x <- mpfr(c(-20:30),64)
-> x <- x[x != 0] # mpfr(0, *) has "random" bits
 > data.frame(x= as.numeric(x), I(Bits(x)))
      x Bits.x.
 1  -20   10100
@@ -133,46 +138,58 @@ The following objects are masked from 'package:base':
 18  -3      11
 19  -2    <NA>
 20  -1    <NA>
-21   1    <NA>
-22   2    <NA>
-23   3      11
-24   4    <NA>
-25   5     101
-26   6     110
-27   7     111
-28   8    <NA>
-29   9    1001
-30  10    1010
-31  11    1011
-32  12    1100
-33  13    1101
-34  14    1110
-35  15    1111
-36  16    <NA>
-37  17   10001
-38  18   10010
-39  19   10011
-40  20   10100
-41  21   10101
-42  22   10110
-43  23   10111
-44  24   11000
-45  25   11001
-46  26   11010
-47  27   11011
-48  28   11100
-49  29   11101
-50  30   11110
+21   0    <NA>
+22   1    <NA>
+23   2    <NA>
+24   3      11
+25   4    <NA>
+26   5     101
+27   6     110
+28   7     111
+29   8    <NA>
+30   9    1001
+31  10    1010
+32  11    1011
+33  12    1100
+34  13    1101
+35  14    1110
+36  15    1111
+37  16    <NA>
+38  17   10001
+39  18   10010
+40  19   10011
+41  20   10100
+42  21   10101
+43  22   10110
+44  23   10111
+45  24   11000
+46  25   11001
+47  26   11010
+48  27   11011
+49  28   11100
+50  29   11101
+51  30   11110
+> 
+> (half <- mpfr(0.5, 64)*(1 + mpfr(2, 64)^-16 * (-3:3)))
+7 'mpfr' numbers of precision  64   bits 
+[1] 0.49997711181640625  0.4999847412109375 0.49999237060546875
+[4]                 0.5 0.50000762939453125  0.5000152587890625
+[7] 0.50002288818359375
+> Bits(half)
+[1] "1111111111111101"  "111111111111111"   "1111111111111111" 
+[4] NA                  "10000000000000001" "1000000000000001" 
+[7] "10000000000000011"
 > 
 > ## pi, in varying number of bits :
 > p. <- round(pi* 2^c(10,16,5*(4:8)))
-> dput(p.)
+> dput(p.)#-> the definition of p :
 c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636, 
 3454217652358)
-> p <- c(mpfr(c(3217, 205887, 3294199, 105414357,
-+               3373259426, 107944301636, 3454217652358), 64),
-+        Const("pi", 64))
-> Bits(p)
+> p <- mpfr(c(3217, 205887, 3294199, 105414357,
++             3373259426, 107944301636, 3454217652358), 64)
+> stopifnot(all.equal(p., p, tolerance = 1e-15))
+> ## all the mantissas are those of pi, rounded differently:
+> Bits(c(p, Const("pi", 64)))
 [1] "110010010001"                                                    
 [2] "110010010000111111"                                              
 [3] "1100100100001111110111"                                          
@@ -184,11 +201,11 @@ c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636,
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.725 0.018 0.805 0 0 
+Time elapsed:  0.737 0.027 0.826 0 0 
 > 
 > if(!interactive()) warnings()
 NULL
 > 
 > proc.time()
    user  system elapsed 
-  0.726   0.018   0.805 
+  0.737   0.027   0.826 

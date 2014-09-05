@@ -4,6 +4,11 @@ doExtras <- function() {
         identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras")))
 }
 
+.onAttach <- function(libname, pkgname) {
+    packageStartupMessage(sprintf("C code of R package 'Rmpfr': GMP using %d bits per limb\n",
+				  .mpfr.gmp.numbbits()))
+}
+
 .onLoad <- function(libname, pkgname) {
     if(mpfrVersion() < "3.0.0")
 	warning("MPFR C library version ", format(mpfrVersion()),

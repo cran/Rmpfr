@@ -1,17 +1,20 @@
 \name{mpfr-utils}
+\title{Rmpfr -- Utilities for Precision Setting, Printing, etc}
 \alias{getPrec}
 \alias{getD}
 \alias{mpfr_default_prec}
 \alias{mpfr2array}
+\alias{mpfrImport}
+\alias{mpfrXport}
+\alias{.mpfr2list}% for now only mentioned in example
+%\alias{.mpfr1tolist}% not exported
 \alias{print.mpfr}
 \alias{print.mpfrArray}
 \alias{toNum}
-\title{
-  Rmpfr -- Utilities for Precision Setting, Printing, etc
-}
 \description{
   This page documents utilities from package \pkg{Rmpfr} which are
-  typically not called by the user.  In some case the may come handy.
+  typically not called by the user, but may come handy in some
+  situations.
 }
 \usage{
 getPrec(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L)
@@ -21,8 +24,11 @@ mpfr_default_prec(prec)
       right = TRUE, \dots)
 \S3method{print}{mpfr}(x, digits = NULL, drop0trailing = TRUE,
       right = TRUE, \dots)
-toNum(from)
+toNum(from, rnd.mode = c('N','D','U','Z','A'))
 mpfr2array(x, dim, dimnames = NULL, check = FALSE)
+
+mpfrXport(x)
+mpfrImport(mxp)
 }
 \arguments{
   \item{x, from}{typically, an \R object of class \code{"\linkS4class{mpfr}"}, or
@@ -45,11 +51,16 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
     justify the strings; see \code{\link{print.default}()} to which it
     is passed.}
   \item{digits, \dots}{further arguments to print methods.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see details of
+    \code{\link{mpfr}}.}
   \item{dim, dimnames}{for \code{"\linkS4class{mpfrArray}"}
     construction.}
   \item{check}{logical indicating if the mpfrArray construction should
     happen with internal safety check.  Previously, the implicit default
     used to be true.}
+  \item{mxp}{an \code{"mpfrXport"} object, as resulting from
+    \code{mpfrXport()}.}
 }
 \details{
   The \code{print} method is currently built on the \code{\link{format}}
@@ -86,6 +97,16 @@ mpfr2array(x, dim, dimnames = NULL, check = FALSE)
   \code{mpfr2array()} a slightly more flexible alternative to
   \code{dim(.) <- dd}.
 }
+\note{
+  \code{mpfrXport()} and \code{mpfrImport()} are \bold{experimental} and
+  used to explore reported platform incompatibilities of
+  \code{\link{save}()}d and \code{\link{load}()}ed \code{"mpfr"}
+  objects between Windows and non-Windows platforms.
+
+  In other words, the format of the result of \code{mpfrXport()} and
+  hence the \code{mxp} argument to \code{mpfrImport()} are considered
+  internal, not part of the API and subject to change.
+}
 \seealso{
   Start using \code{\link{mpfr}(..)}, and compute with these numbers.
 
@@ -102,13 +123,37 @@ stopifnot(opr == (oprec <- mpfr_default_prec(70)),
 ## and reset it:
 mpfr_default_prec(opr)
 
+## Explore behavior of rounding modes 'rnd.mode':
+x <- mpfr(10,99)^512 # too large for regular (double prec. / numeric):
+sapply(c("N", "D", "U", "Z", "A"), function(RM)
+       sapply(list(-x,x), function(.) toNum(., RM)))
+##    N             D              U              Z    A
+## -Inf          -Inf -1.797693e+308 -1.797693e+308 -Inf
+##  Inf 1.797693e+308            Inf  1.797693e+308  Inf
+
 ## Printing of "MPFR" matrices is less nice than R's usual matrix printing:
 m <- outer(c(1, 3.14, -1024.5678), c(1, 1e-3, 10,100))
 m[3,3] <- round(m[3,3])
 m
 mpfr(m, 50)
 
-mpfr2array(Bernoulli(1:6, 60), c(2,3),
-           dimnames = list(LETTERS[1:2], letters[1:3]))
+B6 <- mpfr2array(Bernoulli(1:6, 60), c(2,3),
+                 dimnames = list(LETTERS[1:2], letters[1:3]))
+B6
+
+## Looking at internal representation [for power users only!]:
+
+i8 <- mpfr(-2:5, 32)
+x4 <- mpfr(c(NA, NaN, -Inf, Inf), 32)
+## The output of the following depends on the GMP "numb" size
+## (32 bit vs. 64 bit), and may be even more platform specifics:
+str( .mpfr2list(i8) )
+str( .mpfr2list(x4) )
+
+str(xp4 <- mpfrXport(x4))
+stopifnot(identical(x4, mpfrImport(mpfrXport(x4))),
+          identical(i8, mpfrImport(mpfrXport(i8))))
+if(FALSE) ## FIXME: not yet working:
+  stopifnot(identical(B6, mpfrImport(mpfrXport(B6))))
 }
 \keyword{utilities}

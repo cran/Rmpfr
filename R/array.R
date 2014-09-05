@@ -39,7 +39,7 @@ setMethod("dim<-", signature(x = "mpfr", value = "ANY"),
 
 
 mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
-		      rnd.mode = c('N','D','U','Z'))
+		      rnd.mode = c('N','D','U','Z','A'))
 {
     dim <- as.integer(dim)
     rnd.mode <- toupper(rnd.mode)
@@ -116,17 +116,25 @@ setMethod("as.vector", "mpfrArray", function(x) as(x, "mpfr"))
 ## a "vector" in  *one* sense at least, and "mpfr" does extend "vector":
 setAs("mpfrArray", "vector", function(from) as(from, "mpfr"))
 
-toNum <- function(from) {
+.toNum <- function(from, rnd.mode) { ## <- must have only 'from'
     if(is.null(dn <- dimnames(from)) || identical(dn, list(NULL,NULL)))
 	## --> result has NULL dimnames
-	structure(.Call(mpfr2d, from), dim = dim(from))
+	structure(.Call(mpfr2d, from, rnd.mode), dim = dim(from))
     else
-	structure(.Call(mpfr2d, from), dim = dim(from), dimnames = dn)
+	structure(.Call(mpfr2d, from, rnd.mode), dim = dim(from), dimnames = dn)
+}
+## to be used in setAs(),  must have only 'from' argument:
+.toNum1 <- function(from) .toNum(from, rnd.mode="N")
+
+toNum <- function(from, rnd.mode = c('N','D','U','Z','A')) {
+    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
+    rnd.mode <- match.arg(rnd.mode)
+    .toNum(from, rnd.mode)
 }
 
-setAs("mpfrArray", "array", toNum)
+setAs("mpfrArray", "array", .toNum1)
 
-setAs("mpfrMatrix", "matrix", toNum)
+setAs("mpfrMatrix", "matrix", .toNum1)
 
 setAs("mpfrArray", "matrix", function(from) {
     if(length(dim(from)) != 2)

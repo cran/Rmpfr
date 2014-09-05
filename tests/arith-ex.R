@@ -26,8 +26,15 @@ stopifnot(format(mpfr(1, 60) / mpfr(7, 160)) ==
           "0.14285714285714285714285714285714285714285714285712")
 
 (x <- mpfr(0:7, 100) / 7)
+ix <- x^-1000
+iX <- asNumeric(ix)
+
 stopifnot( mpfr.is.0(x - x), # badly failed on 64-bit
-	  identical(-x, 0-x))# testing "- x"
+	  identical(-x, 0-x),# testing "- x"
+          all.equal(ix, (1/x)^1000, tol= 1e-25),
+          is.numeric(iX), iX[1:4] == Inf, # failed previously as we used RNDD (downward rounding)
+          all.equal(log(iX[5:8]), c(559.6157879, 336.4722366, 154.1506798, 0),
+                    tol = 1e-9))
 
 ## checking hexadecimal input :
 stopifnot(mpfr("0xFFFFFFFFFFFFFFFFFFFF", base=16) + 1 == 2^80,

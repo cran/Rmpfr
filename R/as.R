@@ -3,12 +3,11 @@
 if(getRversion() < "2.15")
     paste0 <- function(...) paste(..., sep = '')
 
-mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z'))
+mpfr <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z','A'))
 {
     if(is.character(x))
 	stopifnot(length(base) == 1, 2 <= base, base <= 36)
-    stopifnot(is.character(rnd.mode))
-    rnd.mode <- toupper(rnd.mode)
+    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
     rnd.mode <- match.arg(rnd.mode)
 
     if(is.raw(x)) { # is.raw() is faster
@@ -63,13 +62,14 @@ setAs("logical", "mpfr", function(from) .mpfr(from,   2L))
 ## TODO?  base=16 for "0x" or "0X" prefix -- but base must have length 1 ..
 setAs("character", "mpfr", function(from) mpfr(from))
 
-setAs("mpfr", "numeric", function(from) .Call(mpfr2d, from))
-setAs("mpfr", "integer", function(from) .Call(mpfr2i, from))
-setMethod("as.numeric", "mpfr", function(x) .Call(mpfr2d, x))
-setMethod("as.integer", "mpfr", function(x) .Call(mpfr2i, x))
+setAs("mpfr", "numeric", function(from) .Call(mpfr2d, from, rnd.mode="N"))
+setAs("mpfr", "integer", function(from) .Call(mpfr2i, from, rnd.mode="N"))
+setMethod("as.numeric", "mpfr", function(x, rnd.mode="N") .Call(mpfr2d, x, rnd.mode))
+setMethod("as.integer", "mpfr", function(x, rnd.mode="N") .Call(mpfr2i, x, rnd.mode))
 
-setMethod("asNumeric", "mpfr",      function(x) .Call(mpfr2d, x))
-setMethod("asNumeric", "mpfrArray", function(x) toNum(x))
+## FIXME (in gmp!!): asNumeric() should get "..." argument
+setMethod("asNumeric", "mpfr",      function(x) .Call(mpfr2d, x, rnd.mode="N"))
+setMethod("asNumeric", "mpfrArray", function(x) toNum(x, rnd.mode="N"))
 
 setAs("mpfr1", "numeric",  ## just for user-de-confusion :
       function(from) {
@@ -78,10 +78,39 @@ setAs("mpfr1", "numeric",  ## just for user-de-confusion :
 
 setAs("mpfr1", "mpfr", function(from) new("mpfr", list(from)))
 setAs("mpfr", "mpfr1", function(from) {
-    if(length(from) == 1) from[[1]] else
+    if(length(from) == 1) getD(from)[[1]] else
     stop("only \"mpfr\" objects of length 1 can be coerced to \"mpfr1\"")
 })
 
+.mpfr1tolist <- function(x)
+    sapply(.slotNames(x), slot, object=x, simplify=FALSE)
+.mpfr2list <- function(x) lapply(getD(x), .mpfr1tolist)
+
+## Breaks the working of vapply(q, FUN.x) in pbetaI() in ./special-fun.R :
+## as.list.mpfr1 <- function(x, ...) .mpfr1tolist(x)
+## as.list.mpfr  <- function(x, ...) .mpfr2list(x)
+
+## and then
+mpfrXport <- function(x) {
+    if(!is(x, "mpfr")) stop("argument is not a \"mpfr\" object")
+    structure(class = "mpfrXport",
+	      list(gmp.numb.bits = .mpfr.gmp.numbbits(),
+		   ## currently unused, but in case:
+		   mpfr.version	 = .mpfrVersion(),
+		   Machine  = .Machine[grepl("sizeof",names(.Machine))],
+		   Sys.info = Sys.info()[c("sysname", "machine")],
+		   mpfr = .mpfr2list(x)))
+}
+
+mpfrImport <- function(mxp) {
+    if(!inherits(mxp, "mpfrXport")) stop("need an \"mpfrXport\" object")
+    nbits <- .mpfr.gmp.numbbits()
+    if(!identical(nbits, mxp$gmp.numb.bits))
+	stop("GMP bits not matching: 'x' has ", mxp$gmp.numb.bits,
+	     "; the loaded 'Rmpfr' package has ", nbits)
+    m1 <- lapply(mxp$mpfr, function(o) do.call(new, c("mpfr1", o)))
+    new("mpfr", m1)
+}
 
 .mpfr2str <- function(x, digits = NULL) {
     stopifnot(is.null(digits) ||

@@ -144,8 +144,9 @@ mpfr_rnd_t R_rnd2MP(SEXP rnd_mode) {
     case 'N': return MPFR_RNDN;
     case 'U': return MPFR_RNDU;
     case 'Z': return MPFR_RNDZ;
+    case 'A': return MPFR_RNDA; // since MPFR 3.0.0
     default:
-	error(_("illegal rounding mode '%s'; must be one of {'D','N','U','Z'}"),
+	error(_("illegal rounding mode '%s'; must be one of {'D','N','U','Z','A'}"),
 	      r_ch);
 	/* Wall: */ return MPFR_RNDN;
     }
@@ -373,7 +374,7 @@ SEXP print_mpfr(SEXP x, SEXP digits)
 
 
 /* Convert R "mpfr" object (list of "mpfr1")  to R "double" vector : */
-SEXP mpfr2d(SEXP x) {
+SEXP mpfr2d(SEXP x, SEXP rnd_mode) {
     int n = length(x), i;
     SEXP val = PROTECT(allocVector(REALSXP, n));
     double *r = REAL(val);
@@ -382,7 +383,7 @@ SEXP mpfr2d(SEXP x) {
 
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
-	r[i] = mpfr_get_d(R_i, MPFR_RNDD);
+	r[i] = mpfr_get_d(R_i, R_rnd2MP(rnd_mode));
     }
 
     mpfr_clear (R_i);
@@ -392,7 +393,7 @@ SEXP mpfr2d(SEXP x) {
 }
 
 /* Convert R "mpfr" object (list of "mpfr1")  to R "integer" vector : */
-SEXP mpfr2i(SEXP x) {
+SEXP mpfr2i(SEXP x, SEXP rnd_mode) {
     int n = length(x), i;
     SEXP val = PROTECT(allocVector(INTSXP, n));
     int *r = INTEGER(val);
@@ -401,12 +402,12 @@ SEXP mpfr2i(SEXP x) {
 
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
-	if(!mpfr_fits_sint_p(R_i, MPFR_RNDD)) {
+	if(!mpfr_fits_sint_p(R_i, R_rnd2MP(rnd_mode))) {
 	    warning("NAs introduced by coercion from \"mpfr\" [%d]", i+1);
 	    r[i] = NA_INTEGER;
 	}
 	else {
-	    long lr = mpfr_get_si(R_i, MPFR_RNDD);
+	    long lr = mpfr_get_si(R_i, R_rnd2MP(rnd_mode));
 	    r[i] = (int) lr;
 	}
     }

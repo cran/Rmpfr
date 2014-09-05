@@ -49,9 +49,11 @@ par(op)
 
 showSys.time(I2 <- integrateR(integrand, lower = -100, upper = 100))
 I2 ## ... Warning ‘no convergence up to order  13’
+## Solaris Sparc (2014-06, CRAN checks); thanks Brian: print(I2[1:2], digits=15)
+I2.Solaris <- list(value = 1.3963550396006e+33, abs.error = 1.79487857486724e+28)
 I.db <- list(value = 1.39635503960059e+33, abs.error = 1.79487857478077e+28)
 stopifnot(
-    all.equal(I2[1:2], I.db, tol = 1e-12)
+    all.equal(I2[1:2], I.db, tol = 1e-10)# Solaris SPARC needs at least 4.8e-11
 )
 
 ## Now using high accuracy
