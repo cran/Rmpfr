@@ -43,6 +43,8 @@ stopifnot(mpfr("0xFFFFFFFFFFFFFFFFFFFF", base=16) + 1 == 2^80,
 
 stopifnot(all.equal(as.numeric(x+ 1L),
                     as.numeric(x)+1L, tol = eps2),
+	  as.integer(  x [x < 1]) == 0,# was *wrong* {we round()ed; previously "down"!}
+	  as.integer((-x)[x < 1]) == 0,#  (ditto)
           (3 * x)/3 <= x,
           all.equal(as.numeric(x * 2L),
                     as.numeric(x + x), tol = 0))
@@ -61,6 +63,8 @@ i7  <- mpfr(0:7,  200)/ 7
 i17 <- mpfr(0:17, 300)/17
 stopifnot(all.equal(as.numeric(x+1),
 		    as.numeric(x)+1),
+	  all.equal(round(x,2), round(asNumeric(x), 2), tol=1e-15),
+	  all.equal(round(mpfr(1.152, 80), 2), 1.15), # was wrong {as.integer() bug}
 	  all.equal(0:7,   7 * round ( i7, 25), tol = 2e-25),
 	  all.equal(0:7,   7 * round ( i7, 50), tol = 2e-50),
 	  all.equal(0:17, 17 * signif(i17,100), tol = 2e-100),

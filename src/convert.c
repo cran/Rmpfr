@@ -54,7 +54,7 @@
  * ==> one limb  <---> 2 R int.s : */
 
 # define RIGHT_HALF(_LONG_) ((long long)(_LONG_) & 0x00000000FFFFFFFF)
-/*					  1  4	 8|  4	 8 */
+//                                                   1  4   8|  4   8
 # define LEFT_SHIFT(_LONG_) (((unsigned long long)(_LONG_)) << 32)
 
 # define R_mpfr_FILL_DVEC(i)						\

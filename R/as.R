@@ -65,7 +65,8 @@ setAs("character", "mpfr", function(from) mpfr(from))
 setAs("mpfr", "numeric", function(from) .Call(mpfr2d, from, rnd.mode="N"))
 setAs("mpfr", "integer", function(from) .Call(mpfr2i, from, rnd.mode="N"))
 setMethod("as.numeric", "mpfr", function(x, rnd.mode="N") .Call(mpfr2d, x, rnd.mode))
-setMethod("as.integer", "mpfr", function(x, rnd.mode="N") .Call(mpfr2i, x, rnd.mode))
+## "Z": round towards [Z]ero -- crucial for as.integer() :
+setMethod("as.integer", "mpfr", function(x, rnd.mode="Z") .Call(mpfr2i, x, rnd.mode))
 
 ## FIXME (in gmp!!): asNumeric() should get "..." argument
 setMethod("asNumeric", "mpfr",      function(x) .Call(mpfr2d, x, rnd.mode="N"))
