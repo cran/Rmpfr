@@ -166,11 +166,10 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
     SEXP val = PROTECT(allocVector(VECSXP, n));
     if(nx > 0) {
 	mpfr_rnd_t rnd = R_rnd2MP(rnd_mode);
-	int *iprec; double *dx;
 	if(!isReal(x))       { PROTECT(x    = coerceVector(x,   REALSXP)); nprot++; }
 	if(!isInteger(prec)) { PROTECT(prec = coerceVector(prec, INTSXP)); nprot++; }
-	dx = REAL(x);
-	iprec = INTEGER(prec);
+	double *dx = REAL(x);
+	int *iprec = INTEGER(prec);
 	for(int i = 0; i < n; i++) {
 	    /* FIXME: become more efficient by doing R_..._2R_init() only once*/
 	    SET_VECTOR_ELT(val, i, d2mpfr1_(dx[i % nx], iprec[i % np], rnd));
@@ -420,14 +419,14 @@ SEXP mpfr2i(SEXP x, SEXP rnd_mode) {
 /* Convert R "mpfr" object (list of "mpfr1")  to R "character" vector,
  * using precision 'prec' which can be NA/NULL in which case
  * "full precision" (as long as necessary) is used : */
-SEXP mpfr2str(SEXP x, SEXP digits) {
+SEXP mpfr2str(SEXP x, SEXP digits, SEXP base) {
     int n = length(x), i;
     int n_dig = isNull(digits) ? 0 : asInteger(digits);
     SEXP val = PROTECT(allocVector(VECSXP, 4)),
 	nms, str, exp, fini, zero;
     int *i_exp, *is_fin, *is_0;
-    int B = 10; /* = base for output -- "TODO" make this an argument*/
-    double p_fact = log(B) / M_LN2;
+    int B = asInteger(base); // = base for output
+    double p_fact = (B == 2) ? 1. : log(B) / M_LN2;
     char *ch = NULL;
     mpfr_t R_i;
 

@@ -202,7 +202,7 @@ setMethod("Arith", signature(e1 = "mpfrArray", e2 = "mpfr"),
 setMethod("Arith", signature(e1 = "array", e2 = "mpfr"),# incl "mpfrArray"
 	  function(e1, e2) {
 	      if(e2Arr <- !is.null(dim(e2)))
-		  d2 <- .dimCheck(e1, e2)
+		  .dimCheck(e1, e2)
 	      else if(length(e1) %% length(e2) != 0)
 		  stop("length of first argument (array) is not multiple of the second argument's one")
 
@@ -221,7 +221,7 @@ setMethod("Arith", signature(e1 = "array", e2 = "mpfr"),# incl "mpfrArray"
 setMethod("Arith", signature(e1 = "mpfr", e2 = "array"),# "mpfr" incl "mpfrArray"
 	  function(e1, e2) {
 	      if(e1Arr <- !is.null(dim(e1)))
-		  d1 <- .dimCheck(e1, e2)
+		  .dimCheck(e1, e2)
 	      else if(length(e2) %% length(e1) != 0)
 		  stop("length of second argument (array) is not multiple of the first argument's one")
 

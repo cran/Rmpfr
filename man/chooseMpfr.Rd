@@ -23,14 +23,16 @@
   }{x^(n) = x(x+1)(x+2)...(x+n-1) = (x+n-1)! / (x-1)! = Gamma(x+n) / Gamma(x).}
 }
 \usage{
-chooseMpfr (a, n)
+chooseMpfr (a, n, rnd.mode = c("N","D","U","Z","A"))
 chooseMpfr.all(n, precBits=NULL, k0=1, alternating=FALSE)
-pochMpfr(a, n)
+pochMpfr(a, n, rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{a}{a numeric or \code{\linkS4class{mpfr}} vector.}
   \item{n}{an integer vector; if not of length one, \code{n} and
     \code{a} are recycled to the same length.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
   \item{precBits}{integer or NULL for increasing the default precision
     of the result.}
   \item{k0}{integer scalar}

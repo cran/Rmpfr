@@ -14,18 +14,20 @@
 }
 \usage{
 formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
-	   showNeg0 = TRUE,
+	   base = 10, showNeg0 = TRUE,
 	   big.mark = "", big.interval = 3L,
-	   small.mark = "", small.interval = 5L, decimal.mark = ".",
-	   zero.print = NULL, drop0trailing = FALSE, ...)
+	   small.mark = "", small.interval = 5L,
+           decimal.mark = ".",
+           exponent.char = if(base <= 14) "e" else if(base <= 36) "E" else "|e",
+           zero.print = NULL, drop0trailing = FALSE, ...)
 \S3method{formatN}{mpfr}(x, drop0trailing = TRUE, \dots)
 }
 \arguments{
   \item{x}{an MPFR number (vector or array).}
-  \item{digits}{how many significant digits are to be used.  The
-    default, \code{NULL}, uses enough digits to represent the full
-    precision, often one or two digits more than \dQuote{you} would
-    expect.}
+  \item{digits}{how many significant digits (in the \code{base} chosen!)
+    are to be used in the result.  The default, \code{NULL}, uses enough
+    digits to represent the full precision, often one or two digits more
+    than \dQuote{you} would expect.}
   \item{trim}{logical; if \code{FALSE}, numbers are right-justified to a
     common width: if \code{TRUE} the leading blanks for justification
     are suppressed.}
@@ -33,9 +35,18 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
     MPFR numbers should be encoded in scientific
     format, or an integer penalty (see \code{\link{options}("scipen")}).
     Missing values correspond to the current default penalty.}
+  \item{base}{an integer in \eqn{2,3,..,62}; the base (\dQuote{basis})
+    in which the numbers should be represented.  Apart from the default
+    base 10, binary (\code{base = 2}) or hexadecimal (\code{base = 16}) are particularly
+    interesting.}
   \item{showNeg0}{logical indicating if \dQuote{\bold{neg}ative} zeros
     should be shown with a \code{"-"}.  The default, \code{TRUE} is
     intentially different from \code{\link{format}(<numeric>)}.}
+  \item{exponent.char}{the \dQuote{exponent} character to be used in
+    scientific notation.  The default takes into account that for
+    \code{base} \eqn{B \ge 15}{B >= 15}, \code{"e"} is part of the
+    (mantissa) digits and the same is true for \code{"E"} when
+    \eqn{B \ge 37}{B >= 37}.}
   \item{big.mark, big.interval, small.mark,
     small.interval, decimal.mark, zero.print, drop0trailing}{%
     used for prettying decimal sequences, these are passed to
@@ -48,6 +59,14 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
   \code{\linkS4class{mpfrArray}}, then \code{cx} is a character
   \code{\link{array}} with the same \code{\link{dim}} and
   \code{\link{dimnames}} as \code{x}.
+
+  Note that in scientific notation, the integer exponent is always in
+  \emph{decimal}, i.e., base 10 (even when \code{base} is not 10), but
+  of course meaning \code{base} powers, e.g., in base 32,
+  \code{"u.giE3"}is the same as \code{"ugi0"} which is \eqn{32^3} times
+  \code{"u.gi"}. This is in contrast, e.g., with
+  \code{\link{sprintf}("\%a", x)} where the powers after \code{"p"} are
+  powers of \eqn{2}.
 }
 \references{
   The MPFR manual's description of \samp{mpfr_get_str()} which is the
@@ -80,6 +99,24 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
  xx <- c(Zero, 1:2, Const("pi", 120), -100*pi, -.00987)
  format(xx, digits = 2)
  format(xx, digits = 1, showNeg0 = FALSE)# "-0" no longer shown
+
+## Output in other bases :
+formatMpfr(mpfr(10^6, 40), base=32, drop0trailing=TRUE)
+## "ugi0"
+mpfr("ugi0", base=32) #-> 1'000'000
+\dontshow{
+stopifnot(
+   identical("ugi0", formatMpfr(mpfr(10^6, 40), base=32, drop0trailing=TRUE)),
+   mpfr("ugi0", base=32) == 10^6)
+}
+
+i32 <- mpfr(1:32, precBits = 64)
+format(i32,   base=  2, drop0trailing=TRUE)
+format(i32,   base= 16, drop0trailing=TRUE)
+format(1/i32, base=  2, drop0trailing=TRUE)# using scientific notation for [17..32]
+format(1/i32, base= 32)
+format(1/i32, base= 62, drop0trailing=TRUE)
+format(mpfr(2, 64)^-(1:16), base=16, drop0trailing=TRUE)
 }
 \keyword{character}
 \keyword{print}

@@ -60,7 +60,7 @@ proc.time()
 ### Riemann's Zeta function:
 
 ## -- integer arguments --
-stopifnot(all(mpfr.is.0(zeta(-2*(1:100)))))
+stopifnot(all(mpfrIs0(zeta(-2*(1:100)))))
 
 k.neg <- 2*(-100:0) - 1
 Z.neg <- zeta(k.neg)

@@ -45,16 +45,16 @@ hjkMpfr <- function(par, fn, control = list(), ...) {
     f <- function(x) scale * fun(x, ...)
 
     ##-- Setting steps and stepsize -----
-    nsteps <- floor(log2(1/tol))        # number of steps
+    nsteps <- floor(log2(1/tol))	# number of steps
     steps  <- 2^c(-(0:(nsteps-1)))      # decreasing step size
     dir <- diag(1, n, n)                # orthogonal directions
 
-    x <- par                         # start point
-    fx <- fbest <- f(x)              # smallest value so far
-    fcount <- 1                      # counts number of function calls
+    x <- par                            # start point
+    fx <- f(x)                          # smallest value so far
+    fcount <- 1                         # counts number of function calls
 
     if (info) cat(sprintf("step  nofc %-12s | %20s\n",
-			   "fmin", "xpar"))
+                          "fmin", "xpar"))
 
     ##-- Start the main loop ------------
     ns <- 0
@@ -63,7 +63,7 @@ hjkMpfr <- function(par, fn, control = list(), ...) {
         hjs    <- .hjsearch(x, f, steps[ns], dir, fcount, maxfeval, target)
         x      <- hjs$x
         fx     <- hjs$fx
-        found  <- hjs$found
+        ## found  <- hjs$found
         fcount <- fcount + hjs$finc
 
 	if (info)
@@ -73,16 +73,15 @@ hjkMpfr <- function(par, fn, control = list(), ...) {
 			if(n > 2)" ...."))
     }
 
-    if (fcount > maxfeval) {
-        warning("Function evaluation limit exceeded -- may not converge.")
-        conv <- FALSE
-    } else if (abs(fx) > target) {
-        warning("Function exceeds min/max value -- may not converge.")
-        conv <- FALSE
-    } else {
-        conv <- TRUE
-    }
-
+    conv <-
+	if (fcount > maxfeval) {
+	    warning("Function evaluation limit exceeded -- may not converge.")
+	    FALSE
+	} else if (abs(fx) > target) {
+	    warning("Function exceeds min/max value -- may not converge.")
+	    FALSE
+	} else
+	    TRUE
     fx <- fx / scale                    # undo scaling
     list(par = x, value = fx,
          convergence = conv, feval = fcount, niter = ns)

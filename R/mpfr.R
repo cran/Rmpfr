@@ -11,21 +11,45 @@ setMethod("is.na", "mpfr",
 setMethod("is.nan", "mpfr",
           function(x) .Call(R_mpfr_is_na, x))
 
-mpfr.is.0 <- function(x) .Call(R_mpfr_is_zero, x)
+mpfrIs0 <- function(x) {
+    if(is(x, "mpfrArray")) .Call(R_mpfr_is_zero_A, x)
+    else .Call(R_mpfr_is_zero, x)
     ## sapply(x, function(.) .@exp == - .Machine$integer.max)
+}
+mpfr.is.0 <- function(x) {
+    .Deprecated("mpfrIs0")
+    mpfrIs0(x)
+}
 
-mpfr.is.integer <- function(x)
-    .Call(R_mpfr_is_integer, x)
+.mpfr.is.whole <- function(x) {
+    if(is(x, "mpfrArray")) .Call(R_mpfr_is_integer_A, x)
+    else .Call(R_mpfr_is_integer, x)
+}
+mpfr.is.integer <- function(x) {
+    .Deprecated(".mpfr.is.whole")
+    .mpfr.is.whole(x)
+}
 
 ## is.whole() is now S3 generic, with default method in gmp
 ## is.whole <- function(x) {
 ##     if(is.integer(x) || is.logical(x)) rep.int(TRUE, length(x))
 ##     else if(is.numeric(x)) x == floor(x)
 ##     else if(is.complex(x)) x == round(x)
-##     else if(is(x,"mpfr")) mpfr.is.integer(x)
+##     else if(is(x,"mpfr")) .mpfr.is.whole(x)
 ##     else rep.int(FALSE, length(x))
 ## }
-is.whole.mpfr <- function(x) mpfr.is.integer(x)
+is.whole.mpfr <- function(x) .mpfr.is.whole(x)
+
+## The above for "mpfrArray" :
+setMethod("is.finite", "mpfrArray",
+	  function(x) .Call(R_mpfr_is_finite_A, x))
+setMethod("is.infinite", "mpfrArray",
+	  function(x) .Call(R_mpfr_is_infinite_A, x))
+## MPFR has only "NaN" ( == "NA"  -- hence these two are identical :
+setMethod("is.na", "mpfrArray",
+	  function(x) .Call(R_mpfr_is_na_A, x))
+setMethod("is.nan", "mpfrArray",
+	  function(x) .Call(R_mpfr_is_na_A, x))
 
 mpfr_default_prec <- function(prec) {
     if(missing(prec) || is.null(prec))
@@ -47,7 +71,7 @@ mpfr_default_prec <- function(prec) {
 ## FIXME? better function name ??
 .mpfr.erange <- function(kind) {
     stopifnot(length(kind) == 1, is.character(kind))
-    if(!any(iseq <- kind == names(.erange.codes)))
+    if(!any(kind == names(.erange.codes)))
         stop("'kind' must be one of ",
              paste(paste0('"', names(.erange.codes), '"'), collapse=", "))
     .Call(R_mpfr_get_erange, .erange.codes[[kind]])
@@ -68,7 +92,7 @@ mpfrVersion <- function()
     numeric_version(sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*","\\1", .mpfrVersion()))
 
 print.mpfr1 <- function(x, digits = NULL, drop0trailing = TRUE, ...) {
-    stopifnot(is(x, "mpfr1"), is.null(digits) || digits >= 2)
+    stopifnot(is(x, "mpfr1"), is.null(digits) || digits >= 1)
     cat("'mpfr1' ",
 	format(as(x, "mpfr"), digits=digits, drop0trailing=drop0trailing),
 	"\n", sep="")
@@ -82,7 +106,7 @@ if(FALSE) ## no longer -- as R CMD check complains about use of non-API R_Output
 if(.Platform$OS.type != "windows") {## No R_Outputfile (in C) on Windows
 
 .print.mpfr <- function(x, digits = NA, ...) {
-    stopifnot(is(x, "mpfr"), is.na(digits) || digits >= 2)
+    stopifnot(is(x, "mpfr"), is.na(digits) || digits >= 1)
     ## digits = NA --> the inherent precision of x will be used
     if(length(x) >= 1)
 	.Call(print_mpfr, x, as.integer(digits))
@@ -99,7 +123,7 @@ getD <- function(x) { attributes(x) <- NULL; x }
 
 print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE,
 		       right = TRUE, ...) {
-    stopifnot(is(x, "mpfr"), is.null(digits) || digits >= 2)
+    stopifnot(is(x, "mpfr"), is.null(digits) || digits >= 1)
     ## digits = NA --> the inherent precision of x will be used
     n <- length(x)
     ch.prec <-
@@ -310,7 +334,7 @@ setMethod("pmin", "mNumber",
 	      is.q <- vapply(cld, extends, NA, "bigq")
 	      is.z <- vapply(cld, extends, NA, "bigz")
 	      is.N <- vapply(args, function(x) is.numeric(x) || is.logical(x), NA)
-	      if(!any(is.mq <- is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
+	      if(!any(is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
 		  stop("no \"mpfr\", \"bigz\", or \"bigq\" argument -- wrong method chosen; please report!")
 	      N <- max(lengths <- vapply(args, length, 1L))
 	      any.m <- any(is.m)
@@ -385,7 +409,7 @@ setMethod("pmax", "mNumber",
 	      is.q <- vapply(cld, extends, NA, "bigq")
 	      is.z <- vapply(cld, extends, NA, "bigz")
 	      is.N <- vapply(args, function(x) is.numeric(x) || is.logical(x), NA)
-	      if(!any(is.mq <- is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
+	      if(!any(is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
 		  stop("no \"mpfr\", \"bigz\", or \"bigq\" argument -- wrong method chosen; please report!")
 	      N <- max(lengths <- vapply(args, length, 1L))
 	      any.m <- any(is.m)
@@ -453,7 +477,7 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 	lf <- length(from)
 	if(lf != 1) stop("'from' must be of length 1")
     }
-    if ((One <- nargs() == 1L) && h.from) {
+    if (nargs() == 1L && h.from) { # 'One'
 	if(is.numeric(from) || is(from,"mpfr")) {
 	    to <- from; from <- mpfr(1, getPrec(from))
 	} else stop("'from' is neither numeric nor \"mpfr\"")
@@ -572,12 +596,24 @@ setMethod("seq", c(from = "ANY", to = "ANY", by = "mpfr"), seqMpfr)
     if(length(x)) vapply(getD(x), slot, 1L, "prec")
     else mpfr_default_prec()
 }
+
+##' The *relevant* number of "bit"/"digit" characters in character vector x
+##' (i.e. is vectorized)
+.ncharPrec <- function(x, base) {
+    if((base ==  2 && any(i <- tolower(substr(x,1L,2L)) == "0b")) ||
+       (base == 16 && any(i <- tolower(substr(x,1L,2L)) == "0x"))) {
+        i <- which(i)
+        x[i] <- substr(x[i], 3L, 1000000L)
+    }
+    nchar(gsub("[-.]", '', x), "bytes")
+}
+
 ## the user version
 getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L) {
     if(isTRUE(is.mpfr) || is(x,"mpfr"))
 	vapply(getD(x), slot, 1L, "prec")# possibly of length 0
     else if(is.character(x)) ## number of digits --> number of bits
-	ceiling(log2(base) * nchar(gsub("[-.]", '', x)))
+	ceiling(log2(base) * .ncharPrec(x, base))
     else if(is.logical(x))
 	2L # even 1 would suffice - but need 2 (in C ?)
     else if(is.raw(x)) {
@@ -596,7 +632,7 @@ getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L) 
     }
     else {
 	if(!doNumeric)
-            stop("No default precision for numeric 'x' when 'doNumeric' is false")
+	    stop("must specify 'precBits' for numeric 'x' when 'doNumeric' is false")
 	## else
 	if(is.integer(x)) 32L
 	else if(is.double(x)) 53L
@@ -665,12 +701,15 @@ diff.mpfr <- function(x, lag = 1L, differences = 1L, ...)
     x
 }
 
-str.mpfr <- function(object, nest.lev, give.head = TRUE, ...) {
+str.mpfr <- function(object, nest.lev, give.head = TRUE, digits.d = 12,
+                     vec.len = NULL, drop0trailing=TRUE,
+                     width = getOption("width"), ...) {
     ## utils:::str.default() gives  "Formal class 'mpfr' [package "Rmpfr"] with 1 slots"
     cl <- class(object)
     le <- length(object)
+    if(le == 0) { print(object); return(invisible()) }
     if(isArr <- is(object, "mpfrArray")) di <- dim(object)
-    r.pr <- range(pr <- getPrec(object))
+    r.pr <- range(getPrec(object))
     onePr <- r.pr[1] == r.pr[2]
     if(give.head)
 	cat("Class", " '", paste(cl, collapse = "', '"),
@@ -680,12 +719,26 @@ str.mpfr <- function(object, nest.lev, give.head = TRUE, ...) {
 	    if(onePr) paste("", r.pr[1]) else paste0("s ", r.pr[1],"..",r.pr[2]),
 	    "\n", sep = "")
     if(missing(nest.lev)) nest.lev <- 0
-    ## maybe add a formatNum() which adds "  " as give.head=TRUE suppresses all
-    str(as.numeric(object), give.head = FALSE, nest.lev = nest.lev+1, ...)
-    ##                   max.level = NA, vec.len = strO$vec.len, digits.d = strO$digits.d,
-    ## nchar.max = 128, give.attr = TRUE, give.head = TRUE, give.length = give.head,
-    ## width = getOption("width"), nest.lev = 0, indent.str = paste(rep.int(" ",
-    ##     max(0, nest.lev + 1)), collapse = ".."), comp.str = "$ ",
-    ## no.list = FALSE, envir = baseenv(), strict.width = strO$strict.width,
-    ## formatNum = strO$formatNum, list.len = 99, ...)
-}
+    cat(paste(rep.int(" ", max(0,nest.lev+1)), collapse= ".."))
+    ## if object is long, drop the rest which won't be used anyway:
+    max.len <- max(100, width %/% 3 + 1, if(is.numeric(vec.len)) vec.len)
+    if(le > max.len) object <- object[seq_len(max.len)]
+    if(!is.null(digits.d))## reduce digits where precision is smaller:
+	digits.d <- pmin(digits.d,
+			 ceiling(log(2)/log(10) * .getPrec(object)))
+    if(is.null(vec.len)) { # use width and precision (and remain simple enough)
+        ff <- formatMpfr(object, digits=digits.d, drop0trailing=drop0trailing, ...)
+	nch <- if(getRversion() >= "3.2.1") nchar(ff, keepNA=FALSE) else nchar(ff)
+	fits <- !any(too.lrg <- cumsum(nch) + length(nch)-1L > width)
+	if(!fits)
+	    vec.len <- max(2L, which.max(too.lrg) - 1L)
+    } else
+	fits <- le <= vec.len
+    if(!fits) {
+	object <- object[i <- seq_len(vec.len)]
+	digits.d <- digits.d[i]
+    }
+    cat(formatMpfr(object, digits=digits.d, drop0trailing=drop0trailing, ...),
+	if(fits) "\n" else "...\n")
+} ## {str.mpfr}
+

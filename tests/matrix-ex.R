@@ -8,6 +8,8 @@ m.[,2] <- Const("pi", 80)
 m.[,] <- exp(mpfr(1, 90))
 stopifnot(is(mx, "mpfrMatrix"), dim(mx) == c(4,2),
           is(m., "mpfrMatrix"), dim(m.) == dim(mx),
+	  dim(is.finite(mx)) == dim(mx),
+	  dim(is.nan(mx)) == dim(mx),
           getPrec(m.) == 90)
 
 xx <- (0:7)/7
@@ -127,6 +129,16 @@ stopifnot(identical(t(n2), m2),
           is(tryCatch(eval(ex), warning=function(.).), "warning"),
 	  identical(cbind("A", "c"), matrix(c("A", "c"), 1,2)),
 	  identical(rbind("A", 2),   matrix(c("A", "2"), 2,1)) )
+
+## matrix(<mpfr>) works since 2015-02-28:
+x <- mpfr(pi,64)*mpfr(2,64)^(2^(0:19))
+(mx <- matrix(x, 4,5))
+
+stopifnot(is(mx, "mpfrMatrix"),
+    all.equal(matrix(0:19, 4,5),
+              asNumeric(log2(log2(mx) - log2(Const("pi")))),
+              tol = 1e-15)) # 64b-lnx: see 8.1e-17
+
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
 if(!interactive()) warnings()

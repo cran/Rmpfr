@@ -41,6 +41,8 @@ setMethod("dim<-", signature(x = "mpfr", value = "ANY"),
 mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
 		      rnd.mode = c('N','D','U','Z','A'))
 {
+    if(!is.atomic(x))
+	stop("'x' must be (coercable to) a numeric vector, possibly consider mpfr2array()")
     dim <- as.integer(dim)
     rnd.mode <- toupper(rnd.mode)
     rnd.mode <- match.arg(rnd.mode)
@@ -68,6 +70,24 @@ as.matrix.mpfr <- function(x, ...) {
     if(is(x, "mpfrMatrix")) x else ## is(x, "mpfr") :
     as.matrix.default(x, ...)
 }
+
+## matrix is S3 generic from 'gmp' anyway:
+matrix.mpfr <- function (data = NA, nrow = 1, ncol = 1, byrow = FALSE, ...) {
+    dim(data) <- c(nrow, ncol)
+    if(length(dots <- list(...))) {
+	if(!is.null(dn <- dots$dimnames)) {
+	    dimnames(data) <- dn # assign and delete from "dots":
+	    dots$dimnames <- NULL
+	}
+	if(nx <- length(dots)) # a simplified  Matrix:::chk.s()
+	    warning(sprintf(ngettext(nx,
+				     "extra argument %s will be disregarded",
+				     "extra arguments %s will be disregarded"),
+			sub(")$", '', sub("^list\\(", '', deparse(dots, control=c())))))
+    }
+    data
+}
+
 
 setMethod("dimnames<-", signature(x = "mpfrArray", value = "ANY"),
 	  function(x, value) {
@@ -391,7 +411,7 @@ setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
     if(nA == 2) ## A[i]
 	return(new("mpfr", r[i]))
     ## else: nA != 2 : nA > 2 -
-    dim(r) <- (dx <- dim(x))
+    dim(r) <- dim(x)
     dimnames(r) <- dimnames(x)
     r <- r[i,j, ..., drop=drop]
     if(drop && is.null(dim(r)))
@@ -603,7 +623,7 @@ setMethod("rbind", "Mnumber",
 unlistMpfr <- function(x, recursive = FALSE, use.names = TRUE)  {
     ## an "unlist(.)" for mpfr contents:
     if(recursive) stop("'recursive = TRUE' is not implemented (yet).")
-    n <- sum(lx <- vapply(x, length, 0L))
+    n <- sum(vapply(x, length, 0L))
     ans <- mpfr(numeric(n), precBits=3L)# dummy to fill
     ans@.Data <- unlist(lapply(x, slot, ".Data"), use.names=use.names)
     ans
@@ -711,19 +731,19 @@ setGeneric("apply")
 setMethod ("apply", "mpfrArray", applyMpfr)
 
 setMethod("colSums", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
-    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    stopifnot((rnk <- length(dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
     applyMpfr(x, (dims+1):rnk, sum)
 })
 setMethod("colMeans", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
-    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    stopifnot((rnk <- length(dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
     applyMpfr(x, (dims+1):rnk, mean)
 })
 setMethod("rowSums", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
-    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    stopifnot((rnk <- length(dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
     applyMpfr(x, 1:dims, sum)
 })
 setMethod("rowMeans", "mpfrArray", function(x, na.rm = FALSE, dims = 1, ...) {
-    stopifnot((rnk <- length(d <- dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
+    stopifnot((rnk <- length(dim(x))) >= 2, 1 <= dims, dims <= rnk - 1)
     applyMpfr(x, 1:dims, mean)
 })
 
@@ -795,3 +815,21 @@ setMethod("kronecker", signature(X = "mpfrMatrix", Y = "mpfrMatrix"),
 scale.mpfrMatrix <- scale.default
 ## essential, so that colMeans() is using "our" colMeans :
 environment(scale.mpfrMatrix) <- environment()# = the "Rmpfr" namespace
+
+### norm() - are "lifted" from ~/R/Pkgs/Matrix/R/sparseMatrix.R :
+##  "FIXME": ideally should be part of the setGenericImplicit("norm",..)
+setMethod("norm", signature(x = "ANY", type = "missing"),
+          function (x, type, ...) norm(x, type = "O", ...))
+setMethod("norm", signature(x = "mpfrMatrix", type = "character"),
+	  function(x, type, ...) {
+	      type <- toupper(substr(type[1], 1, 1))
+	      switch(type,  ##  max(<empty>, 0)  |-->  0
+		     "O" = ,
+                     "1" = max(colSums(abs(x)), 0), ## One-norm (L_1)
+		     "I" = max(rowSums(abs(x)), 0), ## L_Infinity
+		     "F" = sqrt(sum(x^2)), ## Frobenius
+		     "M" = max(abs(x), 0), ## Maximum modulus of all
+		     ## otherwise:
+		     stop("invalid 'type'"))
+	  })
+

@@ -18,8 +18,42 @@ setMethod("Summary", "mpfr",
 		  r
 	  })
 
-## "mean": based on sum() :
-setMethod("mean", "mpfr", function(x, ...) sum(x, ...)/length(x))
+
+stats__quantile.default <- stats:::quantile.default
+
+setMethod("quantile", "mpfr", # 'mpfr' numbers do not have 'names' slot ... (etc)
+	  function(x, ...) {
+	      if((match("names", names(list(...)), nomatch = 0L)) == 0L)
+		  stats__quantile.default(x, ..., names=FALSE)
+	      else ## ... contains 'names = ..'
+		  stats__quantile.default(x, ...)
+	  })
+
+setMethod("mean", "mpfr", function(x, trim = 0, na.rm = FALSE, ...) {
+    if(trim == 0) ## based on sum() :
+	sum(x, na.rm=na.rm, ...) / length(x)
+    else {
+	## cut'n'paste from  mean.default() :
+	if (!is.numeric(trim) || length(trim) != 1L || trim < 0)
+	    stop("'trim' must be numeric of length one, in  [0, 1/2]")
+	if (na.rm)
+	    x <- x[!is.na(x)]
+	n <- length(x)
+	if (anyNA(x))
+	    mpfr(NA)
+	else if (trim >= 0.5)
+	    quantile(x, probs = 0.5, na.rm = FALSE)
+	else {
+	    lo <- floor(n * trim) + 1
+	    hi <- n + 1 - lo
+	    mean(sort(x, partial = unique(c(lo, hi)))[lo:hi], na.rm = FALSE)
+	}
+    }
+})
+
+setMethod("median", "mpfr",
+	  function(x, na.rm=FALSE) quantile(x, probs = 0.5, na.rm=na.rm))
+
 
 ## FIXME: can do this considerably faster in C:
 setMethod("which.max", "mpfr", function(x) which.max(x == max(x)))

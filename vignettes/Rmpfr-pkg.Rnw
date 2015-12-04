@@ -2,6 +2,8 @@
 \documentclass[nojss,article]{jss}
 %              ----- for the package-vignette, don't use JSS logo, etc
 %
+%__FIXME: use ..\index{} for a good "reference index" about the things we show!
+%
 \author{Martin M\"achler \\ ETH Zurich}
 \title{Arbitrarily Accurate Computation with \R: \\ The \pkg{Rmpfr} Package}
 % \def\mythanks{a version of this paper, for \pkg{nacopula} 0.4\_4, has been published
@@ -160,7 +162,7 @@ require("Rmpfr") # after having installed the package ...
 exp(one)
 @
 
-In combinatorics, number theory or when computing series, you may occasionaly want to
+In combinatorics, number theory or when computing series, you may occasionally want to
 work with \emph{exact} factorials or binomial coefficients, where e.g. you
 may need all factorials $k!$, for $k=1,2,\dots,24$ or a full row
 of Pascal's triangle, i.e., want all $\binom{n}{k}$ for $n=80$.
@@ -264,6 +266,8 @@ which here is even ``perfect'' -- but that's ``luck'' only, and also the
 case here for ``simple'' double precision numbers, at least on our current
 platform.\footnote{64-bit Linux, Fedora 13 on a ``AMD Phenom 925'' processor}
 
+\subsection[Mathematical Constants, Pi, gamma, ..]{%
+  Mathematical Constants, Pi ($\pi$), gamma, etc}
 Our \pkg{Rmpfr} package also provides the mathematical constants which MPFR
 provides, via \code{Const(., \Arg{prec})}, currently the
 \Sexpr{length(eval(formals(Const)[["name"]]))} constants
@@ -286,16 +290,100 @@ system.time(Pi <- Const("pi", 1000 *log2(10)))
 Pi
 @
 
-TODO ---  an example of a user written function, computing something
-relevant ...
+As nice example of using Mpfr arithmetic: On a wintery Sunday, Hans
+Borchers desired to have an exact $\pi$ constant in \pkg{Rmpfr}, and
+realized that of course \code{mpfr(pi, 256)} could not be the solution, as
+\code{pi} is the double precision version of $\pi$ and hence only about 53
+bit accurate (and the \code{mpfr()} cannot do magic, recognizing
+``symbolic'' $\pi$).  As he overlooked the \code{Const("pi", .)} solution
+above, he implemented the following function that computes pi applying
+Gauss' spectacular AGM-based (AGM := Arithmetic-Geometric Mean) approach
+[Borwein and Borwein (1987), \emph{Pi and the AGM}]; I have added a
+\code{verbose} argument, explicit iteration counting and slightly adapted the style
+to my own:
+<<pi-fn-Gauss-HB>>=
+piMpfr <- function(prec=256, itermax = 100, verbose=TRUE) {
+    m2 <- mpfr(2, prec) # '2' as mpfr number
+    ## -> all derived numbers are mpfr (with precision 'prec')
+    p <- m2 + sqrt(m2) # 2 + sqrt(2) = 3.414..
+    y <- sqrt(sqrt(m2)) # 2^ {1/4}
+    x <- (y+1/y) / m2
+    it <- 0L
+    repeat {
+	p.old <- p
+	it <- it+1L
+	p <- p * (1+x) / (1+y)
+	if(verbose) cat(sprintf("it=%2d, pi^ = %s, |.-.|/|.|=%e\n",
+				it, formatMpfr(p, min(50, prec/log2(10))), 1-p.old/p))
+	if (abs(p-p.old) <= m2^(-prec))
+	    break
+	if(it > itermax) {
+	    warning("not converged in", it, "iterations") ; break
+	}
+	## else
+	s <- sqrt(x)
+	y <- (y*s + 1/s) / (1+y)
+	x <- (s+1/s)/2
+    }
+    p
+}
 
-...
+piMpfr()# indeed converges  *quadratically* fast
+## with relative error
+relErr <- 1 - piMpfr(256, verbose=FALSE) / Const("pi",260)
+## in bits :
+asNumeric(-log2(abs(relErr)))
+@
 
-\code{seqMpfr()}
+\subsection[{seqMpfr()} for sequences:]{\code{seqMpfr()} for sequences:}
+In \R, arithmetic sequences are constructed by \code{seq()}, the ``sequence'' function,
+which is not generic, and with its many ways and possible arguments is
+convenient, but straightforward to automatically generalize for mpfr numbers.
+Instead, we provide the \code{seqMpfr} function...
 
-...
+\subsection[Rounding, {roundMpfr()}, {asNumeric()} etc:]{%
+  Rounding, \code{roundMpfr()}, \code{asNumeric()} etc:}
+In \R, the \code{round()} and \code{signif()} functions belong to the
+\code{Math2} group, and we provide \code{"mpfr"}-class methods for them:
+<<Math2-def>>=
+getGroupMembers("Math2")
+showMethods("Math2", classes=c("mpfr", "mpfrArray"))
+@
+For consistency reasons, however the resulting numbers keep the same number
+of precision bits, \code{precBits}:
+<<round-ex>>=
+i7 <- 1/mpfr(700, 100)
+c(i7, round(i7, digits = 6), signif(i7, digits = 6))
+@
+If you really want to ``truncate'' the precision to less digits or bits,
+you call \code{roundMpfr()},
+<<roundMpfr-ex>>=
+roundMpfr(i7, precBits = 30)
+roundMpfr(i7, precBits = 15)
+@
+Note that 15 bits correspond to approximately $15 \cdot 0.3$, i.e., 4.5
+digits, because $1/\log_2(10) \approx 0.30103\dots$.
 
-...
+\paragraph{asNumeric():} Often used, e.g., to return to fast (\R-internal)
+arithmetic, also as alternative to \code{roundMpfr()} is to ``round to
+double precision'' producing standard
+\R numbers from ``mpfr'' numbers.  We provide the function
+\code{asNumeric()}, a generic function with methods also for
+\code{"mpfrArray"} see below and the big integers and big rationals from
+package \pkg{gmp},
+<<asNumeric-meth>>=
+showMethods(asNumeric)
+@
+see, e.g., its use above.
+
+\paragraph{Formatting:} For explicit printing or plotting purposes, we
+provide an \code{"mpfr"} method for \R's \code{format()} function, also as
+explicit utility function \code{formatMpfr(x, digits)} which provides
+results to \code{digits} \emph{significant} digits,
+<<format-ex>>=
+cbind( sapply(1:7, function(d) format(i7, digits=d)) )
+@
+
 
 \section{``All'' mathematical functions, arbitrarily precise}
 
@@ -461,7 +549,7 @@ integrateR(dnorm,0,2000, rel.tol=1e-15)
 integrateR(dnorm,0,2000, rel.tol=1e-15, verbose=TRUE)
 @
 
-Now, for situtations where numerical integration would not be necessary,
+Now, for situations where numerical integration would not be necessary,
 as the solution is known analytically, but hence are useful for exploration
 of high accuracy numerical integration:
 
@@ -479,7 +567,7 @@ as.numeric(c(I.true - Ie.d$value,
              I.true - Ie.m$value))
 @
 
-Now, for polynomials, where romberg integration of the appropriate order is
+Now, for polynomials, where Romberg integration of the appropriate order is
 exact, mathematically,
 <<integ-poly-double>>=
 if(require("polynom")) {
@@ -511,5 +599,7 @@ translated to a computer language like \R, often without very careful
 consideration of the limits of computer arithmetic.
 
 \bibliography{Rmpfr,log1mexp}
+
+FIXME:  \textbf{Index} of all functions mentioned \dots
 
 \end{document}

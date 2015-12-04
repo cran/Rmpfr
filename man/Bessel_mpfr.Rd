@@ -11,19 +11,25 @@
 \description{
   Bessel functions of integer orders, provided via arbitrary precision
   algorithms from the MPFR library.
+
+  Note that the computation can be very slow when \code{n} \emph{and}
+  \code{x} are large (and of similar magnitude).
+  % e.g. on nb-mm3,  jn(4e4, 4e4)  takes 14 sec [1.1. 2015]
 }
 \usage{
 Ai(x)
 j0(x)
 j1(x)
-jn(n, x)
+jn(n, x, rnd.mode = c("N","D","U","Z","A"))
 y0(x)
 y1(x)
-yn(n, x)
+yn(n, x, rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{x}{a \code{\link{numeric}} or \code{\linkS4class{mpfr}} vector.}
   \item{n}{non-negative integer (vector).}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
 }
 \value{
   Computes multiple precision versions of the Bessel functions of

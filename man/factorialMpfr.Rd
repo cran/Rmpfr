@@ -13,12 +13,15 @@
   \code{factorialMpfr} now is somewhat \bold{deprecated}.
 }
 \usage{
-factorialMpfr(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))))
+factorialMpfr(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))),
+              rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{n}{non-negative integer (vector).}
   \item{precBits}{desired precision in bits (\dQuote{binary digits});
     the default sets the precision high enough for the result to be \emph{exact}.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
 }
 \value{
   a number of (S4) class \code{\linkS4class{mpfr}}.

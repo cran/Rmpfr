@@ -72,8 +72,8 @@ if(FALSE)
 ## and is always +/- 1 , but R's sign(0) |--> 0
 .getSign <- function(x) vapply(getD(x), slot, 1L, "sign")
 .mpfr.sign <- function(x) {
-    r <- numeric(n <- length(x))# all 0
-    not0 <- !mpfr.is.0(x)
+    r <- numeric(length(x))# all 0
+    not0 <- !mpfrIs0(x)
     r[not0] <- .getSign(x[not0])
     r
 }
@@ -98,7 +98,7 @@ setMethod("Mod", "mpfr", function(z) abs(z))
 setMethod("Arg", "mpfr", function(z) {
     prec <- .getPrec(z)
     r <- mpfr(0, prec)
-    neg <- !mpfr.is.0(z) & .getSign(z) == -1
+    neg <- !mpfrIs0(z) & .getSign(z) == -1
     r[neg] <- Const("pi", prec = prec[neg])
     r
 })
@@ -110,14 +110,16 @@ setMethod("Arg", "mpfr", function(z) {
 setMethod("factorial", "mpfr",
 	  function(x) {
 	      r <- gamma(x + 1)
-	      isi <- mpfr.is.integer(x)
+	      isi <- .mpfr.is.whole(x)
 	      r[isi] <- round(r[isi])
 	      r
 	  })
 ## The "real" thing is to use  the MPFR-internal function:
-factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2)))) {
+factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))),
+                          rnd.mode = c('N','D','U','Z','A'))
+{
     stopifnot(n >= 0)
-    new("mpfr", .Call(R_mpfr_fac, n, precBits))
+    new("mpfr", .Call(R_mpfr_fac, n, precBits, match.arg(rnd.mode)))
 }
 
 ##' Pochhammer rising factorial = Pochhammer(a,n) {1 of 2 definitions!}
@@ -125,7 +127,7 @@ factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2)))) {
 ##' the definition that the GSL and Mathematica use as well.
 ##' We want to do this well for *integer* n, only the general case is using
 ##' P(a,x) := Gamma(a+x)/Gamma(x)
-pochMpfr <- function(a, n) {
+pochMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
     stopifnot(n >= 0)
     if(!is(a, "mpfr")) ## use a high enough default precision (and recycle ..)
         a <- mpfr(a, precBits = pmax(1,n)*getPrec(a))
@@ -133,12 +135,12 @@ pochMpfr <- function(a, n) {
 	a <- a + 0*n
     ## a@.Data[] <- .Call(R_mpfr_poch, a, n)
     ## a
-    setDataPart(a, .Call(R_mpfr_poch, a, n))
+    setDataPart(a, .Call(R_mpfr_poch, a, n, match.arg(rnd.mode)))
 }
 
 ##' Binomial Coefficient choose(a,n)
 ##' We want to do this well for *integer* n
-chooseMpfr <- function(a, n) {
+chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
     stopifnot(n >= 0)
     if(!is(a, "mpfr")) { ## use high enough default precision
         lc <- lchoose(a,n)
@@ -149,7 +151,7 @@ chooseMpfr <- function(a, n) {
 	a <- a + 0*n
     ## a@.Data[] <- .Call(R_mpfr_choose, a, n)
     ## a
-    setDataPart(a, .Call(R_mpfr_choose, a, n))
+    setDataPart(a, .Call(R_mpfr_choose, a, n, match.arg(rnd.mode)))
 }
 
 chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
@@ -218,9 +220,9 @@ sumBinomMpfr <- sumBinomMpfr.v2
 ##' @param precBits integer specifying the desired precision in bits.
 ##' @return an mpfr number as \code{x} but with the new 'precBits' precision
 ##' @author Martin Maechler
-roundMpfr <- function(x, precBits) {
+roundMpfr <- function(x, precBits, rnd.mode = c('N','D','U','Z','A')) {
     stopifnot(is(x, "mpfr"))
-    setDataPart(x, .Call(R_mpfr_round, x, precBits))
+    setDataPart(x, .Call(R_mpfr_round, x, precBits, match.arg(rnd.mode)))
 }
 
 ## "log" is still special with its 'base' :
@@ -237,7 +239,7 @@ setMethod("Math", signature(x = "mpfr"), function(x)
 setMethod("Math2", signature(x = "mpfr"),
 	  function(x, digits) {
 	      ## NOTA BENE: vectorized in  'x'
-	      if(any(ret.x <- !is.finite(x) | mpfr.is.0(x))) {
+	      if(any(ret.x <- !is.finite(x) | mpfrIs0(x))) {
 		  if(any(ok <- !ret.x))
 		      x[ok] <- callGeneric(x[ok], digits=digits)
 		  return(x)

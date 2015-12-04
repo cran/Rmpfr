@@ -17,15 +17,28 @@
 \alias{beta,ANY,mpfr-method}
 \alias{beta,ANY,mpfrArray-method}
 \alias{beta,mpfr,ANY-method}
+\alias{beta,mpfr,mpfr-method}
+\alias{beta,mpfr,numeric-method}
+\alias{beta,numeric,mpfr-method}
 \alias{beta,mpfrArray,ANY-method}
 \alias{beta,mpfrArray,mpfrArray-method}
-\alias{beta,mpfr,mpfr-method}
 \alias{lbeta,ANY,mpfr-method}
 \alias{lbeta,ANY,mpfrArray-method}
 \alias{lbeta,mpfr,ANY-method}
+\alias{lbeta,mpfr,mpfr-method}
+\alias{lbeta,mpfr,numeric-method}
+\alias{lbeta,numeric,mpfr-method}
 \alias{lbeta,mpfrArray,ANY-method}
 \alias{lbeta,mpfrArray,mpfrArray-method}
-\alias{lbeta,mpfr,mpfr-method}
+\alias{atan2,ANY,mpfr-method}
+\alias{atan2,ANY,mpfrArray-method}
+\alias{atan2,mpfr,ANY-method}
+\alias{atan2,mpfr,mpfr-method}
+\alias{atan2,mpfr,numeric-method}
+\alias{atan2,numeric,mpfr-method}
+\alias{atan2,mpfrArray,ANY-method}
+\alias{atan2,mpfrArray,mpfrArray-method}
+\alias{hypot}
 %
 \alias{coerce,mpfr,character-method}
 \alias{coerce,mpfr,numeric-method}
@@ -91,12 +104,18 @@
 \alias{is.infinite,mpfr-method}
 \alias{is.na,mpfr-method}
 \alias{is.nan,mpfr-method}
+\alias{is.finite,mpfrArray-method}
+\alias{is.infinite,mpfrArray-method}
+\alias{is.na,mpfrArray-method}
+\alias{is.nan,mpfrArray-method}
 \alias{unique,mpfr,missing-method}
 %
 \alias{all.equal,mpfr,mpfr-method}
 \alias{all.equal,mpfr,ANY-method}
 \alias{all.equal,ANY,mpfr-method}
 \alias{mean,mpfr-method}
+\alias{median,mpfr-method}
+\alias{quantile,mpfr-method}
 
 \alias{dim<-,mpfr-method}
 \alias{t,mpfr-method}
@@ -125,6 +144,19 @@
   instead of the double precision of \sQuote{traditional} \R numbers
   (with \code{\link{class}(.) == "numeric"} and
   \code{\link{typeof}(.) == "double"}).
+
+  \code{hypot(x,y)} computes the hypothenuse length \eqn{z} in a rectangular
+  triangle with \dQuote{leg} side lengths \eqn{x} and \eqn{y}, i.e.,
+  \deqn{z = hypot(x,y) = \sqrt{x^2 + y^2},}{z = hypot(x,y) = sqrt(x^2 + y^2),}
+  in a numerically stable way.
+}
+\usage{
+hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
+}
+\arguments{
+  \item{x,y}{an object of class \code{mpfr}.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
 }
 \section{Objects from the Class}{
   Objects are typically created by \code{\link{mpfr}(<number>, precBits)}.
@@ -157,6 +189,12 @@
 \section{Methods}{
   \describe{
     \item{abs}{\code{signature(x = "mpfr")}: ... }
+
+    \item{atan2}{\code{signature(y = "mpfr", x = "ANY")}, and}
+    \item{atan2}{\code{signature(x = "ANY", y = "mpfr")}: compute the
+     arc-tangent of two arguments: \code{atan2(y, x)} returns the angle
+     between the x-axis and the vector from the origin to \eqn{(x, y)},
+     i.e., for positive arguments \code{atan2(y, x) == \link{atan}(y/x)}.}
 
     \item{lbeta}{\code{signature(a = "ANY", b = "mpfrArray")}, is
       \eqn{\log(|B(a,b)|)}{log(abs(B(a,b)))} where \eqn{B(a,b)} is the
@@ -208,7 +246,12 @@
       \code{\link{max}}, \code{\link{min}}, \code{\link{range}},
       \code{\link{prod}}, \code{\link{sum}},
       \code{\link{any}}, and \code{\link{all}}
-      are all defined for MPFR numbers.}
+      are all defined for MPFR numbers.  \code{\link{mean}(x, trim)} for
+      non-0 \code{trim} works analogously to \code{\link{mean.default}}.}
+
+    \item{median}{\code{signature(x = "mpfr")}: works via}% quantile(*, probs = 0.5) :
+    \item{quantile}{\code{signature(x = "mpfr")}: a simple wrapper of
+    the \code{quantile.default} method from \pkg{stats}.}
 
     \item{Math}{\code{signature(x = "mpfr")}: All the S4
       \code{\link[methods:S4groupGeneric]{Math}} group functions are
@@ -239,7 +282,10 @@
       \samp{mpfr_fac_ui}.}
 
     \item{Math2}{\code{signature(x = "mpfr")}: \code{\link{round}(x,
-	digits)} and \code{\link{signif}(x, digits)} methods.}
+	digits)} and \code{\link{signif}(x, digits)} methods.  Note that
+	these do not change the formal precision (\code{'prec'} slot),
+	and you may often want to apply \code{\link{roundMpfr}()} in
+	addition or preference.}
 
     \item{as.numeric}{\code{signature(x = "mpfr")}: ... }
 
@@ -319,7 +365,9 @@
   \code{"mpfr"} one.
 
   \code{\link{roundMpfr}} to \emph{change} precision of an \code{"mpfr"}
-  object; \code{\link{is.whole}()} etc.
+  object which is typically desirable \emph{instead} of or in addition
+  to \code{signif()} or \code{round()};
+  \code{\link{is.whole}()} etc.
 
   Special mathematical functions such as some Bessel ones, e.g., \code{\link{jn}};
   further, \code{\link{zeta}(.)} \eqn{(= \zeta(.))}, \code{Ei()} etc.
@@ -372,10 +420,14 @@ stopifnot(all(diff(sort(p)) >= 0),
  TRUE)
 
 m0 <- mpfr(numeric(), 99)
+xy <- expand.grid(x = -2:2, y = -2:2) ; x <- xy[,"x"] ; y <- xy[,"y"]
+a2. <- atan2(y,x)
+
 stopifnot(identical(which.min(m0), integer(0)),
 	  identical(which.max(m0), integer(0)),
-	  max(m0) == mpfr(-Inf, 53), # hmm, the 53 is not a feature
-	  min(m0) == mpfr(+Inf, 53), #	 (ditto)
+          all.equal(a2., atan2(as(y,"mpfr"), x)),
+	  max(m0) == mpfr(-Inf, 53), # (53 is not a feature, but ok)
+	  min(m0) == mpfr(+Inf, 53),
 	  sum(m0) == 0, prod(m0) == 1)
 }
 \keyword{classes}

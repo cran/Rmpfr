@@ -7,11 +7,18 @@ pi. # nicely prints 80 digits [260 * log10(2) ~= 78.3 ~ 80]
 
 ## These both failed (in mpfr2str(.)) with a seg.fault:
 c(mpfr(1, prec=3), pi.)
-mpfr(numeric(), prec=64)
+m0 <- mpfr(numeric(), prec=64)
+## print()ing / str() of 0-length mpfr
+stopifnot(
+    grepl("0 'mpfr' numbers", capture.output(    m0)),
+    grepl("0 'mpfr' numbers", capture.output(str(m0))))
+
 
 ## This is TRUE for 0 and -0 :
 Zero <- mpfr(c(0,1/-Inf), 20)
-stopifnot(mpfr.is.0(Zero))
+stopifnot(mpfrIs0(Zero), is.whole(Zero))
+stopifnot(mpfr.is.0(Zero))# deprecated but must work
+stopifnot(mpfr.is.integer(Zero))# deprecated but must work
 Zero # the "-0" should print correctly
 stopifnot(.getSign(Zero) == c(1,-1),
           sign(Zero) == 0,
@@ -85,14 +92,16 @@ for(n in 1:ntry) {
     )
 }; cat("\n")
 
-X. <- X.[!mpfr.is.0(X.)]
+stopifnot(identical(mpfr.is.0(X.),# deprecated but must work
+		    mpfrIs0  (X.)))
+X. <- X.[!mpfrIs0(X.)]
 stopifnot(all( X./X. == 1)) # TRUE
 
 u <- mpfr(as.raw(0:100))
 z <- mpfr(1:12, 200)
 z[z > 100] <- 100 # nothing done  (but used to fail)
 z[] <- 0
-stopifnot(0:100 == u, is(z,"mpfr"), mpfr.is.0(z),
+stopifnot(0:100 == u, is(z,"mpfr"), mpfrIs0(z),
 	  all.equal(u, mpfr(0:100, prec = 8), tol = 0),
 	  0:1 == mpfr(1:2 %% 2 == 0))
 z[3] <- Const("pi",200)

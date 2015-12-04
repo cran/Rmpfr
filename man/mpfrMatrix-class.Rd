@@ -70,6 +70,8 @@
 \alias{dimnames<-,mpfrArray-method}
 \alias{dimnames,mpfrArray-method}
 
+\alias{norm,ANY,missing-method}
+\alias{norm,mpfrMatrix,character-method}
 \alias{show,mpfrArray-method}
 \alias{sign,mpfrArray-method}
 \alias{t,mpfrMatrix-method}
@@ -177,6 +179,10 @@ class \code{"\linkS4class{vector}"}, by class "mpfrArray", distance 4.
     \item{show}{\code{signature(object = "mpfrArray")}: ... }
     \item{sign}{\code{signature(x = "mpfrArray")}: ... }
 
+    \item{norm}{\code{signature(x = "mpfrMatrix", type = "character")}:
+      computes the matrix norm of \code{x}, see \code{\link[base]{norm}}
+      or the one in package \pkg{Matrix}.}
+
     \item{t}{\code{signature(x = "mpfrMatrix")}: tranpose the mpfrMatrix.}
     \item{aperm}{\code{signature(a = "mpfrArray")}: \code{aperm(a,
 	perm)} is a generalization of \code{t(.)} to \emph{perm}ute the
@@ -235,5 +241,12 @@ CA[i3] <- CA[i3] ^ 3
 S2. <- scale(S2)
 stopifnot(all.equal(abs(as.vector(S2.)), rep(sqrt(1/mpfr(2, 128)), 4),
 		    tol = 1e-30))
+
+## norm() :
+norm(S2)
+stopifnot(identical(norm(S2), norm(S2, "1")),
+          norm(S2, "I") == 6,
+          norm(S2, "M") == 4,
+          abs(norm(S2, "F") - 5.477225575051661) < 1e-15)
 }
 \keyword{classes}

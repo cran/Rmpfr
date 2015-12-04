@@ -8,7 +8,7 @@
 }
 \usage{
 pbetaI(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
-       precBits = NULL)
+       precBits = NULL, rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{q}{called \eqn{x}, above; vector of quantiles, in \eqn{[0,1]}.}
@@ -22,6 +22,8 @@ pbetaI(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
   \item{log.p}{logical; if TRUE, probabilities p are given as log(p).}
   \item{precBits}{the precision (in number of bits) to be used in
     \code{\link{sumBinomMpfr}()}.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
 }
 \value{
   an \code{"\linkS4class{mpfr}"} vector of the same length as \code{q}.

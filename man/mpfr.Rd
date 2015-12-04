@@ -1,39 +1,57 @@
 \name{mpfr}
-\alias{mpfr}
-\alias{Const}
 \title{Create "mpfr" Numbers (Objects)}
+\alias{mpfr}
+\alias{mpfr.default}
+\alias{mpfr.mpfr}% and more
+\alias{Const}
 \description{
   Create multiple (i.e. typically \emph{high}) precision numbers, to be
   used in arithmetic and mathematical computations with \R.
 }
 \usage{
-mpfr(x, precBits, base = 10, rnd.mode = c("N","D","U","Z","A"))
-Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
+mpfr(x, precBits, \dots)
+\S3method{mpfr}{default}(x, precBits, base = 10,
+     rnd.mode = c("N","D","U","Z","A"), scientific = NA, \dots)
+
+Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L,
+      rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
-  \item{x}{a \code{\link{numeric}}, \code{\link[gmp]{bigz}},
-    \code{\link[gmp]{bigq}}, or \code{\link{character}} vector or
-    \code{\link{array}}.}
+  \item{x}{a \code{\link{numeric}}, \code{\linkS4class{mpfr}},
+      \code{\link[gmp]{bigz}}, \code{\link[gmp]{bigq}}, or
+      \code{\link{character}} vector or \code{\link{array}}.}
   \item{precBits, prec}{a number, the maximal precision to be used, in
     \bold{\emph{bits}}; i.e. \code{53} corresponds to double precision.
     Must be at least 2.  If \code{\link{missing}},
     \code{\link{getPrec}(x)} determines a default precision.}
   \item{base}{(only when \code{x} is \code{\link{character}}) the base
     with respect to which \code{x[i]} represent numbers; \code{base}
-    \eqn{b} must fulfill \eqn{2 \le b \le 36}{2 <= b <= 36}.}
+    \eqn{b} must fulfill \eqn{2 \le b \le 62}{2 <= b <= 62}.}
   \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
     should happen at C-level conversion to MPFR, see details.}
+  \item{scientific}{(used only when \code{x} is the result of
+    \code{\link{formatBin}()}, i.e., of class \code{"Bcharacter"}:)
+    logical indicating that the binary representation of \code{x} is in
+    scientific notation.  When \code{TRUE}, \code{mpfr()} will substitute
+    \code{0} for \code{_}; when \code{NA}, \code{mpfr()} will guess, and
+    use \code{TRUE} when finding a \code{"p"} in \code{x}; see also
+    \code{\link{formatBin}}.}
   \item{name}{a string specifying the mpfrlib - internal constant
     computation.  \code{"gamma"} is Euler's gamma \eqn{(\gamma)}{}, and
     \code{"catalan"} Catalan's constant.}
+  \item{\dots}{potentially further arguments passed to and from methods.}
 }
 \value{
-  an object of (S4) class \code{\linkS4class{mpfr}},
+  an object of (S4) class \code{\linkS4class{mpfr}}, or for
+  \code{mpfr(x)} when \code{x} is an array,
   \code{\linkS4class{mpfrMatrix}}, or \code{\linkS4class{mpfrArray}}
   which the user should just as a normal numeric vector or array.
 }
 \details{
-  MPFR supports four rounding modes,
+  The \code{"\linkS4class{mpfr}"} method of \code{mpfr()} is a simple
+      wrapper around \code{\link{roundMpfr}()}.
+
+  MPFR supports the following rounding modes,
   %% the following is +- cut & paste from the MPFR manual
   \describe{
     \item{GMP_RND\bold{N}:}{round to \bold{n}earest (roundTiesToEven in
@@ -54,17 +72,20 @@ Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L)
   to (10.0)=2 with a precision of two bits, and not to (11.0)=3.  This
   rule avoids the "drift" phenomenon mentioned by Knuth in volume 2 of
   The Art of Computer Programming (Section 4.2.2).
+
+  When \code{x} is \code{\link{character}}, \code{mpfr()}
+  will detect the precision of the input object. %% FIXME examples
 }
 \references{
-  The MPFR team. (2009).
+  The MPFR team. (201x).
   \emph{GNU MPFR -- The Multiple Precision Floating-Point Reliable
-    Library}; Edition 2.4.2, November 2009;
-  see \url{http://www.mpfr.org/mpfr-current/#doc} or directly
+    Library}; see \url{http://www.mpfr.org/mpfr-current/#doc} or directly
   \url{http://www.mpfr.org/mpfr-current/mpfr.pdf}.
 }
 \author{Martin Maechler}
 \seealso{The class documentation \code{\linkS4class{mpfr}} contains more
-  details.
+  details.  Use \code{\link{asNumeric}} to transform back to double
+  precision ("\code{\link{numeric}}").
 }
 \examples{
 mpfr(pi, 120) ## the double-precision pi "translated" to 120-bit precision
@@ -91,6 +112,8 @@ print(mpfr("111.1111", base=2)) * 2^4
 
 mpfr("af21.01020300a0b0c", base=16)
 ##  68 bit prec.  44833.00393694653820642
+
+mpfr("ugi0", base = 32) == 10^6   ## TRUE
 
 ## --- Large integers from package 'gmp':
 Z <- as.bigz(7)^(1:200)

@@ -29,7 +29,7 @@ stopifnot(format(mpfr(1, 60) / mpfr(7, 160)) ==
 ix <- x^-1000
 iX <- asNumeric(ix)
 
-stopifnot( mpfr.is.0(x - x), # badly failed on 64-bit
+stopifnot( mpfrIs0(x - x), # badly failed on 64-bit
 	  identical(-x, 0-x),# testing "- x"
           all.equal(ix, (1/x)^1000, tol= 1e-25),
           is.numeric(iX), iX[1:4] == Inf, # failed previously as we used RNDD (downward rounding)
@@ -215,7 +215,16 @@ stopifnot(
     i %/% mpfr(27, prec=99) ==
     r %/% mpfr(27, prec=99)
     , TRUE ##
-    )
+)
 
+cat('Time elapsed: ', proc.time(),'\n') # "stats"
+
+###------Standard Statistics Functions --------------------------------------------------------
+
+x <- c(del, 1000)
+stopifnot(identical(mean(x), mean(x, trim=0)))
+for(tr in (0:8)/16)
+    stopifnot(all.equal(mean(          x,  trim = tr),
+                        mean(asNumeric(x), trim = tr), tol=1e-15))
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

@@ -1,7 +1,7 @@
 
-R version 3.1.1 Patched (2014-09-03 r66517) -- "Sock it to Me"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-unknown-linux-gnu (64-bit)
+R version 3.2.2 RC (2015-08-08 r68920) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -115,7 +115,7 @@ Type 'q()' to quit R.
 15 1024        <NA>
 16 1025 10000000001
 > 
-> x <- mpfr(c(-20:30),64)
+> x <- mpfr(c(-20:-1, 1:30),64)# w/o  0  - as its mantissa is "random" (in 64-bit)
 > data.frame(x= as.numeric(x), I(Bits(x)))
      x Bits.x.
 1  -20   10100
@@ -138,37 +138,37 @@ Type 'q()' to quit R.
 18  -3      11
 19  -2    <NA>
 20  -1    <NA>
-21   0    <NA>
-22   1    <NA>
-23   2    <NA>
-24   3      11
-25   4    <NA>
-26   5     101
-27   6     110
-28   7     111
-29   8    <NA>
-30   9    1001
-31  10    1010
-32  11    1011
-33  12    1100
-34  13    1101
-35  14    1110
-36  15    1111
-37  16    <NA>
-38  17   10001
-39  18   10010
-40  19   10011
-41  20   10100
-42  21   10101
-43  22   10110
-44  23   10111
-45  24   11000
-46  25   11001
-47  26   11010
-48  27   11011
-49  28   11100
-50  29   11101
-51  30   11110
+21   1    <NA>
+22   2    <NA>
+23   3      11
+24   4    <NA>
+25   5     101
+26   6     110
+27   7     111
+28   8    <NA>
+29   9    1001
+30  10    1010
+31  11    1011
+32  12    1100
+33  13    1101
+34  14    1110
+35  15    1111
+36  16    <NA>
+37  17   10001
+38  18   10010
+39  19   10011
+40  20   10100
+41  21   10101
+42  22   10110
+43  23   10111
+44  24   11000
+45  25   11001
+46  26   11010
+47  27   11011
+48  28   11100
+49  29   11101
+50  30   11110
+> b0 <- Bits(mpfr(0, 64)) # not printing it here -- they are "random" for this special case!
 > 
 > (half <- mpfr(0.5, 64)*(1 + mpfr(2, 64)^-16 * (-3:3)))
 7 'mpfr' numbers of precision  64   bits 
@@ -201,11 +201,11 @@ c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636,
 > 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.737 0.027 0.826 0 0 
+Time elapsed:  0.345 0.064 0.404 0 0.002 
 > 
 > if(!interactive()) warnings()
 NULL
 > 
 > proc.time()
    user  system elapsed 
-  0.737   0.027   0.826 
+  0.345   0.066   0.404 

@@ -225,7 +225,10 @@ We have found, however, that in some situations, the use of \code{log1p()} and
 \code{expm1()} may not be sufficient to prevent loss of numerical
 accuracy.  The topic of this note is to analyze the important case of computing
 $\log\left(1 - e^x \right) = \log(1 - \exp(x))$ for $x < 0$, computations needed
-in accurate computations of the beta, gamma, Weibull and logistic distributions,
+in accurate computations of the beta, gamma, exponential, Weibull, t,
+logistic, geometric and hypergeometric distributions,
+%% in ~/R/D/r-devel/R/src/nmath/ :
+%%  grep --color -nHEw -e '(R_Log1_Exp|R_D_LExp|R_DT_Log|R_DT_C?log)' *.?
 and % because of the latter,
 even for the logit link function in logistic regression. For the beta and
 gamma distributions, see, for example, % e.g.,

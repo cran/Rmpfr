@@ -1,18 +1,20 @@
 \name{roundMpfr}
+\title{Rounding to Binary bits, "mpfr-internally"}
 \alias{roundMpfr}
 \alias{setPrec}% <- so its found
-\title{Rounding to Binary bits, "mpfr-internally"}
 \description{Rounding to binary bits, not decimal digits.  Closer to the number
   representation, this also allows to \emph{increase} or decrease a number's
   precBits.  In other words, it acts as \code{setPrec()}, see
   \code{\link{getPrec}()}.
 }
 \usage{
-roundMpfr(x, precBits)
+roundMpfr(x, precBits, rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{x}{an mpfr number (vector)}
   \item{precBits}{integer specifying the desired precision in bits.}
+  \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
+    should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
 }
 % \details{
 % }

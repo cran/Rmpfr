@@ -28,7 +28,7 @@ static R_CallMethodDef CallEntries[] = {
 #endif
     CALLDEF(mpfr2d, 2),
     CALLDEF(mpfr2i, 2),
-    CALLDEF(mpfr2str, 2),
+    CALLDEF(mpfr2str, 3),
     CALLDEF(str2mpfr1_list, 4),
 
     CALLDEF(Rmpfr_minus, 1),
@@ -57,25 +57,25 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(R_mpfr_get_version, 0),
     CALLDEF(R_mpfr_get_GMP_numb_bits, 0),
 
-    CALLDEF(const_asMpfr, 2),
+    CALLDEF(const_asMpfr, 3),
 
-    CALLDEF(R_mpfr_is_finite, 1),
-    CALLDEF(R_mpfr_is_infinite, 1),
-    CALLDEF(R_mpfr_is_integer, 1),
-    CALLDEF(R_mpfr_is_na, 1),
-    CALLDEF(R_mpfr_is_zero, 1),
+    CALLDEF(R_mpfr_is_finite, 1),	CALLDEF(R_mpfr_is_finite_A, 1),
+    CALLDEF(R_mpfr_is_infinite, 1),	CALLDEF(R_mpfr_is_infinite_A, 1),
+    CALLDEF(R_mpfr_is_integer, 1),	CALLDEF(R_mpfr_is_integer_A, 1),
+    CALLDEF(R_mpfr_is_na, 1),		CALLDEF(R_mpfr_is_na_A, 1),
+    CALLDEF(R_mpfr_is_zero, 1),      	CALLDEF(R_mpfr_is_zero_A, 1),
 
-    CALLDEF(R_mpfr_jn, 2),
-    CALLDEF(R_mpfr_yn, 2),
-    CALLDEF(R_mpfr_atan2, 2),
-    CALLDEF(R_mpfr_hypot, 2),
-    CALLDEF(R_mpfr_beta, 2),
-    CALLDEF(R_mpfr_lbeta, 2),
+    CALLDEF(R_mpfr_atan2, 3),
+    CALLDEF(R_mpfr_hypot, 3),
+    CALLDEF(R_mpfr_beta, 3),
+    CALLDEF(R_mpfr_lbeta, 3),
 
-    CALLDEF(R_mpfr_fac, 2),
-    CALLDEF(R_mpfr_choose, 2),
-    CALLDEF(R_mpfr_poch, 2),
-    CALLDEF(R_mpfr_round, 2),
+    CALLDEF(R_mpfr_jn, 3),
+    CALLDEF(R_mpfr_yn, 3),
+    CALLDEF(R_mpfr_fac, 3),
+    CALLDEF(R_mpfr_choose, 3),
+    CALLDEF(R_mpfr_poch, 3),
+    CALLDEF(R_mpfr_round, 3),
 
     {NULL, NULL, 0}
 };
@@ -130,11 +130,11 @@ R_init_Rmpfr(DllInfo *dll)
 
     RREGDEF(const_asMpfr);
 
-    RREGDEF(R_mpfr_is_finite);
-    RREGDEF(R_mpfr_is_infinite);
-    RREGDEF(R_mpfr_is_integer);
-    RREGDEF(R_mpfr_is_na);
-    RREGDEF(R_mpfr_is_zero);
+    RREGDEF(R_mpfr_is_finite);	 RREGDEF(R_mpfr_is_finite_A);
+    RREGDEF(R_mpfr_is_infinite); RREGDEF(R_mpfr_is_infinite_A);
+    RREGDEF(R_mpfr_is_integer);	 RREGDEF(R_mpfr_is_integer_A);
+    RREGDEF(R_mpfr_is_na);	 RREGDEF(R_mpfr_is_na_A);
+    RREGDEF(R_mpfr_is_zero);	 RREGDEF(R_mpfr_is_zero_A);
 
     RREGDEF(R_mpfr_jn);
     RREGDEF(R_mpfr_yn);
@@ -154,6 +154,8 @@ R_init_Rmpfr(DllInfo *dll)
     Rmpfr_expSym = install("exp");
     Rmpfr_d_Sym = install("d");
     Rmpfr_Data_Sym = install(".Data");
+    Rmpfr_Dim_Sym = install("Dim");
+    Rmpfr_Dimnames_Sym = install("Dimnames");
 
 /* not suppressable, hence moved to suppressable R startup code:
     Rprintf("Loading C code of R package 'Rmpfr': GMP using %d bits per limb\n",

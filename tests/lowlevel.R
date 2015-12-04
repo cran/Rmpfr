@@ -16,6 +16,19 @@ o1 <- as(x4[1], "mpfr1")
 stopifnot(is(o1, "mpfr1")) # failed previously
 validObject(o1)            # ditto (failed on 64-bit only)
 
+stopifnot(
+    getPrec("0xabc", base=16, doNumeric=FALSE) == 3*4,
+    getPrec(  "abc", base=16, doNumeric=FALSE) == 3*4,
+    getPrec("0b1001", base=2, doNumeric=FALSE) == 4,
+    getPrec(  "1001", base=2, doNumeric=FALSE) == 4,
+    identical3(mpfr("0b101", base= 2),
+               mpfr(  "101", base= 2), mpfr(5, precBits = 3))
+   ,
+    identical3(mpfr("0xabc", base=16),
+               mpfr(  "abc", base=16), mpfr(2748, base=16, precBits = 12))
+)
+
+
 ###----- _2_ Debugging, changing MPFR defaults, .. -----------------------------
 ##  NB: Currently mostly  *not* documented, not even .mpfr.erange()
 

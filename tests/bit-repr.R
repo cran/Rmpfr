@@ -78,8 +78,9 @@ x <- mpfr(c(3:5,11:16, 59, 125:128, 1024:1025), 64)
 x
 data.frame(x= as.numeric(x), I(Bits(x)))
 
-x <- mpfr(c(-20:30),64)
+x <- mpfr(c(-20:-1, 1:30),64)# w/o  0  - as its mantissa is "random" (in 64-bit)
 data.frame(x= as.numeric(x), I(Bits(x)))
+b0 <- Bits(mpfr(0, 64)) # not printing it here -- they are "random" for this special case!
 
 (half <- mpfr(0.5, 64)*(1 + mpfr(2, 64)^-16 * (-3:3)))
 Bits(half)
