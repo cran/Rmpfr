@@ -4,7 +4,23 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
-\section{Changes in version 0.6-0 [2015-08-08]}{
+\section{Changes in version 0.6-1 [2016-11-15]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{head()} and \code{tail()} methods for \code{"mpfrMatrix"}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item C-level \code{mpfr2str()} no longer calls S_realloc() with
+      wrong "old size" (thanks to Bill Dunlap).
+      \item \code{c()} now also works when its result is a length-0
+      \code{"mpfr"} object.
+    }
+  }
+}
+
+\section{Changes in version 0.6-0 [2015-12-04]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item \code{mpfr()} now is S3 generic with several methods, notably a

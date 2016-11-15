@@ -36,7 +36,7 @@ mpfrImport(mxp)
     \code{getPrec()}, any number-like \R object, or \code{\link{NULL}}.}
   \item{base}{(only when \code{x} is \code{\link{character}}) the base
     with respect to which \code{x[i]} represent numbers; \code{base}
-    \eqn{b} must fulfill \eqn{2 \le b \le 36}{2 <= b <= 36}.}
+    \eqn{b} must fulfill \eqn{2 \le b \le 62}{2 <= b <= 62}.}
   \item{doNumeric}{logical indicating \code{\link{integer}} or
     \code{\link{double}} typed \code{x} should be accepted and a default
     precision be returned.  Should typically be kept at default \code{TRUE}.}

@@ -95,3 +95,9 @@ mil <- mpfr(1025, 111)
 str(mm <- mpfrXport(xx <- mil^(2^25)))
 stopifnot(all.equal(log2(xx) * 2^-25, log2(mil), tol=1e-15))
 
+
+## Bill Dunlap's example (with patch about convert S_alloc bug):
+##               (precision increases, then decreases)
+z <- c(mpfr(1,8)/19, mpfr(1,32)/19, mpfr(1,24)/19)
+cbind(fz <- format(z))
+stopifnot(identical(fz, c("0.05273", "0.052631578947", "0.0526315793")))

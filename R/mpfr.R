@@ -286,7 +286,9 @@ setReplaceMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing",
 
 ## I don't see how I could use setMethod("c", ...)
 ## but this works "magically"  when the first argument is an mpfr :
-c.mpfr <- function(...) new("mpfr", unlist(lapply(list(...), as, Class = "mpfr")))
+c.mpfr <- function(...)
+    new("mpfr", unlist(lapply(list(...), as, Class = "mpfr"),
+		       recursive = FALSE))
 
 ##  duplicated() now works, checked in ../man/mpfr-class.Rd
 

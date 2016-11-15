@@ -5,10 +5,10 @@
 ### as a partial role image
 
 setClass("mpfr1", ## a single Multi-precision float number
-	 representation(prec = "integer", # precision in bits
-			exp = "integer",  # exponent
-			sign= "integer",  # signum
-			d = "integer"),	  # the mantissa as a vector of (32 bit) integers
+	 slots = c(prec = "integer", # precision in bits
+                   exp = "integer",  # exponent
+                   sign= "integer",  # signum
+                   d = "integer"),   # the mantissa as a vector of (32 bit) integers
 	 validity = function(object) {
 	     gmp.numb <- .mpfr.gmp.numbbits() # 32 or 64
 	     if(length(pr <- object@prec) != 1 || is.na(pr) || pr < 2)
@@ -41,7 +41,7 @@ setClass("mpfr", ## a *vector* of "mpfr1", i.e., multi-precision float numbers
 
 setClass("mpfrArray", ## mpfr + "dim" + dimnames
 	 contains = "mpfr",
-	 representation = list(Dim = "integer", Dimnames = "list"),
+	 slots = c(Dim = "integer", Dimnames = "list"),
 	 prototype = prototype(new("mpfr"), Dim= 0L),
 	 validity = function(object) {
 	     if(length(object) != prod(D <- object@Dim))

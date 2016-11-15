@@ -44,7 +44,7 @@ rbind(\dots, deparse.level = 1)
 % \references{ ~put references to the literature/web site here ~ }
 \author{Martin Maechler}
 \seealso{\code{\link{cbind2}}, \code{\link{cbind}},
-  \code{\link[methods]{Methods}}.
+  Documentation in base \R's \pkg{methods} package% R <= 3.3.1 \code{\link[methods]{Methods}}
 }
 \examples{
   cbind(1, mpfr(6:3, 70)/7, 3:0)

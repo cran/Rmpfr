@@ -462,14 +462,17 @@ setMethod("[", signature(x = "mpfrArray", i = "ANY", j = "missing",
 	}
 	attributes(r) <- NULL
     }
-    else if(n.a == 3) { ##  A [ i ] <- v
+    else if(n.a %in% c(2,3)) { ##  A [ i ] <- v  //   A[] <- v
 	if(!isMpfr)
 	    value <- mpfr(value, precBits = pmax(getPrec(value), .getPrec(r[i])))
-
-	r[i] <- value
-    } else { ## n.a <= 2
-	stop(sprintf("nargs() == %d  mpfrArray[i,j] <- value  IMPOSSIBLE?",
-		     n.a))
+        if(n.a == 3L)
+            r[i] <- value
+        else ## n.a == 2:
+            r[] <- value
+    }
+    else { ## n.a <= 1
+	stop(sprintf("nargs() == %d  mpfrArray[i,j] <- value  __ SHOULD NOT HAPPEN!",
+                     n.a))
     }
     setDataPart(x, r, check=FALSE)
 }## .mA.subAssign
@@ -833,3 +836,6 @@ setMethod("norm", signature(x = "mpfrMatrix", type = "character"),
 		     stop("invalid 'type'"))
 	  })
 
+
+setMethod("head", signature(x = "mpfrMatrix"), utils::head.matrix)
+setMethod("tail", signature(x = "mpfrMatrix"), utils::tail.matrix)

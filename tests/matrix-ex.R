@@ -130,6 +130,12 @@ stopifnot(identical(t(n2), m2),
 	  identical(cbind("A", "c"), matrix(c("A", "c"), 1,2)),
 	  identical(rbind("A", 2),   matrix(c("A", "2"), 2,1)) )
 
+## head() / tail() :
+stopifnot(all.equal(c(21, 12),
+		    dim(mm3 <- m3[rep(1:3, each=7), rep(3:1, 4)])),
+	  all.equal(dim(t3 <- tail(mm3)), c(6, 12)),
+	  all.equal(head(mm3), mm3[1:6,]))
+
 ## matrix(<mpfr>) works since 2015-02-28:
 x <- mpfr(pi,64)*mpfr(2,64)^(2^(0:19))
 (mx <- matrix(x, 4,5))
@@ -139,6 +145,37 @@ stopifnot(is(mx, "mpfrMatrix"),
               asNumeric(log2(log2(mx) - log2(Const("pi")))),
               tol = 1e-15)) # 64b-lnx: see 8.1e-17
 
+
+## Ensure that apply() continues to work with 'bigz'/'bigq'
+A <- matrix(2^as.bigz(1:12), 3,4)
+
+stopifnot(
+    identical(asNumeric(apply(A,  1, min)),
+              apply(asNumeric(A), 1, min))
+   ,
+    identical(asNumeric(apply(A,  1, min)),
+              apply(asNumeric(A), 1, min))
+)
+## failed up to Rmpfr 0.6.0
+
+if(FALSE) ## Bug in gmp <= 0.5-12 :
+stopifnot(
+          identical(asNumeric(apply(A,  1, range)),
+                    apply(asNumeric(A), 1, range))
+)
+if(FALSE) ## Bug in gmp <= 0.5-12 :
+stopifnot(
+          identical(asNumeric(apply(A,  2, max)),
+                    apply(asNumeric(A), 2, max))
+)
+if(FALSE) ## Bug in gmp <= 0.5-12 :
+stopifnot(
+          all.equal(asNumeric(apply(A,  1, mean)),
+                    apply(asNumeric(A), 1, mean))
+          ,
+          all.equal(asNumeric(apply(A,  2, mean)),
+                    apply(asNumeric(A), 2, mean))
+)
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
 if(!interactive()) warnings()

@@ -33,7 +33,7 @@ importFrom("stats"  # import *and* rename -- we extend these :
 importClassesFrom("gmp", "bigz", "bigq")
 importFrom("gmp"
            , asNumeric, as.bigz, as.bigq, .as.char.bigz, ..as.bigz
-           , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
+         , apply, crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
            , matrix, numerator, denominator, frexpZ, chooseZ
            , is.whole, formatN # because we add own S3 methods
 	   )
@@ -166,6 +166,7 @@ exportMethods(##___ "own generics" ___
   , "show", "unique"
   , "colSums", "colMeans"
   , "rowSums", "rowMeans", "norm"
+  , head, tail
   , "which.min", "which.max"
 )
 

@@ -13,6 +13,10 @@ stopifnot(
     grepl("0 'mpfr' numbers", capture.output(    m0)),
     grepl("0 'mpfr' numbers", capture.output(str(m0))))
 
+c(m0,m0) # failed in Rmpfr <= 0.6-0
+stopifnot(identical(c(m0,m0), m0),
+	  identical(c(m0,pi.), pi.),
+	  identical(c(pi.,m0), pi.))
 
 ## This is TRUE for 0 and -0 :
 Zero <- mpfr(c(0,1/-Inf), 20)

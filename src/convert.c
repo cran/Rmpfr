@@ -422,6 +422,7 @@ SEXP mpfr2i(SEXP x, SEXP rnd_mode) {
 SEXP mpfr2str(SEXP x, SEXP digits, SEXP base) {
     int n = length(x), i;
     int n_dig = isNull(digits) ? 0 : asInteger(digits);
+    int dig_n_max = -1;
     SEXP val = PROTECT(allocVector(VECSXP, 4)),
 	nms, str, exp, fini, zero;
     int *i_exp, *is_fin, *is_0;
@@ -453,7 +454,7 @@ SEXP mpfr2str(SEXP x, SEXP digits, SEXP base) {
     for(i=0; i < n; i++) {
 	mpfr_exp_t exp = (mpfr_exp_t) 0;
 	mpfr_exp_t *exp_ptr = &exp;
-	int dig_needed, dig_n_max = -1;
+	int dig_needed;
 
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
 

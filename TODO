@@ -10,7 +10,6 @@
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
 ** TODO 32) .getPrec() should be documented {slightly}; .getSign(), .mpfr() -- at least *internal* (e.g. roxygen)
-** DONE is.finite(.) etc: *Must* keep matrices -> src/utils.c
 
 
 * Short or Mid Term
@@ -101,6 +100,20 @@
       to take each src/*.c file and mechanically  s/mpfr/mpc/  producing a
       mpc version of that;
       then "the same" for the R interface code.
+
+** TODO 51) Incomplete gamma, i.e. pgamma(), is being added to MPFR. -> do in Rmpfr!
+  ~/F/IN-lists--2016-08 :
+     From: paul zimmermann <Paul.Zimmermann@inria.fr>
+      Subject: [MPFR] incomplete Gamma function
+      Date: Mon, 18 Jan 2016 09:54:51 +0100
+
+      zimmerma@tomate:~/mpfr/tests$ ./tgamma_inc 60 30 100
+      1.3868299023788801161747839921242e80
+
+*** Will be in MPFR 3.2.x (Oct.2016: current is 3.1.5)
+*** MPFR-devel(svn): https://gforge.inria.fr/scm/viewvc.php/mpfr/trunk/src/gamma_inc.c?view=markup
+    - get: --> http://mpfr.loria.fr/gforge.html explains:
+    - svn checkout https://scm.gforge.inria.fr/anonscm/svn/mpfr/trunk mpfr
 
 
 * Accomplished
@@ -203,3 +216,5 @@
 ** DONE 38) Define a norm() method.  For expm(*, "Higham08") need  solve() !
 ** DONE 34) Can specify the rounding mode in mpfr() and roundMpfr(), since 2015-08-08
 ** DONE 9) median(<mpfr>) now works, as does mean(<mpfr>, trim = *) and quantile() w/o warning.
+** DONE is.finite(.) etc: *Must* keep matrices -> src/utils.c
+** DONE 52) No longer use 'representation' but rather 'slots' in  'setClass(..)'
