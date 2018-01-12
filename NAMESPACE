@@ -33,7 +33,8 @@ importFrom("stats"  # import *and* rename -- we extend these :
 importClassesFrom("gmp", "bigz", "bigq")
 importFrom("gmp"
            , asNumeric, as.bigz, as.bigq, .as.char.bigz, ..as.bigz
-         , apply, crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
+         , apply # , apply.default # *.default: else apply() breaks in pkg SNscan
+         , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
            , matrix, numerator, denominator, frexpZ, chooseZ
            , is.whole, formatN # because we add own S3 methods
 	   )
@@ -142,7 +143,8 @@ export(.mpfr, .mpfr.
 
 
 exportMethods(##___ "own generics" ___
-    "apply", "asNumeric"
+    "apply" # <- we made it into S4 generic (with "ANY" method = S3 generic from gmp!)
+  , "asNumeric"
 
     ##___ "other generics" ___
 
@@ -175,8 +177,14 @@ S3method(mpfr, default)
 S3method(mpfr, bigz)
 S3method(mpfr, bigq)
 S3method(mpfr, mpfr)
-S3method(mpfr, Bcharacter)
-S3method(mpfr, Hcharacter)
+S3method(mpfr, Ncharacter)
+
+## needed because gmp "forgets" to  S3method() these:
+## (and so things only work, when gmp / Rmpfr is attached):
+## S3method(apply, default)
+## S3method(apply, bigz)
+## S3method(apply, bigq)
+
 
 S3method(c, mpfr)
 
@@ -200,8 +208,14 @@ S3method(print, mpfr)
 S3method(print, mpfr1)
 S3method(print, mpfrArray)
 S3method(print, integrateR)
-S3method(print, Bcharacter)
-S3method(print, Hcharacter, print.Bcharacter)# use the same
+S3method(print, Ncharacter)
+
+S3method("[", Ncharacter)
+S3method(as.data.frame, Ncharacter)
+## not easily
+## S3method("cbind", Ncharacter)
+## S3method("rbind", Ncharacter)
+
 
 S3method(matrix, mpfr)
 ## useful, to have  base::outer() work automatically:

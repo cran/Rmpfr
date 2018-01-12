@@ -21,13 +21,15 @@ setMethod("Summary", "mpfr",
 
 stats__quantile.default <- stats:::quantile.default
 
-setMethod("quantile", "mpfr", # 'mpfr' numbers do not have 'names' slot ... (etc)
-	  function(x, ...) {
-	      if((match("names", names(list(...)), nomatch = 0L)) == 0L)
-		  stats__quantile.default(x, ..., names=FALSE)
-	      else ## ... contains 'names = ..'
-		  stats__quantile.default(x, ...)
-	  })
+setMethod("quantile", "mpfr",
+          stats__quantile.default)
+## 'mpfr' numbers do not have 'names' slot ... (etc) -- but "work" with names
+	  ## function(x, ...) {
+	  ##     if((match("names", names(list(...)), nomatch = 0L)) == 0L)
+	  ##         stats__quantile.default(x, ..., names=FALSE)
+	  ##     else ## ... contains 'names = ..'
+	  ##         stats__quantile.default(x, ...)
+	  ## })
 
 setMethod("mean", "mpfr", function(x, trim = 0, na.rm = FALSE, ...) {
     if(trim == 0) ## based on sum() :
@@ -42,7 +44,7 @@ setMethod("mean", "mpfr", function(x, trim = 0, na.rm = FALSE, ...) {
 	if (anyNA(x))
 	    mpfr(NA)
 	else if (trim >= 0.5)
-	    quantile(x, probs = 0.5, na.rm = FALSE)
+	    quantile(x, probs = 0.5, na.rm = FALSE, names = FALSE)
 	else {
 	    lo <- floor(n * trim) + 1
 	    hi <- n + 1 - lo
@@ -52,7 +54,8 @@ setMethod("mean", "mpfr", function(x, trim = 0, na.rm = FALSE, ...) {
 })
 
 setMethod("median", "mpfr",
-	  function(x, na.rm=FALSE) quantile(x, probs = 0.5, na.rm=na.rm))
+	  function(x, na.rm=FALSE, ...)
+	      quantile(x, probs = 0.5, na.rm=na.rm, names = FALSE))
 
 
 ## FIXME: can do this considerably faster in C:

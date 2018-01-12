@@ -1,8 +1,13 @@
 #### All Class Definitions in package  "Rmpfr"
 
-### NB:	 Use   /usr/local/app/R/R_local/src/Brobdingnag/R/brob.R
-###					    -----------
-### as a partial role image
+### Historically, we have used /usr/local/app/R/R_local/src/Brobdingnag/R/brob.R
+### as partial role image                		    -----------
+
+## NB: Most MPFR numbers are regular (C: mpfr_regular_p )
+## ==  ---> then 'd' is well defined.
+##     If they are not, i.e., it is in {0, NaN, +/- Inf}, then 'exp' shows this
+##     and 'd' (in mpfr a pointer to the limbs) is *not* used and not defined.
+## Since Jan.2018, Rmpfr 0.7-0, we reflect this by using a 0-length 'd' slot
 
 setClass("mpfr1", ## a single Multi-precision float number
 	 slots = c(prec = "integer", # precision in bits
@@ -21,11 +26,25 @@ setClass("mpfr1", ## a single Multi-precision float number
 		 "'sign' slot not in {-1,1} is invalid"
 	     else {
 		 nd <- length(d <- object@d)
-		 need.d <- ceiling(pr / 32)
-		 if((gmp.numb == 32 && nd != need.d) ||
-		    (gmp.numb == 64 && !any((nd - need.d) == 0:1)))
-		     "length('d' slot) does not match 'prec'"
-		 else TRUE
+		 if(nd) { ## "regular"
+		     need.d <- ceiling(pr / 32)
+		     if((gmp.numb == 32 && nd != need.d) ||
+			(gmp.numb == 64 && !any((nd - need.d) == 0:1)))
+			 "length('d' slot) does not match 'prec'"
+		     else TRUE
+		 } else ## not regular: valid if exp slot shows so
+		     if(gmp.numb == 64) {  ## ex of length 2
+			 if((is.na(ex[2]) && any(ex[[1]] == (1:3))) ||  ## mpfr 3.1.5, Fedora 26
+			    (ex[1] == ex[2] && any(ex[1]+2^31 == 1:3))) ## mpfr 3.1.3, Windows
+			     TRUE
+			 else
+			     "'exp' slot invalid for non-regular number (64b, length(d) == 0)"
+		     } else { ## gmp.numb == 32: 'exp' slot of length one
+			 if(any(ex+2^31 == 1:3))
+			     TRUE
+			 else
+			     "'exp' slot invalid for non-regular number (32b, length(d) == 0)"
+		     }
 	     }
 	 })
 
@@ -49,7 +68,7 @@ setClass("mpfrArray", ## mpfr + "dim" + dimnames
 	     else if(length(DN <- object@Dimnames) != length(D))
 		 "Dimnames must have same length as 'Dim'"
 	     else if(any(hasN <- !vapply(DN, is.null, NA)) &&
-		     any((lDN <- vapply(DN[hasN], length, 1L)) != D[hasN]))
+		     any(lengths(DN[hasN]) != D[hasN]))
 		 "length of some 'Dimnames' do not match 'Dim'"
 	     else
 		 TRUE

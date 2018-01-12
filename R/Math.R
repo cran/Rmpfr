@@ -128,7 +128,7 @@ factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))),
 ##' We want to do this well for *integer* n, only the general case is using
 ##' P(a,x) := Gamma(a+x)/Gamma(x)
 pochMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
-    stopifnot(n >= 0)
+    stopifnot(is.integer(n <- as.integer(n)), n >= 0)
     if(!is(a, "mpfr")) ## use a high enough default precision (and recycle ..)
         a <- mpfr(a, precBits = pmax(1,n)*getPrec(a))
     else if((ln <- length(n)) != 1 && ln != length(a))
@@ -141,7 +141,7 @@ pochMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
 ##' Binomial Coefficient choose(a,n)
 ##' We want to do this well for *integer* n
 chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
-    stopifnot(n >= 0)
+    stopifnot(is.integer(n <- as.integer(n)), n >= 0)
     if(!is(a, "mpfr")) { ## use high enough default precision
         lc <- lchoose(a,n)
         precB <- if(any(iF <- is.finite(lc))) ceiling(max(lc[iF])/log(2)) else 0
@@ -149,8 +149,6 @@ chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
         a <- mpfr(a, precBits = n + max(2, precB))
     } else if((ln <- length(n)) != 1 && ln != length(a))
 	a <- a + 0*n
-    ## a@.Data[] <- .Call(R_mpfr_choose, a, n)
-    ## a
     setDataPart(a, .Call(R_mpfr_choose, a, n, match.arg(rnd.mode)))
 }
 

@@ -324,6 +324,8 @@ SEXP R_mpfr_get_GMP_numb_bits(void) {// for diagnosing
 
 /* Set or get the C-global debugging level --
  * currently only used in R_mpfr_dbg_printf() --> ./Rmpfr_utils.h
+ *
+ * Called from R  .mpfr.debug(i = NA)
 */
 SEXP R_mpfr_set_debug(SEXP I)
 {

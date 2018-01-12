@@ -121,10 +121,11 @@ getD <- function(x) { attributes(x) <- NULL; x }
 ## Get or Set the C-global  'R_mpfr_debug_' variable:
 .mpfr.debug <- function(i = NA) .Call(R_mpfr_set_debug, as.integer(i))
 
-print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE,
-		       right = TRUE, ...) {
+print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE, right = TRUE,
+                       max.digits = getOption("Rmpfr.print.max.digits", 9999L),
+                       ...) {
     stopifnot(is(x, "mpfr"), is.null(digits) || digits >= 1)
-    ## digits = NA --> the inherent precision of x will be used
+    ## digits = NULL --> the inherent precision of x will be used
     n <- length(x)
     ch.prec <-
 	if(n >= 1) {
@@ -134,9 +135,9 @@ print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE,
 	}
     cat(n, "'mpfr'", if(n == 1) "number" else "numbers", ch.prec, "\n")
     if(n >= 1)
-	print(format(x, digits=digits, drop0trailing=drop0trailing), ...,
-	      right=right, quote = FALSE)
-    ## .Call(print_mpfr, x, as.integer(digits))
+	print(format(x, digits=digits, max.digits=max.digits,
+		     drop0trailing=drop0trailing),
+	      ..., right=right, quote = FALSE)
     invisible(x)
 }
 setMethod(show, "mpfr", function(object) print.mpfr(object))
@@ -338,7 +339,7 @@ setMethod("pmin", "mNumber",
 	      is.N <- vapply(args, function(x) is.numeric(x) || is.logical(x), NA)
 	      if(!any(is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
 		  stop("no \"mpfr\", \"bigz\", or \"bigq\" argument -- wrong method chosen; please report!")
-	      N <- max(lengths <- vapply(args, length, 1L))
+	      N <- max(lenA <- lengths(args))
 	      any.m <- any(is.m)
 	      any.q <- any(is.q)
 	      ## precision needed -- FIXME: should be *vector*
@@ -354,16 +355,16 @@ setMethod("pmin", "mNumber",
 	      i.frst.m <- which.max(if(any.m) is.m else if(any.q) is.q else is.z)
 	      ## ==> r is "mpfr" if there's any, otherwise "bigq", or "bigz"
 	      r <- args[[i.frst.m]]
-	      if((n.i <- lengths[i.frst.m]) != N)
+	      if((n.i <- lenA[i.frst.m]) != N)
 		  r <- r[rep(seq_len(n.i), length.out = N)]
 
 	      ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
 	      has.na <- FALSE
-	      ii <- seq_along(lengths) ## = seq_along(args)
+	      ii <- seq_along(lenA) ## = seq_along(args)
 	      ii <- ii[ii != i.frst.m]
 	      for(i in ii) {
 		  x <- args[[i]]
-		  if((n.i <- lengths[i]) != N)
+		  if((n.i <- lenA[i]) != N)
 		      x <- x[rep(seq_len(n.i), length.out = N)]
 		  n.r <- is.na(r); n.x <- is.na(x)
 		  ## mpfr() is relatively expensive
@@ -413,7 +414,7 @@ setMethod("pmax", "mNumber",
 	      is.N <- vapply(args, function(x) is.numeric(x) || is.logical(x), NA)
 	      if(!any(is.m | is.q | is.z)) # should not be needed -- TODO: "comment out"
 		  stop("no \"mpfr\", \"bigz\", or \"bigq\" argument -- wrong method chosen; please report!")
-	      N <- max(lengths <- vapply(args, length, 1L))
+	      N <- max(lenA <- lengths(args))
 	      any.m <- any(is.m)
 	      any.q <- any(is.q)
 	      ## precision needed -- FIXME: should be *vector*
@@ -429,16 +430,16 @@ setMethod("pmax", "mNumber",
 	      i.frst.m <- which.max(if(any.m) is.m else if(any.q) is.q else is.z)
 	      ## ==> r is "mpfr" if there's any, otherwise "bigq", or "bigz"
 	      r <- args[[i.frst.m]]
-	      if((n.i <- lengths[i.frst.m]) != N)
+	      if((n.i <- lenA[i.frst.m]) != N)
 		  r <- r[rep(seq_len(n.i), length.out = N)]
 
 	      ## modified from ~/R/D/r-devel/R/src/library/base/R/pmax.R
 	      has.na <- FALSE
-	      ii <- seq_along(lengths) ## = seq_along(args)
+	      ii <- seq_along(lenA) ## = seq_along(args)
 	      ii <- ii[ii != i.frst.m]
 	      for(i in ii) {
 		  x <- args[[i]]
-		  if((n.i <- lengths[i]) != N)
+		  if((n.i <- lenA[i]) != N)
 		      x <- x[rep(seq_len(n.i), length.out = N)]
 		  n.r <- is.na(r); n.x <- is.na(x)
 		  ## mpfr() is relatively expensive
@@ -599,6 +600,9 @@ setMethod("seq", c(from = "ANY", to = "ANY", by = "mpfr"), seqMpfr)
     else mpfr_default_prec()
 }
 
+## binary exponents: [1] should be ok also for 64-bit limbs
+.getExp <- function(x) vapply(getD(x), function(m) m@exp[1L], 1)
+
 ##' The *relevant* number of "bit"/"digit" characters in character vector x
 ##' (i.e. is vectorized)
 .ncharPrec <- function(x, base) {
@@ -614,8 +618,12 @@ setMethod("seq", c(from = "ANY", to = "ANY", by = "mpfr"), seqMpfr)
 getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L) {
     if(isTRUE(is.mpfr) || is(x,"mpfr"))
 	vapply(getD(x), slot, 1L, "prec")# possibly of length 0
-    else if(is.character(x)) ## number of digits --> number of bits
-	ceiling(log2(base) * .ncharPrec(x, base))
+    else if(is.character(x)) {
+	if (inherits(x, "Ncharacter"))
+	    attr(x, "bindigits") + 1L
+	else
+	    ceiling(log2(base) * .ncharPrec(x, base)) ## number of digits --> number of bits
+    }
     else if(is.logical(x))
 	2L # even 1 would suffice - but need 2 (in C ?)
     else if(is.raw(x)) {
@@ -703,7 +711,8 @@ diff.mpfr <- function(x, lag = 1L, differences = 1L, ...)
     x
 }
 
-str.mpfr <- function(object, nest.lev, give.head = TRUE, digits.d = 12,
+str.mpfr <- function(object, nest.lev, internal = FALSE,
+                     give.head = TRUE, digits.d = 12,
                      vec.len = NULL, drop0trailing=TRUE,
                      width = getOption("width"), ...) {
     ## utils:::str.default() gives  "Formal class 'mpfr' [package "Rmpfr"] with 1 slots"
@@ -722,6 +731,14 @@ str.mpfr <- function(object, nest.lev, give.head = TRUE, digits.d = 12,
 	    "\n", sep = "")
     if(missing(nest.lev)) nest.lev <- 0
     cat(paste(rep.int(" ", max(0,nest.lev+1)), collapse= ".."))
+    if(internal) { ## internal structure
+	cat("internally @.Data: ")
+	if(is.null(vec.len)) vec.len <- getOption("str", list(vec.len = 4))$vec.len
+	str(getD(object),
+	    nest.lev=nest.lev, give.head=give.head, digits.d=digits.d,
+	    vec.len=vec.len, drop0trailing=drop0trailing, width=width, ...)
+	return(invisible())
+    }
     ## if object is long, drop the rest which won't be used anyway:
     max.len <- max(100, width %/% 3 + 1, if(is.numeric(vec.len)) vec.len)
     if(le > max.len) object <- object[seq_len(max.len)]

@@ -7,14 +7,16 @@
   the default method \code{\link{str.default}}.
 }
 \usage{
-\method{str}{mpfr}(object, nest.lev, give.head=TRUE,
-    digits.d = 12, vec.len = NULL, drop0trailing=TRUE,
+\method{str}{mpfr}(object, nest.lev, internal = FALSE,
+    give.head = TRUE, digits.d = 12, vec.len = NULL, drop0trailing=TRUE,
     width = getOption("width"), \dots)
 }
 \arguments{
   \item{object}{an object of class \code{\linkS4class{mpfr}}.}
   \item{nest.lev}{for \code{\link{str}()}, typically only used when
     called by a higher level \code{str()}.}
+  \item{internal}{logical indicating if the low-level internal structure
+    should be shown; if true (not by default), uses \code{str(object@.Data)}.}
   \item{give.head}{logical indicating if the \dQuote{header} should be
     printed.}
   \item{digits.d}{the number of digits to be used, will be passed
@@ -40,6 +42,8 @@ str(x)
 str(list(pi = pi, x.mpfr = x))
 str(x ^ 1000)
 str(x ^ -1e4, digits=NULL) # full precision
+
+str(x, internal = TRUE) # internal low-level (for experts)
 
 uu <- Const("pi", 16)# unaccurate
 str(uu) # not using default of 12 digits

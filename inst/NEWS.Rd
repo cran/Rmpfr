@@ -4,6 +4,74 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.7-0 [2018-01-12]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{.mpfr2list()} and \code{mpfrXport()} gain an option
+      \code{names} (for nicer output).
+
+      \item \code{formatMpfr()} and the \code{print()} method get a new
+      option \code{max.digits} with default \code{9999} for the print
+      methods, to limit the number of digits printed for high precision
+      numbers.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item For non-\dQuote{regular} mpfr numbers, the \code{d} slot in
+      the \code{"mpfr1"} representation is now empty instead of
+      \dQuote{random}.   This also eliminates valgrind warnings about
+      uninitialized values in C.
+    }
+  }
+}
+\section{Changes in version 0.6-2 [2017-05-29], never on CRAN}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item The S3 classes \code{"Hcharacter"} and \code{"Bcharacter"}
+      resulting from \code{formatHex()} and \code{formatBin()} now
+      \dQuote{inherit from} \code{"character"} formally.
+
+      \item They also got a \code{`[`} method, so subsetting should
+      work, including for \code{array}s of these.
+
+      \item The \code{"mpfr"} method of \code{str()} gains option
+      \code{internal}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item when \code{print()}ing mpfr numbers, the result no longer sometimes
+      loses the last digit.
+
+      \item \code{dnorm()} now works correctly with mpfr numbers;
+      similarly \code{dbinom()} and \code{dpois()} should work in all
+      cases, now.
+
+      \item in \file{NAMESPACE}, also \code{exportMethods(apply)}, so
+      \pkg{SNscan} works.
+
+      \item \code{print(formatHex(..))}, \code{formatBin()} and
+      \code{formatDec()} now look better and are more correct; the first
+      two get a new option \code{expAlign} indicating to use the same
+      number of digits for exponents (in \dQuote{scientific} cases).
+
+      Notably, \code{mpfr(formatBin(mpx))} works for more \code{mpx}
+      objects (of class \code{"mpfr"}).
+
+      \item \code{format(mpfr(3,7), digits = 1, base = 2)} no longer
+      crashes (from inside MPFR).
+
+      \item \code{formatDec(mpfr(NA, 7))} now works.
+
+      \item For non-\dQuote{regular} mpfr numbers, the \code{d} slot in
+      the \code{"mpfr1"} representation is now empty instead of
+      \dQuote{random}.   This also eliminates valgrind warnings about
+      uninitialized values in C.
+    }
+  }
+}
+
 \section{Changes in version 0.6-1 [2016-11-15]}{
   \subsection{NEW FEATURES}{
     \itemize{

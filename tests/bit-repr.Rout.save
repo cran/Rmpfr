@@ -1,6 +1,6 @@
 
-R version 3.2.2 RC (2015-08-08 r68920) -- "Fire Safety"
-Copyright (C) 2015 The R Foundation for Statistical Computing
+R Under development (unstable) (2017-06-24 r72853) -- "Unsuffered Consequences"
+Copyright (C) 2017 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -82,7 +82,13 @@ Type 'q()' to quit R.
 > 
 > x <- mpfr(r <- c(NA,NaN, Inf, -Inf), 64)
 > stopifnot(identical(asNumeric(x), # mpfr has no NA, just NaN's:
-+                     c(NaN,NaN, Inf, -Inf)))
++ 		    c(NaN,NaN, Inf, -Inf)),
++ 	  identical(as.character(fDec <- formatDec(x)),
++ 		    as.character(asNumeric(x))) # of different nchar() for now
++ 	  )
+> formatDec(x) # should print fine (no quotes)
+[1] NaN  NaN  Inf  -Inf
+> 
 > 
 > if(FALSE) # platform dependent:
 +     ## The "non-finite" mpfr value internals (in 64-bit: 'exp' has NA):
@@ -199,13 +205,53 @@ c(3217, 205887, 3294199, 105414357, 3373259426, 107944301636,
 [7] "110010010000111111011010101000100010000110"                      
 [8] "1100100100001111110110101010001000100001011010001100001000110101"
 > 
+> ###--- and possibly the _internal_   sprintfMpfr() ---  see also ./tstHexBin.R
+> ## TODO: use examples above for checking formatBin() <--->        ============
+> spr <- Rmpfr:::sprintfMpfr
+> ##=            ~~~~~~~~~~~
+> (fB.04 <- formatBin(i16.04 <- mpfr(0:16,  4)))
+ [1] +0b0.000p+0 +0b1.000p+0 +0b1.000p+1 +0b1.100p+1 +0b1.000p+2 +0b1.010p+2
+ [7] +0b1.100p+2 +0b1.110p+2 +0b1.000p+3 +0b1.001p+3 +0b1.010p+3 +0b1.011p+3
+[13] +0b1.100p+3 +0b1.101p+3 +0b1.110p+3 +0b1.111p+3 +0b1.000p+4
+> (fB.60 <- formatBin(i16.60 <- mpfr(0:16, 60)))
+ [1] +0b0.00000000000000000000000000000000000000000000000000000000000p+0
+ [2] +0b1.00000000000000000000000000000000000000000000000000000000000p+0
+ [3] +0b1.00000000000000000000000000000000000000000000000000000000000p+1
+ [4] +0b1.10000000000000000000000000000000000000000000000000000000000p+1
+ [5] +0b1.00000000000000000000000000000000000000000000000000000000000p+2
+ [6] +0b1.01000000000000000000000000000000000000000000000000000000000p+2
+ [7] +0b1.10000000000000000000000000000000000000000000000000000000000p+2
+ [8] +0b1.11000000000000000000000000000000000000000000000000000000000p+2
+ [9] +0b1.00000000000000000000000000000000000000000000000000000000000p+3
+[10] +0b1.00100000000000000000000000000000000000000000000000000000000p+3
+[11] +0b1.01000000000000000000000000000000000000000000000000000000000p+3
+[12] +0b1.01100000000000000000000000000000000000000000000000000000000p+3
+[13] +0b1.10000000000000000000000000000000000000000000000000000000000p+3
+[14] +0b1.10100000000000000000000000000000000000000000000000000000000p+3
+[15] +0b1.11000000000000000000000000000000000000000000000000000000000p+3
+[16] +0b1.11100000000000000000000000000000000000000000000000000000000p+3
+[17] +0b1.00000000000000000000000000000000000000000000000000000000000p+4
+> stopifnot(
++     identical(sub("00p","p", spr(i16.60, bits = 10)),
++                              spr(i16.60, bits = 4)),
++     identical(spr(i16.60, bits = 4),
++               spr(i16.04, bits = 4))
++     ,
++     all.equal(i16.04, mpfr(fB.04), tolerance = 0)
++     ,
++     all.equal(i16.60, mpfr(fB.60), tolerance = 0)
++ )
+> 
+> ## not even this one
+> two <- mpfr(2, precBits = 60)
+> stopifnot(identical(two, mpfr(formatBin(two))))
+> 
 > 
 > cat('Time elapsed: ', proc.time(),'\n') # "stats"
-Time elapsed:  0.345 0.064 0.404 0 0.002 
+Time elapsed:  0.67 0.102 0.855 0.002 0.001 
 > 
 > if(!interactive()) warnings()
-NULL
 > 
 > proc.time()
    user  system elapsed 
-  0.345   0.066   0.404 
+  0.672   0.103   0.855 

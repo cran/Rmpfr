@@ -23,7 +23,7 @@ eps32 <- 32 * .Machine$double.eps
 
 ## must take the *larger* of the two precisions:
 stopifnot(format(mpfr(1, 60) / mpfr(7, 160)) ==
-          "0.14285714285714285714285714285714285714285714285712")
+          "0.1428571428571428571428571428571428571428571428571")# (previously had an extra "2" at end)
 
 (x <- mpfr(0:7, 100) / 7)
 ix <- x^-1000
@@ -76,6 +76,8 @@ stopifnot(all.equal(as.numeric(x+1),
 del <- abs((x+pi)-pi - x) / 2^-100
 stopifnot(del <= 4) ## <= 2 already
 (fd <- format(del, drop0 = TRUE))
+stopifnot(all.equal(as.numeric(del),
+		    as.numeric(fd), tol = 1e-15))
 if(print(Sys.info()[["machine"]]) == "x86_64")
     stopifnot(fd %in% as.character(c(0:2, c(2,7)/4)))
 
@@ -111,7 +113,8 @@ checkPmin(x, nx)
     ## FIXME checkPmin(x, qx); cat("[Ok]\n")
     ##
     print( base::pmin(Z, Z, max(Z)) )# via  gmp:: rep.bigz(x, length.out = *)
-    cat("checking pmin(. bigz ) : ")
+    cat("checking pmin(. bigz )
+ [currently with lots of pmin() and pmax(...) warnings 'incompatible methods]:\n ")
     checkPmin(Z); cat("[Ok]\n") # via gmp:: all.equal.bigz()
 
 stopifnot(all.equal( round(x, 10),  round(nx, 10)),

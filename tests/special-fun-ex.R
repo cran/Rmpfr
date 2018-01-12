@@ -47,9 +47,11 @@ for(n in 1:nSim) {
     for(LOG in c(TRUE,FALSE))
 	for(L.T in c(TRUE,FALSE)) {
 	    p. <- pnorm( x, m=m,sd=s, log.p=LOG, lower.tail=L.T)
-	    stopifnot(all.equal(p., pnorm(mpfr(x, precBits= 48), m=m,sd=s, log.p=LOG, lower.tail=L.T),
+	    stopifnot(all.equal(p., pnorm(mpfr(x, precBits= 48), m=m,sd=s,
+                                          log.p=LOG, lower.tail=L.T),
 				tol = 128 * cEps))
-	    stopifnot(all.equal(p., pnorm(mpfr(x, precBits= 60), m=m,sd=s, log.p=LOG, lower.tail=L.T),
+	    stopifnot(all.equal(p., pnorm(mpfr(x, precBits= 60), m=m,sd=s,
+                                          log.p=LOG, lower.tail=L.T),
 				tol = 2 * cEps))
 	}
     cat(".")
@@ -234,6 +236,33 @@ bb <- beta(           1:4,   mpfr(2,99))
 stopifnot(identical(bb, beta(mpfr(2,99), 1:4)),
 	  all.equal((2*bb)*cumsum(1:4), rep(1, 4), tol=1e-20),
 	  getPrec(bb) == 128)
+
+
+##-- The d*() density functions from ../R/special-fun.R  |  ../man/distr-etc.Rd ---
+
+dx <- 1400+ 0:10
+mx <- mpfr(dx, 120)
+nx <- sort(c(c(-32:32)/2, 50*(-8:8)))
+stopifnot(
+    all.equal(dpois(dx, 1000), dpois(mx, 1000), tol = 3e-13) # 64b Lnx: 7.369e-14
+    ,
+    all.equal(dbinom(0:16, 16, pr = 4 / 5),
+              dbinom(0:16, 16, pr = 4/mpfr(5, 128)) -> db, tol = 5e-15)# 64b Lnx: 4.3e-16
+    ,
+    all.equal(dnorm(     -3:3,       m=10, s=1/4),
+              dnorm(mpfr(-3:3, 128), m=10, s=1/4), tol = 1e-15) # 64b Lnx: 6.45e-17
+    ,
+    all.equal(dnorm(nx), dnorm(mpfr(nx, 99)), tol = 1e-15)
+    ,
+    all.equal(dnorm(     nx,      m = 4, s = 1/4),
+              dnorm(mpfr(nx, 99), m = 4, s = 1/4), tol = 1e-15)
+    ,
+    all.equal(dnorm(     nx,      m = -10, s = 1/4, log=TRUE),
+              dnorm(mpfr(nx, 99), m = -10, s = 1/4, log=TRUE), tol = 1e-15)
+)
+
+
+
 
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

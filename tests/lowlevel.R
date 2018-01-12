@@ -32,16 +32,20 @@ stopifnot(
 ###----- _2_ Debugging, changing MPFR defaults, .. -----------------------------
 ##  NB: Currently mostly  *not* documented, not even .mpfr.erange()
 
-stopifnot(Rmpfr:::.mpfr.debug() == 0,# the default level
-          ## Debugging level 1:
-          Rmpfr:::.mpfr.debug(1) == 0)# the previous level
+stopifnot(Rmpfr:::.mpfr.debug() == 0 # the default level
+	  ## Activate debugging level 1:
+	  , Rmpfr:::.mpfr.debug(1) == 0 # the previous level
+	  ## and check it :
+	  , Rmpfr:::.mpfr.debug() == 1 # the current level
+)
+
 r <- mpfr(7, 100)^-1000
 r
-## still prints as default
+## (same as without debugging)
 
 ## where as this does print info: -- notably the very large values [3..6]:
 .eranges <- function() sapply(names(Rmpfr:::.erange.codes), .mpfr.erange)
-## now returning *double* - which loses some precision:
+## now returning *double* - which loses some precision [ending in '04' instead of '03']:
 formatC(.eranges(), format="fg")
 
 .mpfr.minPrec()
@@ -55,6 +59,26 @@ r
 r2 <- r^100
 r2
 L <- r^-100000
+L3 <- L^3
+str(L3, internal=TRUE)
+## Class 'mpfr' [package "Rmpfr"] of length 1 and precision 100
+##  internally @.Data: List of 1
+##  $ :Formal class 'mpfr1' [package "Rmpfr"] with 4 slots
+##   .. ..@ prec: int 100
+##   .. ..@ exp : int [1:2] 842206477 0
+##   .. ..@ sign: int 1
+##   .. ..@ d   : int [1:4] 268435456 761715680 1492345294 -1000766770
+str(L3)
+## lots of debugging output, then
+## 1.00989692356e253529412
+##              ^~~~~~~~~~ 10 ^ 253'529'412 that is humongous
+if(!interactive()) # not seg.faulting,  but printing a *huge* line
+  show(L3)
+## segmentation fault -- randomly; 2017-06: no longer see any problem, not even with
+if(FALSE) ## well, not really, definitely not interactively for now
+if(interactive())
+    for(i in 1:256) show(L3)
+##
 
 ## quite platform dependent {valgrind ==> bug? even in mpfr/gmp/.. ?}
 str(.mpfr2list(x4))
@@ -63,7 +87,7 @@ x4 ## "similar info" as .mpfr2list(.)
 ## Increase maximal exponent:
 
 tools:::assertWarning(
-    .mpfr.erange.set("Emax", 5e18)) # too large {FIXME why only wann ??}
+    .mpfr.erange.set("Emax", 5e18)) # too large {FIXME why only warning and not error ??}
 .mpfr.erange("Emax") # is unchanged
 if(4e18 < .mpfr.erange("max.emax")) {
     .mpfr.erange.set("Emax", 4e18) # now ok:
@@ -75,7 +99,7 @@ if(4e18 < .mpfr.erange("max.emax")) {
 stopifnot(Rmpfr:::.mpfr.debug(0) == 2)
 .mpfr.maxPrec()
 
-L / (r2^-1000)# (could be more accurate?)
+L / (r2^-1000)# 1.00000....448  (could be more accurate?)
 
 stopifnot(
     all.equal(L, r2^-1000, tol= 1e-27), # why not more accurate?
@@ -100,4 +124,8 @@ stopifnot(all.equal(log2(xx) * 2^-25, log2(mil), tol=1e-15))
 ##               (precision increases, then decreases)
 z <- c(mpfr(1,8)/19, mpfr(1,32)/19, mpfr(1,24)/19)
 cbind(fz <- format(z))
-stopifnot(identical(fz, c("0.05273", "0.052631578947", "0.0526315793")))
+##stopifnot(identical(fz, c("0.05273", "0.052631578947", "0.0526315793")))
+## no longer, rather with updated formatMpfr() [2017-12]:
+stopifnot(identical(fz, c("0.0527",
+                          "0.05263157895",
+                          "0.05263157934")))

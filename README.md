@@ -24,7 +24,7 @@ system vendor / package system:
 	+ In Fedora, Redhat, CentOS, opensuse, etc, you get these via
 
 ```sh
-  sudo dnf install mpfr-devevel
+  sudo dnf install mpfr-devel
 
 ```
 

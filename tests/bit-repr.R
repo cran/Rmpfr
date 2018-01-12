@@ -65,7 +65,12 @@ Bits <- function(x) {
 
 x <- mpfr(r <- c(NA,NaN, Inf, -Inf), 64)
 stopifnot(identical(asNumeric(x), # mpfr has no NA, just NaN's:
-                    c(NaN,NaN, Inf, -Inf)))
+		    c(NaN,NaN, Inf, -Inf)),
+	  identical(as.character(fDec <- formatDec(x)),
+		    as.character(asNumeric(x))) # of different nchar() for now
+	  )
+formatDec(x) # should print fine (no quotes)
+
 
 if(FALSE) # platform dependent:
     ## The "non-finite" mpfr value internals (in 64-bit: 'exp' has NA):
@@ -93,6 +98,27 @@ p <- mpfr(c(3217, 205887, 3294199, 105414357,
 stopifnot(all.equal(p., p, tolerance = 1e-15))
 ## all the mantissas are those of pi, rounded differently:
 Bits(c(p, Const("pi", 64)))
+
+###--- and possibly the _internal_   sprintfMpfr() ---  see also ./tstHexBin.R
+## TODO: use examples above for checking formatBin() <--->        ============
+spr <- Rmpfr:::sprintfMpfr
+##=            ~~~~~~~~~~~
+(fB.04 <- formatBin(i16.04 <- mpfr(0:16,  4)))
+(fB.60 <- formatBin(i16.60 <- mpfr(0:16, 60)))
+stopifnot(
+    identical(sub("00p","p", spr(i16.60, bits = 10)),
+                             spr(i16.60, bits = 4)),
+    identical(spr(i16.60, bits = 4),
+              spr(i16.04, bits = 4))
+    ,
+    all.equal(i16.04, mpfr(fB.04), tolerance = 0)
+    ,
+    all.equal(i16.60, mpfr(fB.60), tolerance = 0)
+)
+
+## not even this one
+two <- mpfr(2, precBits = 60)
+stopifnot(identical(two, mpfr(formatBin(two))))
 
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

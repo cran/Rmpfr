@@ -60,16 +60,15 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
     if(is.numeric(x) && is.numeric(mean) && is.numeric(sd))
 	stats__dnorm(x, mean, sd, log=log)
-    else if((x.mp <- is(x, "mpfr")) || is(mean, "mpfr") || (s.mp <- is(sd, "mpfr"))) {
+    else if((x.mp <- is(x, "mpfr")) || is(mean, "mpfr") || is(sd, "mpfr")) {
 	## stopifnot(length(log) == 1)
 	prec <- pmax(53, getPrec(x), getPrec(mean), getPrec(sd))
 	if(!x.mp) x <- mpfr(x, prec)
 	x <- (x - mean) / sd
 	twopi <- 2*Const("pi", prec)
-	if(!s.mp) sd <- mpfr(sd, prec)
 	## f(x) =  1/(sigma*sqrt(2pi)) * exp(-1/2 x^2)
 	if(log) ## log( f(x) ) = -[ log(sigma) + log(2pi)/2 + x^2 / 2]
-	    -(log(sd) + (log(twopi) + x*x)/2)
+	    -(log(if(is(sd,"mpfr")) sd else mpfr(sd, prec))  + (log(twopi) + x*x)/2)
 	else exp(-x^2/2) / (sd*sqrt(twopi))
     } else stop("invalid arguments (x,mean,sd)")
 }
@@ -77,7 +76,7 @@ dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
 dpois <- function (x, lambda, log = FALSE) {
     if(is.numeric(x) && is.numeric(lambda)) ## standard R
 	stats__dpois(x, lambda, log=log)
-    else if((l.mp <- is(lambda, "mpfr")) || (x.mp <- is(x, "mpfr"))) {
+    else if((l.mp <- is(lambda, "mpfr")) | (x.mp <- is(x, "mpfr"))) {
 	prec <- pmax(53, getPrec(lambda), getPrec(x))
 	if(!l.mp) lambda <- mpfr(lambda, prec)
 	if(!x.mp) x <- mpfr(x, prec)
@@ -91,13 +90,12 @@ dbinom <- function (x, size, prob, log = FALSE) {
     if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) ## standard R
 	stats__dbinom(x, size, prob, log=log)
     else if((s.mp <- is(size, "mpfr")) |
-	    (p.mp <- is(prob, "mpfr")) |
-	    (x.mp <- is(x,    "mpfr"))) {
+	    (p.mp <- is(prob, "mpfr")) || is(x, "mpfr")) {
 	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
+        if(!is.integer(x)) x <- as.integer(x) # chooseMpfr() needs
 	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
 	if(!s.mp) size <- mpfr(size, prec)
 	if(!p.mp) prob <- mpfr(prob, prec)
-	if(!x.mp)    x <- mpfr(x, prec)
 	## n:= size, p:= prob,	compute	 P(x) = choose(n, x) p^x (1-p)^(n-x)
 	C.nx <- chooseMpfr(size, x)
 	if(log) log(C.nx) + x*log(prob) + (size-x)*log1p(-prob)

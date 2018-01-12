@@ -6,7 +6,7 @@
 \alias{mpfr2array}
 \alias{mpfrImport}
 \alias{mpfrXport}
-\alias{.mpfr2list}% for now only mentioned in example
+\alias{.mpfr2list}
 %\alias{.mpfr1tolist}% not exported
 \alias{print.mpfr}
 \alias{print.mpfrArray}
@@ -23,11 +23,15 @@ mpfr_default_prec(prec)
 \S3method{print}{mpfrArray}(x, digits = NULL, drop0trailing = FALSE,
       right = TRUE, \dots)
 \S3method{print}{mpfr}(x, digits = NULL, drop0trailing = TRUE,
-      right = TRUE, \dots)
+      right = TRUE,
+      max.digits = getOption("Rmpfr.print.max.digits", 9999),
+      \dots)
 toNum(from, rnd.mode = c('N','D','U','Z','A'))
 mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 
-mpfrXport(x)
+.mpfr2list(x, names = FALSE)
+
+mpfrXport(x, names = FALSE)
 mpfrImport(mxp)
 }
 \arguments{
@@ -51,6 +55,11 @@ mpfrImport(mxp)
     justify the strings; see \code{\link{print.default}()} to which it
     is passed.}
   \item{digits, \dots}{further arguments to print methods.}
+  \item{max.digits}{a number (possibly \code{Inf}) to limit the number
+    of (mantissa) digits to be printed, simply passed to
+    \code{\link{formatMpfr}}.  The default is finite to protect from
+    printing very long strings which is often undesirable, notably in
+    \code{\link{interactive}} use.}
   \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
     should happen at C-level conversion to MPFR, see details of
     \code{\link{mpfr}}.}
@@ -59,6 +68,10 @@ mpfrImport(mxp)
   \item{check}{logical indicating if the mpfrArray construction should
     happen with internal safety check.  Previously, the implicit default
     used to be true.}
+  \item{names}{(for \code{.mpfr2list()}) \code{\link{logical}} or
+    \code{\link{character}} vector, indicating if the list returned
+    should have \code{\link{names}}.  If character, it specifies the
+    names; if true, the names are set to \code{format(x)}.}
   \item{mxp}{an \code{"mpfrXport"} object, as resulting from
     \code{mpfrXport()}.}
 }
@@ -67,6 +80,13 @@ mpfrImport(mxp)
   method for class \code{\linkS4class{mpfr}}.  This, currently does
   \emph{not} format columns jointly which leads to suboptimally looking
   output.  There are plans to change this.
+
+  Note that \code{\link{formatMpfr}()} which is called by \code{print()}
+  (or \code{show()} or \R's implicit printing) uses \code{max.digits =
+    Inf}, differing from our \code{print()}'s default on purpose.
+  If you do want to see the full accuracy even in cases it is large, use
+  \code{\link{options}(Rmpfr.print.max.digits = Inf)} or
+  \code{.. = 1e7)}, say.
 }
 \value{
   \code{getPrec(x)} returns a \code{\link{integer}} vector of the same
@@ -148,9 +168,9 @@ x4 <- mpfr(c(NA, NaN, -Inf, Inf), 32)
 ## The output of the following depends on the GMP "numb" size
 ## (32 bit vs. 64 bit), and may be even more platform specifics:
 str( .mpfr2list(i8) )
-str( .mpfr2list(x4) )
+str( .mpfr2list(x4, names = TRUE) )
 
-str(xp4 <- mpfrXport(x4))
+str(xp4 <- mpfrXport(x4, names = TRUE))
 stopifnot(identical(x4, mpfrImport(mpfrXport(x4))),
           identical(i8, mpfrImport(mpfrXport(i8))))
 if(FALSE) ## FIXME: not yet working:

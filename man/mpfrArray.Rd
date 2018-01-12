@@ -56,11 +56,17 @@ stopifnot(identical(asNumeric(mat),
 apply(mat, 2, range)
 apply(A2, 1:2, range)
 apply(A2, 2:3, max)
-apply(A2, 2, fivenum)% works,.. whereas quantile() fails.. "R design bug"
+(fA2 <- apply(A2, 2, fivenum))
+a2 <- as(A2, "array")
 stopifnot(as(apply(A2, 2, range), "matrix") ==
-          apply(as(A2,"array"), 2, range))
+             apply(a2, 2, range)
+        , all.equal(fA2, apply(a2, 2, fivenum))
+        , all.equal(apply(A2, 2, quantile),
+                    apply(a2, 2, quantile))
+        , all.equal(A2, apply(A2, 2:3, identity) -> aA2, check.attributes=FALSE)
+        , dim(A2) == dim(aA2)
+)
 \dontshow{
- a2 <- as(A2, "array")
  for(nf in c("colSums", "colMeans", "rowSums", "rowMeans")) {
    FUN <- getFunction(nf)
    for(di in c(1,2)) {
@@ -71,8 +77,13 @@ stopifnot(as(apply(A2, 2, range), "matrix") ==
                          unname(r), tol = 1e-15))
    }
  }
-%% TODO: also check examples with non-trivial dimnames !
-
+## with non-trivial dimnames:
+ma2 <- mat
+dimnames(ma2) <- list(row=paste0("r",1:5), col=colnames(mat))
+stopifnot(identical(ma2,   apply(ma2, 2, identity)),
+          identical(ma2, t(apply(ma2, 1, identity))),
+          identical(names(apply(ma2,2,sum)), colnames(ma2))
+)
 }%end{ dontshow }
 }
 \keyword{array}

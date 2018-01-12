@@ -4,23 +4,26 @@
 \alias{formatBin}
 \alias{formatDec}
 %% \alias{formatHexInternal}
-\alias{print.Bcharacter}% not mentioned
+\alias{print.Ncharacter}% not mentioned
 \description{
   Show numbers in binary, hex and decimal format.  The resulting
   character-like objects can be back-transformed to \code{"mpfr"}
   numbers via \code{\link{mpfr}()}.
 }
 \usage{
-formatHex(x, precBits = min(getPrec(x)), style = "+")
+formatHex(x, precBits = min(getPrec(x)), style = "+", expAlign = TRUE)
 
 formatBin(x, precBits = min(getPrec(x)), scientific = TRUE,
-          left.pad = "_", right.pad = left.pad, style = "+")
-%% FIXME:  Currently needed because decimal point alignment.
+          left.pad = "_", right.pad = left.pad, style = "+", expAlign = TRUE)
+%% FIXME:  Currently needed mainly because decimal point alignment.
 %% -----   TODO: Allow formatMpfr(.) to do decimal alignment -- even by default
 formatDec(x, precBits = min(getPrec(x)), digits = decdigits,
-          nsmall = NULL, scientific = FALSE, style = "+", ...)
-%% ## not exported
-%% formatHexInternal(x, precBits = min(Rmpfr::getPrec(x)), \dots)
+          nsmall = NULL, scientific = FALSE, style = "+",
+          decimalPointAlign = TRUE, \dots)
+%% ## not exported:
+%% formatHexInternal(x, precBits = min(Rmpfr::getPrec(x)), style = "+", expAlign=TRUE)
+%% formatAlign(x, leftpad=" ", rightpad=leftpad, \dots)
+%% sprintfMpfr(x, bits, style = "+", expAlign=TRUE)
 }
 \arguments{
   \item{x}{a \code{numeric} or \code{\link{mpfr}} \R object.}
@@ -32,6 +35,10 @@ formatDec(x, precBits = min(getPrec(x)), digits = decdigits,
     format (\code{fmt}), immediately after the "%".  The default always
     sets a sign in the output, i.e., \code{"+"} or \code{"-"}, where as
     \code{style = " "} may seem more standard.}
+  \item{expAlign}{\code{\link{logical}} indicating if for scientific
+    (\dQuote{exponential}) representations the exponents should be
+    aligned to the same width, i.e., zero-padded to the same number of
+    digits.}
   \item{scientific}{\code{\link{logical}} indicating that
     \code{formatBin} should display the binary representation in
     scientific notation (\code{mpfr(3, 5)} is displayed as
@@ -58,6 +65,9 @@ formatDec(x, precBits = min(getPrec(x)), digits = decdigits,
     larger of this argument and the internally generated value that is a
     function of \code{precBits}.  This is related to but different than
     \code{digits} in \code{\link{format}}.}
+  \item{decimalPointAlign}{logical indicating if padding should be used
+    to ensure that the resulting strings align on the decimal point
+    (\code{"."}).}
 }
 \details{
   For the hexadecimal representation, when the precision is not larger
@@ -72,17 +82,21 @@ formatDec(x, precBits = min(getPrec(x)), digits = decdigits,
   calculated with the specified precision and then sent to the
   \code{format} function for \code{scientific=FALSE} or to the sprintf
   function for \code{scientific=TRUE}.
-%  \code{mpfrBchar} reads the output of \code{formatBin}.
-%  \code{mpfrHchar} reads the output of \code{formatHex}.
 }
 \value{
   a character vector (or matrix) like \code{x}, say \code{r}, containing
   the formatted represention of \code{x}, with a \code{\link{class}}
   (unless \code{left.pad} or \code{right.pad} were not \code{"_"}).  In
-  that case, \code{formatHex()} returns class \code{"Hcharacter"} and
-  \code{formatBin()} gives class \code{"Bcharacter"}; for these,
-  \code{\link{mpfr}(.)} has methods and will basically return \code{x},
+  that case, \code{formatHex()} and \code{formatBin()} return class
+  \code{"Ncharacter"}; for that,
+  \code{\link{mpfr}(.)} has a method and will basically return \code{x},
   i.e., work as \emph{inverse} function.
+
+  Since \pkg{Rmpfr} version \command{0.6-2}, the S3 class
+  \code{"Ncharacter"} extends \code{"character"}.
+  (\code{class(.)} is now of length two and \code{class(.)[2]} is
+  \code{"character"}.).  There are simple \code{[} and \code{\link{print}}
+  methods; modifying or setting \code{dim} works as well.
 }
 \references{
   R FAQ 7.31:  Why doesn't R think these numbers are equal?
@@ -103,13 +117,37 @@ formatBin(FourBits, style = " ")
 formatBin(FourBits, scientific=FALSE)
 formatDec(FourBits)
 
-FBB <- formatBin(FourBits)
-(nFBB <- mpfr(FBB))
-stopifnot(all.equal(nFBB, FourBits, tol=0))
+## as "Ncharacter"  'inherits from' "character", this now works too :
+data.frame(Dec = c( formatDec(FourBits) ), formatHex(FourBits),
+           Bin = formatBin(FourBits, style = " "))
 
-FBH <- formatHex(FourBits)
+FBB <- formatBin(FourBits) ; clB <- class(FBB)
+(nFBB <- mpfr(FBB))
+stopifnot(class(FBB)[1] == "Ncharacter",
+          all.equal(nFBB, FourBits, tol=0))
+
+FBH <- formatHex(FourBits) ; clH <- class(FBH)
 (nFBH <- mpfr(FBH))
-stopifnot(all.equal(nFBH, FourBits, tol=0))
+stopifnot(class(FBH)[1] == "Ncharacter",
+          all.equal(nFBH, FourBits, tol=0))
+
+## Compare the different "formattings"  (details will change, i.e. improve!)%% FIXME
+M <- mpfr(c(-Inf, -1.25, 1/(-Inf), NA, 0, .5, 1:2, Inf), 3)
+data.frame(fH = formatHex(M), f16 = format(M, base=16),
+           fB = formatBin(M), f2  = format(M, base= 2),
+           fD = formatDec(M), f10 = format(M), # base = 10 is default
+           fSci= format(M, scientific=TRUE),
+           fFix= format(M, scientific=FALSE))
+
+## Other methods ("[", t()) also work :
+stopifnot(dim(F1 <- FBB[, 1, drop=FALSE]) == c(8,1), identical(class(  F1), clB),
+          dim(t(F1)) == c(1,8),                      identical(class(t(F1)),clB),
+          is.null(dim(F.2 <- FBB[,2])),              identical(class( F.2), clB),
+          dim(F22 <- FBH[1:2, 3:4]) == c(2,2), identical(class(F22),  clH),
+          identical(class(FBH[2,3]), clH), is.null(dim(FBH[2,3])),
+          identical(FBH[2,3:4], F22[2,]),
+          identical(FBH[2,3], unname(FBH[,3][2])),
+          TRUE)
 
 TenFrac <- matrix((1:10)/10, dimnames=list(1:10, expression(1/x)))
 TenFrac9 <- mpfr(TenFrac, precBits=9) ## 9 significant bits

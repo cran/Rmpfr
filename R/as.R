@@ -1,7 +1,9 @@
 #### All  coercion methods for the  "Rmpfr" classes
 
-if(getRversion() < "2.15")
-    paste0 <- function(...) paste(..., sep = '')
+if(getRversion() < "3.5") {
+    isFALSE <- function (x) is.logical(x) && length(x) == 1L && !is.na(x) && !x
+    isTRUE  <- function (x) is.logical(x) && length(x) == 1L && !is.na(x) && x
+
 if(getRversion() < "3.3")
     strrep <- function (x, times) { ## (x, times) must be "recycled"
 	if((lx <- length(x)) < (lt <- length(times)))
@@ -11,6 +13,9 @@ if(getRversion() < "3.3")
 	vapply(seq_along(x),
 	       function(i) paste(rep.int(x[i], times[i]), collapse = ""), "")
     }
+if(getRversion() < "3.2")
+    lengths <- function(x, use.names = TRUE) vapply(x, length, 1L, USE.NAMES = use.names)
+}
 
 mpfr <- function(x, precBits, ...) UseMethod("mpfr")
 
@@ -106,14 +111,21 @@ setAs("mpfr", "mpfr1", function(from) {
 
 .mpfr1tolist <- function(x)
     sapply(.slotNames(x), slot, object=x, simplify=FALSE)
-.mpfr2list <- function(x) lapply(getD(x), .mpfr1tolist)
+.mpfr2list <- function(x, names=FALSE) {
+    if(isTRUE(names)) names <- format(x)
+    x <- lapply(getD(x), .mpfr1tolist)
+    if(is.character(names))
+	names(x) <- names
+    x
+}
+
 
 ## Breaks the working of vapply(q, FUN.x) in pbetaI() in ./special-fun.R :
 ## as.list.mpfr1 <- function(x, ...) .mpfr1tolist(x)
 ## as.list.mpfr  <- function(x, ...) .mpfr2list(x)
 
 ## and then
-mpfrXport <- function(x) {
+mpfrXport <- function(x, names=FALSE) {
     if(!is(x, "mpfr")) stop("argument is not a \"mpfr\" object")
     structure(class = "mpfrXport",
 	      list(gmp.numb.bits = .mpfr.gmp.numbbits(),
@@ -121,7 +133,7 @@ mpfrXport <- function(x) {
 		   mpfr.version	 = .mpfrVersion(),
 		   Machine  = .Machine[grepl("sizeof",names(.Machine))],
 		   Sys.info = Sys.info()[c("sysname", "machine")],
-		   mpfr = .mpfr2list(x)))
+		   mpfr = .mpfr2list(x, names=names)))
 }
 
 mpfrImport <- function(mxp) {
@@ -134,37 +146,54 @@ mpfrImport <- function(mxp) {
     new("mpfr", m1)
 }
 
-.mpfr2str <- function(x, digits = NULL, base = 10L) {
-    ##	digits = NULL : use as many digits "as needed"
-    stopifnot(is.null(digits) ||
-	      (is.numeric(digits) && digits >= 1),
-	      is.numeric(base), length(base) == 1, base >= 2)
-    .Call(mpfr2str, x, digits, base)
+.mpfr2str <- function(x, digits = NULL, maybe.full = !is.null(digits), base = 10L) {
+    ## digits = NULL : use as many digits "as needed" for the precision
+    stopifnot(is.null(digits) || (is.numeric(digits) && digits >= 0),
+              is.logical(maybe.full), !is.na(maybe.full),
+	      is.numeric(base), length(base) == 1, base == as.integer(base),
+	      2 <= base, base <= 62)
+    if(!is.null(digits) && digits == 1 && base %in% 2L^(1:5)) {
+	## MPFR mpfr_get_str(): "N must be >= 2"; we found that N = 1 is ok unless
+	##      for these bases where it aborts (in C). ==> prevent that:
+	digits <- 2L
+	message(gettextf("base = %d, digits = 1 is increased to digits = 2", base))
+    }
+    .Call(mpfr2str, x, digits, maybe.full, base)
 }
 
 formatMpfr <-
     function(x, digits = NULL, trim = FALSE, scientific = NA,
-             base = 10, showNeg0 = TRUE,
+             base = 10, showNeg0 = TRUE, max.digits = Inf,
 	     big.mark = "", big.interval = 3L,
 	     small.mark = "", small.interval = 5L,
              decimal.mark = ".",
              exponent.char = if(base <= 14) "e" else if(base <= 36) "E" else "|e",
 	     zero.print = NULL, drop0trailing = FALSE, ...)
 {
-    ##	digits = NULL : use as many digits "as needed"
-    ff <- .mpfr2str(x, digits, base=base)
+    ## digits = NULL : use as many digits "as needed"
+    ## FIXME/TODO: If we have very large numbers, but not high precision, we should detect it
+    ## ==========  and use  maybe.full = FALSE also for the default scientific = NA
+    ## digs.x <- ceiling(.getPrec(x) / log2(base))
+    if((maybe.full <- !isTRUE(scientific)) && !isFALSE(scientific))
+        maybe.full <- !is.null(digits)
+    ff <- .mpfr2str(x, digits, maybe.full=maybe.full, base=base)
+    stopifnot(is.numeric(max.digits), max.digits > 0)
+    if(is.numeric(digits)) stopifnot(digits <= max.digits)
 
     isNum <- ff$finite	## ff$finite == is.finite(x)
     i0 <- ff$is.0	## == mpfrIs0(x)
-    ex <- ff$exp ## the *decimal* exp : one too large *unless* x == 0
+    ex <- ff$exp ## the *decimal* exp (wrt given 'base' !): one too large *unless* x == 0
     r  <- ff$str
-    if(is.null(digits)) digits <- nchar(r)
-
+    r.dig <- nchar(r) # (in both cases, digits NULL or not)
+    ## Note that r.dig[] entries may vary, notably for digits NULL when .getPrec(x) is non-constant
+    if(any(Lrg <- r.dig > max.digits)) { ## now "cut down", e.g. in print() when max.digits < Inf
+	r    [Lrg] <- substr(r, 1L, max.digits)
+	r.dig[Lrg] <- max.digits
+    }
     if(any(i0)) {
 	## sign(x) == -1 "fails" for '-0'
 	hasMinus <- substr(ff$str, 1L,1L) == "-"
-	if(showNeg0) {
-	} else if(any(iN0 <- hasMinus & i0)) {
+	if(!showNeg0 && any(iN0 <- hasMinus & i0)) {
 	    ## get rid of "-" for "negative zero"
 	    r[iN0] <- substring(r[iN0], 2)
 	    hasMinus[iN0] <- FALSE
@@ -190,15 +219,15 @@ formatMpfr <-
     ## if(scientific) --> all get a final "e<exp>"; otherwise, we
     ## adopt the following simple scheme :
     hasE <- { if(is.logical(scientific)) scientific else
-	      isNum & (Ex < -4 + scientific | Ex > digits) }
+	      isNum & (Ex < -4 + scientific | Ex > r.dig) }
 
     if(aE <- any(ii <- isNum & hasE)) {
         ii <- which(ii)
 	i. <- 1L + hasMinus
 	r[ii] <- patch(r[ii], i.[ii])
 	if(drop0trailing)
-	    ## drop 0's only *after* (and together with!) decimal mark:
-	    r[ii] <- sub(paste0(decimal.mark, "0+$"), "", r[ii])
+	    ## drop 0's only after decimal mark (and drop it, if immediately there)
+	    r[ii] <- sub(paste0("\\", decimal.mark, "?0+$"), "", r[ii])
 	r[ii] <- paste(r[ii], as.character(Ex[ii]), sep = exponent.char)
     }
     use.prettyN <- (base <= 14 && (!aE || exponent.char == "e"))
@@ -209,9 +238,7 @@ formatMpfr <-
 	iNeg <- Ex <  0	 & ii ## i.e., ex	 in {0,-1,-2,-3}
 	iPos <- Ex >= 0	 & ii ## i.e., ex	 in {1,2..., digits}
 
-	nZeros <- function(n) ## e.g.  nZeros(2:0) gives  c("00","0", "")
-	    vapply(n, function(k) paste(rep.int("0", k), collapse = ""), "")
-	if(any(eq <- (Ex == digits))) {
+	if(any(eq <- (Ex == r.dig))) {
 	    r[eq] <- paste0(r[eq], "0")
 	    Ex[eq] <- Ex[eq] + 1L
 	}
@@ -220,10 +247,10 @@ formatMpfr <-
 		rr <- r[iNeg]
 		rr[isMin] <- substring(rr[isMin], 2)
 		r[iNeg] <- paste0(c("","-")[1+isMin], "0.",
-				  nZeros(-ex[iNeg]), rr)
+				  strrep("0", -ex[iNeg]), rr)
 	    }
 	    else {
-		r[iNeg] <- paste0("0.", nZeros(-ex[iNeg]), r[iNeg])
+		r[iNeg] <- paste0("0.", strrep("0", -ex[iNeg]), r[iNeg])
 	    }
 	}
 	if(any(iPos)) ## "xy.nnnn" :

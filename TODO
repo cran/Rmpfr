@@ -14,6 +14,9 @@
 
 * Short or Mid Term
 *** TODO Split this section into  Short | Mid  (?)
+** TODO 53) plogis() {and dlogis, qlogis} are "easy": do use <R>/src/nmath/[dpq]logis.c, as they
+ already use all the numerical tricks including R_Log1_Exp(x) .. :
+ R_Log1_Exp(x) := ((x) > -M_LN2 ? log(-expm1(x)) : log1p(-exp(x)))
 ** TODO 35) tests/bit-repr.R : Bits() fails to work with 2^k
 
 ** TODO 37) mpfrXport()/*Import() should work for arrays.  Test Windows-portability:
@@ -73,9 +76,6 @@
 
 ** TODO 24) Bernoulli(): we use builtin zeta(); alternatively, use *exact*
      rationals from 'gmp', using "bigq" (and "bigz") -- and R code from ~/R/Pkgs/copula/R/special-func.R
-** TODO 25) mpfr(<mpfr>, ...) should work: return argument unchanged *if* precision
-    and rounding mode are ok; otherwise use roundMpfr() *BUT* that needs an
-    additional rnd.mode  argument -- as mpfr
 ** TODO 26) (?) Revert the decision to *not* care about rounding mode in Ops/function,
     and rather expose that as in mpfr(), e.g., in R/Math.R  roundMpfr
     -- see  MPFR_RNDN in src/utils.c and others; --> use src/convert.c  R_rnd2MP()
@@ -218,3 +218,6 @@
 ** DONE 9) median(<mpfr>) now works, as does mean(<mpfr>, trim = *) and quantile() w/o warning.
 ** DONE is.finite(.) etc: *Must* keep matrices -> src/utils.c
 ** DONE 52) No longer use 'representation' but rather 'slots' in  'setClass(..)'
+** DONE 25) mpfr(<mpfr>, ...) should work: return argument unchanged *if* precision
+    and rounding mode are ok; otherwise use roundMpfr() *BUT* that needs an
+    additional rnd.mode  argument -- as mpfr

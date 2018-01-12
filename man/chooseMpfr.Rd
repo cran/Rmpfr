@@ -29,8 +29,8 @@ pochMpfr(a, n, rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
   \item{a}{a numeric or \code{\linkS4class{mpfr}} vector.}
-  \item{n}{an integer vector; if not of length one, \code{n} and
-    \code{a} are recycled to the same length.}
+  \item{n}{an \code{\link{integer}} vector; if not of length one,
+    \code{n} and \code{a} are recycled to the same length.}
   \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
     should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
   \item{precBits}{integer or NULL for increasing the default precision
