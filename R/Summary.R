@@ -58,6 +58,6 @@ setMethod("median", "mpfr",
 	      quantile(x, probs = 0.5, na.rm=na.rm, names = FALSE))
 
 
-## FIXME: can do this considerably faster in C:
+## FIXME: can do this considerably faster in C: [which.max(): loc.(first TRUE)]
 setMethod("which.max", "mpfr", function(x) which.max(x == max(x)))
 setMethod("which.min", "mpfr", function(x) which.max(x == min(x)))

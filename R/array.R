@@ -844,3 +844,6 @@ setMethod("norm", signature(x = "mpfrMatrix", type = "character"),
 
 setMethod("head", signature(x = "mpfrMatrix"), utils::head.matrix)
 setMethod("tail", signature(x = "mpfrMatrix"), utils::tail.matrix)
+
+## Workaround fact that base::outer() using tcrossprod() does not dispatch (but did on %*% !?!?!?!)
+environment(outer) <- environment() # and export and document >>  ../man/base-copies.Rd

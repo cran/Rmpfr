@@ -137,7 +137,10 @@ stopifnot(identical(L <- x > 0.5, L & x),
 ##
 ## and has 'details' about  how	 non-integer 'y' works
 ##
-N <- if(doExtras) 1000 else 200
+(N <- if(doExtras) 1000 else 200)
+(todays.seed <- eval(parse(text=Sys.Date())))# so this is reproducible
+                                        # (and constant within one day)
+set.seed(todays.seed)
 mm <- c(-4:4, sample(50, N-9, replace=TRUE))
 for(n in seq_len(N)) {
     cat("."); if(n %% 50 == 0) cat(n,"\n")

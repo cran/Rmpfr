@@ -226,7 +226,7 @@ s2 <- with(da, smooth.spline(a, abs(log1p)^(1/3), df = 9))
 ### code chunk number 18: zoom-in-fig
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
-cl2 <- "slateblue" # "gray35" # the color for "log(2)"
+cl2 <- adjustcolor("slateblue", 1/2)# (adj: lwd=3) # the color for "log(2)"
 par(mar = c(4.1,4.1,0.6,1.6))
 
 matplot(a., abs(ra2), type = "l", log = "y", # ylim = c(-1,1)*1e-12,
@@ -237,9 +237,10 @@ eaxis(1); eaxis(2); draw.machEps()
 lines(a., predict(s1)$y ^ 3, col=cc[2], lwd=2)
 lines(a., predict(s2)$y ^ 3, col=cc[3], lwd=2)
 
-abline(v = log(2), col = cl2, lty=4)
+abline(v = log(2), col=cl2, lty="9273", lwd=2.5)
+cl2. <- adjustcolor(cl2, 2)
 axis(1, at=log(2), label=quote(a[0] == log~2), las=1,
-     col.axis=cl2, col=cl2, lty=4)
+     col.axis=cl2.,col=cl2, lty="9273", lwd=2.5)
 ## what system is it ?
 sysInf <- Sys.info()[c("sysname", "release", "nodename", "machine")]
 mtext(with(as.list(sysInf),
@@ -336,13 +337,20 @@ axis(1, at=x12, labels=formatC(x12), padj = -3.2, hadj = -.1, tcl = +.8,
 
 
 ###################################################
-### code chunk number 24: sessionInfo
+### code chunk number 24: exp-overflow
+###################################################
+(eMax <- .Machine$double.max.exp * log(2))
+exp(eMax * c(1, 1+1e-15))
+
+
+###################################################
+### code chunk number 25: sessionInfo
 ###################################################
 toLatex(sessionInfo(), locale=FALSE)
 
 
 ###################################################
-### code chunk number 25: finalizing
+### code chunk number 26: finalizing
 ###################################################
 options(op.orig)
 

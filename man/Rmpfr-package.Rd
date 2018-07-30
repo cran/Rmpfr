@@ -12,25 +12,9 @@
   the GMP (GNU Multiple Precision) Library.
 }
 \details{
-  \tabular{ll}{
-    Package: \tab Rmpfr\cr
-    %% Type: \tab Package\cr
-    %% Version: \tab 0.5-0\cr
-    %% Date: \tab 2012-07-07\cr
-    SystemRequirements: \tab gmp (>= 4.2.3), mpfr (>= 3.0.0)\cr
-                        \tab (\bold{C} (not R!) libraries; must be installed)\cr
-    Depends: \tab methods, gmp (>= 0.5-8), R (>= 2.12.0)\cr
-    Imports: \tab gmp, stats, utils\cr
-    Suggests: \tab MASS, polynom, sfsmisc (>= 1.0-20), Matrix\cr
-    SuggestNotes: \tab MASS, polynom, sfsmisc are only needed for
-    vignette; Matrix only because of its test-tools\cr
-    URL: \tab http://rmpfr.r-forge.r-project.org/\cr
-    License: \tab GPL (>= 2)\cr
-    %% Packaged: \tab 2012-07-07 20:33:21 UTC; maechler\cr
-    %% Repository: \tab CRAN\cr
-    %% Date/Publication: \tab 2012-07-13 14:45:04\cr
-    %% Built: \tab R 2.15.1; x86_64-unknown-linux-gnu; 2012-08-20 09:00:35 UTC; unix\cr
-}
+%  The DESCRIPTION file:
+  \packageDESCRIPTION{Rmpfr}
+  \packageIndices{Rmpfr}
 
 The following (help pages) index does not really mention that we provide \emph{many}
 methods for mathematical functions, including

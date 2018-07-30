@@ -218,7 +218,10 @@ formatMpfr <-
     ## This very much depends on the desired format.
     ## if(scientific) --> all get a final "e<exp>"; otherwise, we
     ## adopt the following simple scheme :
-    hasE <- { if(is.logical(scientific)) scientific else
+    hasE <- {
+        ## RMH repaired: if(is.logical(scientific) && scientific) scientific else
+        ## MM: the above simplified is
+        if(isTRUE(scientific)) TRUE else
 	      isNum & (Ex < -4 + scientific | Ex > r.dig) }
 
     if(aE <- any(ii <- isNum & hasE)) {

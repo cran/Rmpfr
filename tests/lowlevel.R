@@ -129,3 +129,43 @@ cbind(fz <- format(z))
 stopifnot(identical(fz, c("0.0527",
                           "0.05263157895",
                           "0.05263157934")))
+
+k1 <- mpfr(  c(123, 1234, 12345, 123456), precBits=2)
+(N1 <- asNumeric(k1))# 128  1024  12288  131072 -- correct
+str(.mpfr2str(k1))
+str(.mpfr2str(k1, maybe.full=TRUE, base=10), vec.len=10)
+str(.mpfr2str(k1, maybe.full=TRUE, base= 2), vec.len=10)
+
+## MM: --> need_dig is fine  but is not used in the string that is returned !!
+
+(fk1 <- formatMpfr(k1, scientific=FALSE)) # "the bug" --- now fixed!
+stopifnot(all.equal(N1, as.numeric(fk1), tol=0))
+format(k1, digits=3) # now fine
+##
+digs <- setNames(1:6, 1:6)
+## Each of these are  4 x 6  matrices
+ffix <- sapply(digs, function(d) format(k1, digits = d, scientific = FALSE)) ## *not* good at all ..
+## ==> need a maybe.full=TRUE   even here
+ff   <- sapply(digs, function(d) format(k1, digits = d))# sci..fic = NA -- digits=1 failing for '128'
+fsci <- sapply(digs, function(d) format(k1, digits = d, scientific = TRUE)) # perfect
+stopifnot(exprs = {
+    length(dd <- dim(ff)) == 2
+    identical(dd, dim(ffix))
+    identical(dd, dim(fsci))
+    all.equal(asNumeric(fsci), asNumeric(ffix) -> dmat, tol=0)
+    all.equal(asNumeric(ff),   asNumeric(ffix), tol=0)
+})
+rE <- 1 - dmat / asNumeric(k1)
+i <- 1:5
+summary(fm <- lm(log10(colMeans(abs(rE)))[i] ~ i))
+stopifnot(exprs = {
+    rE[ cbind(FALSE, upper.tri(rE)[,-6]) ] == 0
+    abs(residuals(fm)) < 0.15
+})
+
+
+## Bug example from RMH 2018-03-16 :
+(x <- mpfr(c(65, 650, 6500, 65000, 650000), precBits=6))
+data.frame(fDec = formatDec(x), f = formatMpfr(x))
+x. <- as.numeric(xDec <- formatDec(x))
+stopifnot(abs(x - x.) <= c(0, 0, 2, 12, 360))

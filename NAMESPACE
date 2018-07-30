@@ -34,7 +34,7 @@ importClassesFrom("gmp", "bigz", "bigq")
 importFrom("gmp"
            , asNumeric, as.bigz, as.bigq, .as.char.bigz, ..as.bigz
          , apply # , apply.default # *.default: else apply() breaks in pkg SNscan
-         , crossprod, tcrossprod# `%*%`, <- as we write (S4) methods for those
+         , crossprod, tcrossprod# <- as we write (S4) methods for those (*not* '%*%' !)
            , matrix, numerator, denominator, frexpZ, chooseZ
            , is.whole, formatN # because we add own S3 methods
 	   )
@@ -103,9 +103,7 @@ export(.mpfr, .mpfr.
        , "atan2"
        , "beta", "lbeta"
        ## S3 "c.mpfr"
-       , "cbind"
        , "chooseMpfr", "chooseMpfr.all", "sumBinomMpfr"
-       , "crossprod"
        , "dbinom", "dpois", "dnorm"
        , "erf", "erfc"
        , "factorial"
@@ -124,16 +122,15 @@ export(.mpfr, .mpfr.
        , "mpfrVersion"
        , "mpfr_default_prec"
        , "optimizeR"
+       , outer # <- our own instead of base, so it uses tcrossprod() methods
        , "hjkMpfr" ## <-- FIXME, rather part of an  optimR(...., method = "hjk")
        , "pbetaI"
        , "pmax", "pmin"
        , "pnorm"
        , "pochMpfr"
-       , "rbind"
        , "roundMpfr"
        , "seqMpfr"
        , "t"
-       , "tcrossprod"
        , "toNum"
        , "unique"
        , "unirootR"
