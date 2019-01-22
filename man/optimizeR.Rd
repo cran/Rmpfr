@@ -1,9 +1,9 @@
 \name{optimizeR}
 \alias{optimizeR}
-\title{High Precisione One-Dimensional Optimization}
+\title{High Precision One-Dimensional Optimization}
 %% Compare with ~/R/D/r-devel/R/src/library/stats/man/optimize.Rd
 \description{
-  \code{optimizeR} searches the intervalfrom
+  \code{optimizeR} searches the interval from
   \code{lower} to \code{upper} for a minimum % TODO ? or maximum
   of the function \code{f} with respect to its first argument.
 }
@@ -49,7 +49,8 @@ optimizeR(f, lower, upper, ..., tol = 1e-20,
       In smooth cases, the convergence is considerably faster than the golden
       section or Fibonacci ratio algorithms.
     }
-    \item{\code{"GoldenRatio"}:}{The golden ratio method works as follows:
+    \item{\code{"GoldenRatio"}:}{The golden ratio method, aka
+      \sQuote{golden-section search} works as follows:
       from a given interval containing the solution, it constructs the
       next point in the golden ratio between the interval boundaries.
     }
@@ -78,6 +79,15 @@ optimizeR(f, lower, upper, ..., tol = 1e-20,
   \R's standard \code{\link{optimize}}; \pkg{Rmpfr}'s \code{\link{unirootR}}.
 }
 \examples{
+## The minimum of the Gamma (and lgamma) function (for x > 0):
+Gmin <- optimizeR(gamma, .1, 3, tol = 1e-50)
+str(Gmin, digits = 8)
+## high precision chosen for "objective"; minimum has "estim.prec" = 1.79e-50
+Gmin[c("minimum","objective")]
+## it is however more accurate to 59 digits:
+asNumeric(optimizeR(gamma, 1, 2, tol = 1e-100)$minimum - Gmin$minimum)
+
+
 iG5 <- function(x) -exp(-(x-5)^2/2)
 curve(iG5, 0, 10, 200)
 o.dp  <- optimize (iG5, c(0, 10)) #->  5 of course
@@ -113,7 +123,7 @@ msq <- optimizeR(f.sq, 0, 5, tol = 1e-50, trace=5)
 str(msq) # ok
 stopifnot(abs(msq$minimum - 2) < 1e-49)
 
-## find the other local minimum: -- non-smooth ==> Golden-section is used
+## find the other local minimum: -- non-smooth ==> Golden ratio -section is used
 msq2 <- optimizeR(f.sq, 3.5, 5, tol = 1e-50, trace=10)
 stopifnot(abs(msq2$minimum - 4) < 1e-49)
 

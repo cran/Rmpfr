@@ -21,8 +21,9 @@ setMethod("Summary", "mpfr",
 
 stats__quantile.default <- stats:::quantile.default
 
-setMethod("quantile", "mpfr",
-          stats__quantile.default)
+setMethod("quantile", "mpfr", stats__quantile.default)
+##
+## Not perfect: has the "0%" "25%" "50%" ... names but not as slot ... hmm ...
 ## 'mpfr' numbers do not have 'names' slot ... (etc) -- but "work" with names
 	  ## function(x, ...) {
 	  ##     if((match("names", names(list(...)), nomatch = 0L)) == 0L)
@@ -56,6 +57,49 @@ setMethod("mean", "mpfr", function(x, trim = 0, na.rm = FALSE, ...) {
 setMethod("median", "mpfr",
 	  function(x, na.rm=FALSE, ...)
 	      quantile(x, probs = 0.5, na.rm=na.rm, names = FALSE))
+
+
+setMethod("summary", "mpfr", function (object, ..., digits, quantile.type = 7) {
+    ## Should work almost like  summary(asNumeric(object, ..., digits=digits))
+    ## *but* w/o underflow and overflow:
+    nas <- is.na(object)
+    object <- object[!nas]
+    qq <- quantile(object, names=FALSE, type = quantile.type)
+    qq <- c(qq[1L:3L], mean(object), qq[4L:5L])
+    ## names(qq) <- c("Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max.")
+    if (!missing(digits))
+        qq <- signif(qq, digits)
+    if(any(nas)) # names() updatingn works for "mpfr"
+        qq  <- c(qq, "NA's" = sum(nas))
+    ## loses names: as(qq, "summaryMpfr")
+    ## workaround :
+    new("summaryMpfr", qq,
+        names = c("Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."))
+})
+
+setClass("summaryMpfr", contains = "mpfr",
+         slots = c(names = "character"))
+
+print.summaryMpfr <- function (x, digits=max(3L, getOption("digits") - 3L), ...)
+{
+    xx <- x
+    names(xx) <- NULL # will be lost anyway
+    if(getRversion() >= "3.5.2") { ## for zapsmall() to work
+        finite <- is.finite(xx)
+        xx[finite] <- zapsmall(xx[finite])
+    }
+    m <- match("NA's", names(xx), nomatch = 0L)
+    xx <-
+        if(m)
+            c(format(xx[-m], digits = digits), `NA's` = as.character(xx[m]))
+        else
+            format(xx, digits = digits)
+    names(xx) <- names(x)
+    print.table(xx, digits = digits, ...)
+    invisible(x)
+}
+
+setMethod(show, "summaryMpfr", function(object) print.summaryMpfr(object))
 
 
 ## FIXME: can do this considerably faster in C: [which.max(): loc.(first TRUE)]

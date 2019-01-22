@@ -7,6 +7,7 @@ unirootR(f, interval, \dots,
         f.lower = f(lower, ...), f.upper = f(upper, ...),
         verbose = FALSE,
         tol = .Machine$double.eps^0.25, maxiter = 1000,
+        warn.no.convergence = TRUE,
         epsC = NULL)
 }
 \arguments{
@@ -25,6 +26,8 @@ unirootR(f, interval, \dots,
     verbose output should be produced during the iterations.}
   \item{tol}{the desired accuracy (convergence tolerance).}
   \item{maxiter}{the maximum number of iterations.}
+  \item{warn.no.convergence}{if set to \code{FALSE} there's no warning
+    about non-convergence.  Useful to just run a few iterations.}
   \item{epsC}{positive number or \code{NULL} in which case a smart
     default is sought.  This should specify the \dQuote{achievable
       machine precision} \emph{for} the given numbers and their

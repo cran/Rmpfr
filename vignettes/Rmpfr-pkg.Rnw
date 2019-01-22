@@ -17,6 +17,7 @@
 %\VignetteIndexEntry{Arbitrarily Accurate Computation with R Package Rmpfr}
 %\VignetteDepends{Rmpfr}
 %\VignetteDepends{gmp}
+%\VignetteDepends{Bessel}
 \SweaveOpts{engine=R,eps=FALSE,pdf=TRUE,width=7,height=4,strip.white=true,keep.source=TRUE}
 
 %% an abstract and keywords
@@ -527,7 +528,9 @@ abline(h=0, v=0, lty=3); abline(v=c(-1,1), lty=3, lwd=.8, col="gray")
 legend(-3,1, c("erf(x)", "erfc(x)"), col = c("red","blue"), lty=1)
 @
 \subsection{Applications}
-The CRAN package \CRANpkg{Bessel}
+The CRAN package \CRANpkg{Bessel} provides asymptotic formulas for Bessel
+functions also of \emph{fractional} order which do work for
+\code{mpfr}-vector arguments as well.
 
 \section{Integration highly precisely}
 Sometimes, important functions are defined as integrals of

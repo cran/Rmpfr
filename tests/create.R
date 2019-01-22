@@ -133,3 +133,6 @@ assertError <- tools::assertError
 assertError( pp <- Const("pi", prec   = 1e11) )
 assertError( mpfr("123.456",  precBits= 1e11) )
 assertError( mpfr(as.bigz(3), precBits= 1e11) )
+
+stopifnot(identical(mpfr(NULL), mpfr(logical())))
+

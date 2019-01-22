@@ -12,6 +12,7 @@ unirootR <- function(f, interval, ...,
 		     f.lower = f(lower, ...), f.upper = f(upper, ...),
 		     verbose = FALSE,
 		     tol = .Machine$double.eps^0.25, maxiter = 1000,
+                     warn.no.convergence = TRUE,
 		     epsC = NULL)
 {
     if(!missing(interval) && length(interval) != 2L)
@@ -181,7 +182,8 @@ unirootR <- function(f, interval, ...,
     } else { ## (!converged) : failed!
 	val <- list(root= b, rtol = abs(c-b))
 	iter <- maxiter
-	warning("_NOT_ converged in ", iter, " iterations")
+	if(warn.no.convergence)
+	    warning("_NOT_ converged in ", iter, " iterations")
     }
 
     list(root = val[["root"]], f.root = f(val[["root"]], ...),

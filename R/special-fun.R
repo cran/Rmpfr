@@ -28,19 +28,20 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
     if(is.numeric(q) && is.numeric(mean) && is.numeric(sd))
 	stats__pnorm(q, mean, sd, lower.tail=lower.tail, log.p=log.p)
     else if((q.mp <- is(q, "mpfr")) || is(mean, "mpfr") || is(sd, "mpfr")) {
-	stopifnot(length(lower.tail) == 1, length(log.p) == 1)
+	stopifnot(length(lower.tail) == 1L, length(log.p) == 1L)
 	rr <- q <- ((if(q.mp) q else as(q, "mpfr")) - mean) / sd
 	if(any(neg <- (q < 0))) ## swap those:	Phi(-z) = 1 - Phi(z)
 	    rr[neg] <- pnorm(-q[neg], lower.tail = !lower.tail, log.p=log.p)
 	if(any(pos <- !neg)) {
 	    q <- q[pos]
 	    prec.q <- max(.getPrec(q))
-	    rt2 <- sqrt(mpfr(2, prec.q))
+	    two <- mpfr(2, prec.q)
+	    rt2 <- sqrt(two)
 	    rr[pos] <- if(lower.tail) {
 		eq2 <- erf(q/rt2)
 		if(log.p && any(sml <- abs(eq2) < .5)) {
 		    r <- q
-		    r[ sml] <- log1p(eq2[sml]) - log(2)
+		    r[ sml] <- log1p(eq2[sml]) - log(two)
 		    r[!sml] <- log((1 + eq2[!sml])/2)
 		    r
 		}
@@ -328,6 +329,7 @@ pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
 
     mpfr1 <- list(.Call(const_asMpfr, 1, 16L, "N")) # as prototype for vapply()
     F <- if(log.p) log else identity
+    ## FIXME: logspace add sum   lsum(.) should be more accurate for large n ==> could use larger a,b
 
     if(lower.tail) {
 	## The prob. is	  P[ X <= x ] = \sum_{k=a}^ n    (n \\ k) x^k (1-x)^(n-k)

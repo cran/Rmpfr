@@ -70,8 +70,7 @@ mpfr_default_prec <- function(prec) {
 .erange.codes <- setNames(seq_along(.erange.codes), .erange.codes)
 ## FIXME? better function name ??
 .mpfr.erange <- function(kind) {
-    stopifnot(length(kind) == 1, is.character(kind))
-    if(!any(kind == names(.erange.codes)))
+    if(missing(kind) || length(kind) != 1 || is.na(match(kind, names(.erange.codes))))
         stop("'kind' must be one of ",
              paste(paste0('"', names(.erange.codes), '"'), collapse=", "))
     .Call(R_mpfr_get_erange, .erange.codes[[kind]])
@@ -290,6 +289,9 @@ setReplaceMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing",
 c.mpfr <- function(...)
     new("mpfr", unlist(lapply(list(...), as, Class = "mpfr"),
 		       recursive = FALSE))
+## and the same trick can be used to implement an
+sapplyMpfr <- function(X, FUN, ...) new("mpfr", unlist(lapply(X, FUN, ...), recursive = FALSE))
+
 
 ##  duplicated() now works, checked in ../man/mpfr-class.Rd
 
@@ -495,25 +497,27 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
 	length.out <- length(along.with)
     } else if (!is.null(length.out)) {
 	if (length(length.out) != 1) stop("'length.out' must be of length 1")
-	length.out <- ceiling(length.out)
+	length.out <- asNumeric(ceiling(length.out))
     }
 ##     status <- c(!missing(to), !missing(by), !is.null(length.out))
 ##     if(sum(status) != 2)
 ## ## stop("exactly two of 'to', 'by' and 'length.out' / 'along.with' must be specified")
 ##	   warning("not exactly two of 'to', 'by' and 'length.out' / 'along.with' have been specified")
 
+    miss.by <- missing(by)
     if(is.null(length.out)) {
 	if(!is(to,   "mpfr")) to   <- as(to,   "mpfr")
 	if(!is(from, "mpfr")) from <- as(from, "mpfr")# need it again
 	del <- to - from
 	if(del == 0 && to == 0) return(to)
-	if(missing(by)) {
+	if(miss.by) {
 	    by <- mpfr(sign(del), getD(from)[[1]]@prec)
 	}
     }
-    if (!is(by, "mpfr")) by <- as(by, "mpfr")
-    if (length(by) != 1) stop("'by' must be of length 1")
-
+    else if(!miss.by) { # to mpfr and check it
+        if (!is(by, "mpfr")) by <- as(by, "mpfr")
+        if (length(by) != 1) stop("'by' must be of length 1")
+    }
     ## ---- This is  cut n paste  from seq.default() :
     ## ---- It should work, since "arithmetic works for mpfr :
     if(is.null(length.out)) {
@@ -540,19 +544,20 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
     else if(length.out == 0)
 	as(from,"mpfr")[FALSE] # of same precision
     ## else if (One) 1:length.out
-    else if(missing(by)) {
+    else if(miss.by) {
 	## if(from == to || length.out < 2) by <- 1
-        length.out <- as.integer(length.out)
+        if(length.out < .Machine$integer.max)
+            length.out <- as.integer(length.out)
 	if(missing(to))
-	    to <- as(from,"mpfr") + length.out - 1
+	    to <- as(from,"mpfr") + (length.out - 1)
 	if(missing(from))
-	    from <- to - length.out + 1
+	    from <- to - (length.out - 1)
 	if(length.out > 2)
 	    if(from == to)
 		rep.int(as(from,"mpfr"), length.out)
 	    else { f <- as(from,"mpfr")
 		   as.vector(c(f, f + (1:(length.out - 2)) * by, to))
-}
+            }
 	else as.vector(c(as(from,"mpfr"), to))[seq_len(length.out)]
     }
     else if(missing(to))
@@ -560,7 +565,7 @@ seqMpfr <- function(from = 1, to = 1, by = ((to - from)/(length.out - 1)),
     else if(missing(from))
 	to - ((as.integer(length.out) - 1L):0) * by
     else stop("too many arguments")
-}
+} ## {seqMpfr}
 
 if(FALSE) { ##-- --- I don't see *any* way  to define  seq() {S4} methods
     ## 1. Currently  need a  setGeneric() :
@@ -744,7 +749,7 @@ str.mpfr <- function(object, nest.lev, internal = FALSE,
     if(le > max.len) object <- object[seq_len(max.len)]
     if(!is.null(digits.d))## reduce digits where precision is smaller:
 	digits.d <- pmin(digits.d,
-			 ceiling(log(2)/log(10) * .getPrec(object)))
+			 ceiling(log(2)/log(10) * max(.getPrec(object))))
     if(is.null(vec.len)) { # use width and precision (and remain simple enough)
         ff <- formatMpfr(object, digits=digits.d, drop0trailing=drop0trailing, ...)
 	nch <- if(getRversion() >= "3.2.1") nchar(ff, keepNA=FALSE) else nchar(ff)
@@ -753,10 +758,8 @@ str.mpfr <- function(object, nest.lev, internal = FALSE,
 	    vec.len <- max(2L, which.max(too.lrg) - 1L)
     } else
 	fits <- le <= vec.len
-    if(!fits) {
-	object <- object[i <- seq_len(vec.len)]
-	digits.d <- digits.d[i]
-    }
+    if(!fits)
+	object <- object[seq_len(vec.len)]
     cat(formatMpfr(object, digits=digits.d, drop0trailing=drop0trailing, ...),
 	if(fits) "\n" else "...\n")
 } ## {str.mpfr}

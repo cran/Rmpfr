@@ -43,7 +43,7 @@ seqMpfr(7, 3) # -> default prec.
 eq.test <- function(...) {
   args <- list(...)
   r <- do.call(seqMpfr, args)
-  is(r,"mpfr") && r == do.call(seq, lapply(args, as.numeric))
+  is(r, "mpfr") && all(r == do.call(seq, lapply(args, as.numeric)))
 }
 m <- mpfr(8, 60); m2 <- as(2, "mpfr")
 stopifnot(seqMpfr(7,3) == 7:3, seqMpfr(to=1) == 1,

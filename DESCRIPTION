@@ -1,18 +1,20 @@
 Package: Rmpfr
 Title: R MPFR - Multiple Precision Floating-Point Reliable
-Version: 0.7-1
-Date: 2018-07-24
-DateNote: Previous CRAN version 0.7-0 on 2018-01-12
+Version: 0.7-2
+Date: 2019-01-18
+DateNote: Previous CRAN version 0.7-1 on 2018-07-24
 Type: Package
-Author: Martin Maechler
-Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
+Authors@R: c(
+  person("Martin","Maechler", role=c("aut","cre"),
+	email="maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
+  )
 SystemRequirements: gmp (>= 4.2.3), mpfr (>= 3.0.0)
 SystemRequirementsNote: 'MPFR' (MP Floating-Point Reliable Library,
         http://mpfr.org/) and 'GMP' (GNU Multiple Precision library,
         http://gmplib.org/), see >> README.md
 Depends: gmp (>= 0.5-8), R (>= 3.3.0)
 Imports: stats, utils, methods
-Suggests: MASS, polynom, sfsmisc (>= 1.0-20), Matrix
+Suggests: MASS, Bessel, polynom, sfsmisc (>= 1.0-20), Matrix
 SuggestsNote: MASS, polynom, sfsmisc: only for vignette; Matrix:
         test-tools
 URL: http://rmpfr.r-forge.r-project.org/
@@ -23,6 +25,8 @@ Description: Arithmetic (via S4 classes and methods) for
   which itself is based on the 'GMP' (GNU Multiple Precision) Library.
 License: GPL (>= 2)
 NeedsCompilation: yes
-Packaged: 2018-07-24 13:15:37 UTC; maechler
+Packaged: 2019-01-18 16:24:15 UTC; maechler
+Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>)
+Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2018-07-30 16:10:22 UTC
+Date/Publication: 2019-01-22 22:00:02 UTC

@@ -4,7 +4,34 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
-\section{Changes in version 0.7-1 [2018-07-..]}{
+\section{Changes in version 0.7-2 [2019-01-14, r298]}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{str(<mpfr>)} no longer calls \code{formatMpfr(x, digits, *)}
+      with a \code{digits} \emph{vector} of the same length as \code{x}
+      (which never worked correctly).
+
+      \item \code{seqMpfr(1, length.out=8)} now works correctly.
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{unirootR()} gets an option to \emph{not} warn on
+      non-convergence.
+
+      \item Provide a \code{summary()} method for \code{"mpfr"} numbers
+      closely modeled after \code{summary.default} for numeric.
+
+      \item \code{mpfr(NULL)} now works, returning \code{mpfr(logical())}.
+
+      \item a simple \code{sapplyMpfr()} function, showing how to work
+      around the fact that \code{sapply()} does typically not work with
+      \code{"mpfr"} numbers.
+    }
+  }
+}
+
+\section{Changes in version 0.7-1 [2018-07-24, r291]}{
   \subsection{BUG FIXES}{
     \itemize{
       \item \code{formatMpfr()} for large low-precision numbers now uses
@@ -18,7 +45,7 @@
   }
 }
 
-\section{Changes in version 0.7-0 [2018-01-12]}{
+\section{Changes in version 0.7-0 [2018-01-12, r284]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item \code{.mpfr2list()} and \code{mpfrXport()} gain an option
@@ -39,7 +66,7 @@
     }
   }
 }
-\section{Changes in version 0.6-2 [2017-05-29], never on CRAN}{
+\section{Changes in version 0.6-2 [2017-05-29, r264], never on CRAN}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item The S3 classes \code{"Hcharacter"} and \code{"Bcharacter"}
@@ -86,7 +113,7 @@
   }
 }
 
-\section{Changes in version 0.6-1 [2016-11-15]}{
+\section{Changes in version 0.6-1 [2016-11-15, r249]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item \code{head()} and \code{tail()} methods for \code{"mpfrMatrix"}.
@@ -102,7 +129,7 @@
   }
 }
 
-\section{Changes in version 0.6-0 [2015-12-04]}{
+\section{Changes in version 0.6-0 [2015-12-04, r237]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item \code{mpfr()} now is S3 generic with several methods, notably a
@@ -162,7 +189,7 @@
 
 
 
-\section{Changes in version 0.5-7 [2014-11-27]}{
+\section{Changes in version 0.5-7 [2014-11-27, r205]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item .
@@ -177,7 +204,7 @@
   }
 }
 
-\section{Changes in version 0.5-6 [2014-09-05]}{
+\section{Changes in version 0.5-6 [2014-09-05, r203]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item experimental \code{mpfrImport()}, \code{mpfrXport()}

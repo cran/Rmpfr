@@ -354,8 +354,7 @@ typedef enum { E_min = 1, E_max,
 SEXP R_mpfr_get_erange(SEXP kind_) {
     erange_kind kind = asInteger(kind_);
 /* MUST be sync'ed with  ../R/mpfr.R
- *                       ~~~~~~~~~~~ where  .Summary.codes <-
-
+ *                       ~~~~~~~~~~~ and its  .erange.codes <-
  */
     mpfr_exp_t r;
     switch(kind) {
@@ -441,6 +440,8 @@ SEXP const_asMpfr(SEXP I, SEXP prec, SEXP rnd_mode)
     FINISH_1_RETURN(r, val);
 }
 
+/** For functions     <logical>  <-  FUN(x = <mpfr>) :
+ */
 #define R_MPFR_Logic_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x) {							\
     SEXP D = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));/* R list() */	\
@@ -527,6 +528,8 @@ SEXP R_mpfr_fac (SEXP n_, SEXP prec, SEXP rnd_mode)
 }
 
 
+/** For functions   FUN(x = <mpfr>, y = <mpfr>) :
+ */
 #define R_MPFR_2_Numeric_Function(_FNAME, _MPFR_NAME)	\
 SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {		\
     SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));	\
@@ -559,6 +562,8 @@ R_MPFR_2_Numeric_Function(R_mpfr_beta,  my_mpfr_beta)
 R_MPFR_2_Numeric_Function(R_mpfr_lbeta, my_mpfr_lbeta)
 
 
+/** For functions   FUN(x = <mpfr>, y = <integer>) :
+ */
 #define R_MPFR_2_Num_Long_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {				\
     SEXP xD, yt, val;							\

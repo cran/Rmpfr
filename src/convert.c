@@ -26,7 +26,7 @@
 
 // Initialize contents (4 slots) of a "mpfr1" R object
 #define R_mpfr_MPFR_2R_init(_V_, _d_length_)				\
-    SEXP _V_ = PROTECT(NEW_OBJECT(MAKE_CLASS("mpfr1")));		\
+    SEXP _V_ = PROTECT(NEW_OBJECT(PROTECT(MAKE_CLASS("mpfr1"))));	\
     SEXP prec_R = PROTECT(ALLOC_SLOT(_V_, Rmpfr_precSym, INTSXP, 1));	\
     SEXP sign_R = PROTECT(ALLOC_SLOT(_V_, Rmpfr_signSym, INTSXP, 1));	\
     SEXP exp_R  = PROTECT(ALLOC_SLOT(_V_, Rmpfr_expSym,  INTSXP, R_mpfr_exp_size)); \
@@ -113,7 +113,7 @@ SEXP MPFR_as_R(mpfr_t r) {
 
     R_mpfr_MPFR_2R_fill;
 
-    UNPROTECT(5);
+    UNPROTECT(6);
     return val;
 }
 
@@ -136,7 +136,7 @@ SEXP d2mpfr1_(double x, int i_prec, mpfr_rnd_t rnd)
     mpfr_clear (r);
     mpfr_free_cache(); /* <- Manual 4.8 "Memory Handling" strongly advises ...*/
 
-    UNPROTECT(5);
+    UNPROTECT(6);
     return val;
 }/* d2mpfr1_ */
 

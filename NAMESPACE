@@ -46,6 +46,7 @@ if(packageVersion("gmp") >= "0.5.8")
 exportClasses("mpfr1", "mpfr"
               , "mpfrArray"
               , "mpfrMatrix"
+              , "summaryMpfr" # mainly for printing
 
               , "atomicVector"
               , "array_or_vector"
@@ -129,6 +130,7 @@ export(.mpfr, .mpfr.
        , "pnorm"
        , "pochMpfr"
        , "roundMpfr"
+       , sapplyMpfr
        , "seqMpfr"
        , "t"
        , "toNum"
@@ -165,6 +167,7 @@ exportMethods(##___ "own generics" ___
   , "show", "unique"
   , "colSums", "colMeans"
   , "rowSums", "rowMeans", "norm"
+  , summary
   , head, tail
   , "which.min", "which.max"
 )
@@ -174,6 +177,7 @@ S3method(mpfr, default)
 S3method(mpfr, bigz)
 S3method(mpfr, bigq)
 S3method(mpfr, mpfr)
+S3method(mpfr, NULL)
 S3method(mpfr, Ncharacter)
 
 ## needed because gmp "forgets" to  S3method() these:
@@ -206,6 +210,7 @@ S3method(print, mpfr1)
 S3method(print, mpfrArray)
 S3method(print, integrateR)
 S3method(print, Ncharacter)
+S3method(print, summaryMpfr)
 
 S3method("[", Ncharacter)
 S3method(as.data.frame, Ncharacter)

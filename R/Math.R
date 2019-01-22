@@ -306,6 +306,8 @@ setMethod("Math2", signature(x = "mpfr"),
 				   .Generic)))
 	  })
 
+
+
 ##---- mpfrArray / mpfrMatrix --- methods -----------------
 
 ## not many needed: "mpfrArray" contain "mpfr",

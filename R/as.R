@@ -36,6 +36,8 @@ mpfr.bigq <- function(x, precBits, ...) {
     ..bigq2mpfr(x, precBits)
 }
 
+mpfr.NULL <- function(x, ...) mpfr(logical(), ...)
+
 mpfr.default <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z','A'),
                          scientific = NA, ...)
 {
@@ -148,7 +150,7 @@ mpfrImport <- function(mxp) {
 
 .mpfr2str <- function(x, digits = NULL, maybe.full = !is.null(digits), base = 10L) {
     ## digits = NULL : use as many digits "as needed" for the precision
-    stopifnot(is.null(digits) || (is.numeric(digits) && digits >= 0),
+    stopifnot(is.null(digits) || (is.numeric(digits) && length(digits) == 1 && digits >= 0),
               is.logical(maybe.full), !is.na(maybe.full),
 	      is.numeric(base), length(base) == 1, base == as.integer(base),
 	      2 <= base, base <= 62)
@@ -175,7 +177,7 @@ formatMpfr <-
     ## ==========  and use  maybe.full = FALSE also for the default scientific = NA
     ## digs.x <- ceiling(.getPrec(x) / log2(base))
     if((maybe.full <- !isTRUE(scientific)) && !isFALSE(scientific))
-        maybe.full <- !is.null(digits)
+	maybe.full <- !is.null(digits)
     ff <- .mpfr2str(x, digits, maybe.full=maybe.full, base=base)
     stopifnot(is.numeric(max.digits), max.digits > 0)
     if(is.numeric(digits)) stopifnot(digits <= max.digits)

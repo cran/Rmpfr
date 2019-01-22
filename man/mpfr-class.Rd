@@ -4,6 +4,7 @@
 %
 \alias{mpfr-class}
 \alias{mpfr1-class}
+\alias{summaryMpfr-class}
 %
 \alias{[[,mpfr-method}
 \alias{[,mpfr,ANY,missing,missing-method}
@@ -116,6 +117,7 @@
 \alias{mean,mpfr-method}
 \alias{median,mpfr-method}
 \alias{quantile,mpfr-method}
+\alias{summary,mpfr-method}
 
 \alias{dim<-,mpfr-method}
 \alias{t,mpfr-method}
@@ -132,13 +134,15 @@
 
 \alias{show,mpfr-method}
 \alias{show,mpfr1-method}
+\alias{show,summaryMpfr-method}
 \alias{print.mpfr1}
+\alias{print.summaryMpfr}
 %
 \description{
   \code{"mpfr"} is the class of \bold{M}ultiple \bold{P}recision
   \bold{F}loatingpoint numbers with \bold{R}eliable arithmetic.
 
-  For the high-level user, \code{"mpfr"} objects should behave
+  sFor the high-level user, \code{"mpfr"} objects should behave
   as standard \R's \code{\link{numeric}} \emph{vectors}. They would just
   print differently and use the prespecified (typically high) precision
   instead of the double precision of \sQuote{traditional} \R numbers
@@ -160,6 +164,9 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
 }
 \section{Objects from the Class}{
   Objects are typically created by \code{\link{mpfr}(<number>, precBits)}.
+
+  \code{summary(<mpfr>)} returns an object of class \code{"summaryMpfr"}
+  which contains \code{"mpfr"} but has its own \code{\link{print}} method.
 }
 \section{Slots}{
   Internally, \code{"mpfr"} objects just contain standard \R
@@ -251,7 +258,10 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
 
     \item{median}{\code{signature(x = "mpfr")}: works via}% quantile(*, probs = 0.5) :
     \item{quantile}{\code{signature(x = "mpfr")}: a simple wrapper of
-    the \code{quantile.default} method from \pkg{stats}.}
+      the \code{quantile.default} method from \pkg{stats}.}
+    \item{summary}{\code{signature(object = "mpfr")}: modeled after
+      \code{\link{summary.default}}, ensuring to provide the full "mpfr"
+      range of numbers.}
 
     \item{Math}{\code{signature(x = "mpfr")}: All the S4
       \code{\link[methods:S4groupGeneric]{Math}} group functions are
@@ -410,6 +420,7 @@ two ^ (mpfr.min.exp2 * (1 - 1e-15))
 
 p <- mpfr(rpois(32, lambda=500), precBits=128)^10
 np <- as.numeric(log(p))
+(sp <- summary(p))# using the print.summaryMpfr() method
 stopifnot(all(diff(sort(p)) >= 0),
    identical(order(p), order(np)),
    identical(rank (p), rank (np)),

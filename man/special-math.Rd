@@ -46,16 +46,18 @@ erfc(x)
   the class description \code{\linkS4class{mpfr}} mentioning the
   generic arithmetic and mathematical functions (\code{sin}, \code{log},
   \dots, etc) for which \code{"mpfr"} methods are available.
+
+  Note the (integer order, non modified) Bessel functions \eqn{j_0()},
+  \eqn{y_n()}, etc, named \code{\link{j0}, \link{yn}} etc, and Airy
+  function \eqn{Ai()} in \link{Bessel_mpfr}.
 }
 \examples{
 curve(Ei,  0, 5, n=2001)
 
-if(mpfrVersion() >= "2.4.0") { ## Li2() is not available in older MPFR versions
-curve(Li2, 0, 5, n=2001)
-
-curve(Li2, -2, 13,   n=2000); abline(h=0,v=0, lty=3)
+## As we now require (mpfrVersion() >= "2.4.0"):
+curve(Li2,  0,    5, n=2001)
+curve(Li2, -2,   13, n=2000); abline(h=0,v=0, lty=3)
 curve(Li2, -200,400, n=2000); abline(h=0,v=0, lty=3)
-}
 
 curve(erf, -3,3, col = "red", ylim = c(-1,2))
 curve(erfc, add = TRUE, col = "blue")

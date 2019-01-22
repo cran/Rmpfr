@@ -89,9 +89,9 @@ mpfrImport(mxp)
   \code{.. = 1e7)}, say.
 }
 \value{
-  \code{getPrec(x)} returns a \code{\link{integer}} vector of the same
-  length as \code{x} when that is positive, whereas \code{getPrec(NULL)}
-  returns \code{mpfr_default_prec()}, see below.
+  \code{getPrec(x)} returns a \code{\link{integer}} vector of length one or
+  the same length as \code{x} when that is positive, whereas
+  \code{getPrec(NULL)} returns \code{mpfr_default_prec()}, see below.
   % the current MPFR default precision, see   \code{mpfr_default_prec()}
   If you need to \emph{change} the precision of \code{x}, i.e., need
   something like \dQuote{setPrec}, use \code{\link{roundMpfr}()}.

@@ -1,5 +1,6 @@
 		-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
 * Very Short Term
+** TODO 32) .getPrec() should be documented {slightly}; .getSign(), .mpfr(), .erange()... -- at least *internal* (e.g. roxygen)
 ** TODO 31) Valgrind problems + leaks: Brian's e-mail 2014-06-19; ~/R/Pkgs/Rmpfr.Rcheck_valgrind/
 ** TODO 11) format() method for "mpfr", "mpfrArray" (and hence "mpfrMatrix") which nicely
     and correctly *jointly* formats (for "mpfr") and aligns columns !
@@ -9,7 +10,6 @@
 ** TODO 17b) see 'Ops' in R/Arith.R  ,  Rmpfr:::.Math.codes,  and
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
-** TODO 32) .getPrec() should be documented {slightly}; .getSign(), .mpfr() -- at least *internal* (e.g. roxygen)
 
 
 * Short or Mid Term
@@ -17,6 +17,7 @@
 ** TODO 53) plogis() {and dlogis, qlogis} are "easy": do use <R>/src/nmath/[dpq]logis.c, as they
  already use all the numerical tricks including R_Log1_Exp(x) .. :
  R_Log1_Exp(x) := ((x) > -M_LN2 ? log(-expm1(x)) : log1p(-exp(x)))
+** TODO 54) zapsmall() would be nice, base::zapsmall() fails
 ** TODO 35) tests/bit-repr.R : Bits() fails to work with 2^k
 
 ** TODO 37) mpfrXport()/*Import() should work for arrays.  Test Windows-portability:
@@ -48,10 +49,9 @@
   environment(`dimnames<-`) <- as.environment("package:Rmpfr")
   environment(which) <- as.environment("package:Rmpfr")
 
-** TODO 5) I'd like seq() methods, but that seems currently impossible because of
+** TODO 5) have seqMpfr(), but would like seq() methods, but that seems currently impossible because of
    a "design infelicity" in base::seq.default  --- ???? E-mail to R-core ??
    --> R/mpfr.R
-
 ** TODO 6) It is "wrong" that the class "Mnumber" also extends "character", "list";
    but it's not clear we can find better definitions, see R/AllClasses.R
 
@@ -81,11 +81,7 @@
     -- see  MPFR_RNDN in src/utils.c and others; --> use src/convert.c  R_rnd2MP()
     -- and all the SEXP functions get an additional   SEXP rnd_mode
        argument, the same as   SEXP d2mpfr1() in src/convert.c has already.
-** TODO 27) sapply(), vapply() etc do not work with mpfr --- show workaround
-    e.g. from ~/R/MM/Pkg-ex/Rmpfr/Dutang_test_v6.R
-	 res.mpfr <- lapply(1:length(n), function(i) binomsum.mpfr.MM(n[i], f, n0, precBits=precBits[i], ...))
-	 sapply(res.mpfr, as, "double")
-
+** DONE 27) Now have simple sapplyMpfr()
 ** TODO 29) Our sum() should use system mpfr_sum() :
    mpfr_sum (mpfr_t ROP, mpfr_ptr const TAB[], unsigned long int N, mpfr_rnd_t RND)
 ** TODO 32) Use ./LUP.R  to compute the lu() decomposition of an mpfrMatrix
