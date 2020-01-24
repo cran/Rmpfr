@@ -60,7 +60,8 @@ if(FALSE) ## here are the individual function
       ## available in the mpfr - library:
       "erf" = 101, "erfc" = 102, "zeta" = 104, "Eint" = 106, "Li2" = 107,
       "j0" = 111, "j1" = 112, "y0" = 113, "y1" = 114,
-      "Ai" = 120) # Airy function (new in mpfr 3.0.0)
+      "Ai" = 120 # Airy function (new in mpfr 3.0.0)
+      )
 storage.mode(.Math.codes) <- "integer"
 
 if(FALSE)
@@ -71,13 +72,13 @@ if(FALSE)
 ## Note that the 'sign' slot is from the C-internal struct
 ## and is always +/- 1 , but R's sign(0) |--> 0
 .getSign <- function(x) vapply(getD(x), slot, 1L, "sign")
-.mpfr.sign <- function(x) {
+.mpfr_sign <- function(x) {
     r <- numeric(length(x))# all 0
     not0 <- !mpfrIs0(x)
     r[not0] <- .getSign(x[not0])
     r
 }
-setMethod("sign", "mpfr", .mpfr.sign)
+setMethod("sign", "mpfr", .mpfr_sign)
 
 ## R version, no longer used:
 .abs.mpfr <- function(x) {
@@ -314,6 +315,6 @@ setMethod("Math2", signature(x = "mpfr"),
 ## i.e., if the above methods are written "general enough", they apply directly
 
 setMethod("sign", "mpfrArray",
-	  function(x) structure(.mpfr.sign(x),
+	  function(x) structure(.mpfr_sign(x),
 				dim = dim(x),
 				dimnames = dimnames(x)))

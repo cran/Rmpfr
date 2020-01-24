@@ -385,6 +385,23 @@ results to \code{digits} \emph{significant} digits,
 cbind( sapply(1:7, function(d) format(i7, digits=d)) )
 @
 
+There, \code{digits = NULL} is the default where the help has (``always'') promised
+\emph{The default, \code{NULL}, uses enough digits to represent the full precision, often one or two digits more than you would expect}.
+However, for large numbers, say $10^{20000}$, e.g., \Sexpr{x <- mpfr(10,80)^20000},
+all of \code{formatMpfr(x)}, \code{format(x)}, and \code{print(x)}
+(including ``auto-printing'' of \code{x}), have shown all
+digits \emph{before} the decimal point and not at all taken into account
+the 80-bit precision of \code{x} (which corresponds to only \code{80 /
+  log2(10)} $\approx 24$ decimal digits).
+This has finally changed in the (typically default) case
+\code{formatMpfr(*, maybe.full = FALSE)}:
+<<format-lrg>>=
+x <- mpfr(2, 80) ^ ((1:4)*10000)
+cbind(x) # -> show() -> print.mpfr() -> formatMpfr(.. , digits = NULL, maybe.full = FALSE)
+nchar(formatMpfr(x))
+nchar(formatMpfr(x, maybe.full = TRUE))
+@
+
 
 \section{``All'' mathematical functions, arbitrarily precise}
 

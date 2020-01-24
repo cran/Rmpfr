@@ -1,4 +1,5 @@
 ### R code from vignette source 'Rmpfr-pkg.Rnw'
+### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: preliminaries
@@ -188,65 +189,74 @@ cbind( sapply(1:7, function(d) format(i7, digits=d)) )
 
 
 ###################################################
-### code chunk number 23: Math-group
+### code chunk number 23: format-lrg
+###################################################
+x <- mpfr(2, 80) ^ ((1:4)*10000)
+cbind(x) # -> show() -> print.mpfr() -> formatMpfr(.. , digits = NULL, maybe.full = FALSE)
+nchar(formatMpfr(x))
+nchar(formatMpfr(x, maybe.full = TRUE))
+
+
+###################################################
+### code chunk number 24: Math-group
 ###################################################
 getGroupMembers("Math")
 
 
 ###################################################
-### code chunk number 24: Matrix-ex
+### code chunk number 25: Matrix-ex
 ###################################################
 head(x <- mpfr(0:7, 64)/7) ; mx <-  x
 dim(mx) <- c(4,2)
 
 
 ###################################################
-### code chunk number 25: mpfrArr-ex
+### code chunk number 26: mpfrArr-ex
 ###################################################
 dim(aa <- mpfrArray(1:24, precBits = 80, dim = 2:4))
 
 
 ###################################################
-### code chunk number 26: pr-mpfrArr-fake (eval = FALSE)
+### code chunk number 27: pr-mpfrArr-fake (eval = FALSE)
 ###################################################
 ## aa
 
 
 ###################################################
-### code chunk number 27: pr-mpfrArr-do
+### code chunk number 28: pr-mpfrArr-do
 ###################################################
 capture.and.write(aa, 11, 4)
 
 
 ###################################################
-### code chunk number 28: crossprod
+### code chunk number 29: crossprod
 ###################################################
 mx[ 1:3, ] + c(1,10,100)
 crossprod(mx)
 
 
 ###################################################
-### code chunk number 29: apply-mat
+### code chunk number 30: apply-mat
 ###################################################
 apply(7 * mx, 2, sum)
 
 
 ###################################################
-### code chunk number 30: Ei-curve
+### code chunk number 31: Ei-curve
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 curve(Ei,  0, 5, n=2001);  abline(h=0,v=0, lty=3)
 
 
 ###################################################
-### code chunk number 31: Li2-1
+### code chunk number 32: Li2-1
 ###################################################
 if(mpfrVersion() >= "2.4.0")  ## Li2() is not available in older MPFR versions
   all.equal(Li2(1), Const("pi", 128)^2/6, tol = 1e-30)
 
 
 ###################################################
-### code chunk number 32: Li2-curve
+### code chunk number 33: Li2-curve
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 if(mpfrVersion() >= "2.4.0")
@@ -254,7 +264,7 @@ if(mpfrVersion() >= "2.4.0")
 
 
 ###################################################
-### code chunk number 33: erf-curves
+### code chunk number 34: erf-curves
 ###################################################
 getOption("SweaveHooks")[["fig"]]()
 curve(erf, -3,3, col = "red", ylim = c(-1,2))
@@ -264,7 +274,7 @@ legend(-3,1, c("erf(x)", "erfc(x)"), col = c("red","blue"), lty=1)
 
 
 ###################################################
-### code chunk number 34: integrateR-dnorm
+### code chunk number 35: integrateR-dnorm
 ###################################################
 integrateR(dnorm,0,2000)
 integrateR(dnorm,0,2000, rel.tol=1e-15)
@@ -272,13 +282,13 @@ integrateR(dnorm,0,2000, rel.tol=1e-15, verbose=TRUE)
 
 
 ###################################################
-### code chunk number 35: integ-exp-double
+### code chunk number 36: integ-exp-double
 ###################################################
 (Ie.d <- integrateR(exp,            0     , 1, rel.tol=1e-15, verbose=TRUE))
 
 
 ###################################################
-### code chunk number 36: integ-exp-mpfr
+### code chunk number 37: integ-exp-mpfr
 ###################################################
 (Ie.m <- integrateR(exp, mpfr(0,200), 1, rel.tol=1e-25, verbose=TRUE))
 (I.true <- exp(mpfr(1, 200)) - 1)
@@ -288,7 +298,7 @@ as.numeric(c(I.true - Ie.d$value,
 
 
 ###################################################
-### code chunk number 37: integ-poly-double
+### code chunk number 38: integ-poly-double
 ###################################################
 if(require("polynom")) {
     x <- polynomial(0:1)

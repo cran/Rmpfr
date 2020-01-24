@@ -1,6 +1,6 @@
-		-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
+	-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
 * Very Short Term
-** TODO 32) .getPrec() should be documented {slightly}; .getSign(), .mpfr(), .erange()... -- at least *internal* (e.g. roxygen)
+** TODO 55b) possibly more documentation on .mpfr* functions, e.g. .getSign(), at least *internally* (roxygen)
 ** TODO 31) Valgrind problems + leaks: Brian's e-mail 2014-06-19; ~/R/Pkgs/Rmpfr.Rcheck_valgrind/
 ** TODO 11) format() method for "mpfr", "mpfrArray" (and hence "mpfrMatrix") which nicely
     and correctly *jointly* formats (for "mpfr") and aligns columns !
@@ -71,9 +71,6 @@
     or provide ifelse2() -- a fast simplified version ?
 
 
-** TODO 22) *do* test rank(), sort(), order() : we claim they work in man/mpfr-class.Rd
-    quantile() should work from R 2.15.1 (June 2012) on       ~~~~~~~~~~~~~~~~~
-
 ** TODO 24) Bernoulli(): we use builtin zeta(); alternatively, use *exact*
      rationals from 'gmp', using "bigq" (and "bigz") -- and R code from ~/R/Pkgs/copula/R/special-func.R
 ** TODO 26) (?) Revert the decision to *not* care about rounding mode in Ops/function,
@@ -81,7 +78,6 @@
     -- see  MPFR_RNDN in src/utils.c and others; --> use src/convert.c  R_rnd2MP()
     -- and all the SEXP functions get an additional   SEXP rnd_mode
        argument, the same as   SEXP d2mpfr1() in src/convert.c has already.
-** DONE 27) Now have simple sapplyMpfr()
 ** TODO 29) Our sum() should use system mpfr_sum() :
    mpfr_sum (mpfr_t ROP, mpfr_ptr const TAB[], unsigned long int N, mpfr_rnd_t RND)
 ** TODO 32) Use ./LUP.R  to compute the lu() decomposition of an mpfrMatrix
@@ -175,7 +171,7 @@
     (still depending  on rel.tol !)
 
 ** DONE 21) What's the exponent range -- and possibly change it: R interface
-   in R/mpfr.R via  .mpfr.erange()  [and .mpfr.erange(.) <- v ]
+   in R/mpfr.R via  .mpfr_erange()  [and .mpfr_erange(.) <- v ]
    to
    - Function: mpfr_exp_t mpfr_get_emin (void)
    - Function: mpfr_exp_t mpfr_get_emax (void)
@@ -189,6 +185,9 @@
    - Function: mpfr_exp_t mpfr_get_emax_max (void)
 
 ** DONE 22) apply(<mpfrArray>, .) --> S4 method
+
+** DONE 22x) *do* test rank(), sort(), order() : we claim they work in man/mpfr-class.Rd
+    quantile() should work from R 2.15.1 (June 2012) on       ~~~~~~~~~~~~~~~~~
 
 ** DONE 23) quantile(<mpfr>)  does not work ---- but will from R 2.15.1 with better quantile.default()
     Reason: in stats::quantile.default(),
@@ -217,3 +216,14 @@
 ** DONE 25) mpfr(<mpfr>, ...) should work: return argument unchanged *if* precision
     and rounding mode are ok; otherwise use roundMpfr() *BUT* that needs an
     additional rnd.mode  argument -- as mpfr
+** DONE 27) Now have simple sapplyMpfr()
+** DONE 57) Fix pnorm() bugs reported by Jerry Lewis (>> ~/R/MM/Pkg-ex/Rmpfr/pnorm-* )
+** DONE 58) print(<large Matrix>) somehow fails to use max.digits = 9999 [print.mpfr(*, max.digits = ...)] ???
+*** Why did we introduce 'max.digits' *and* allow  digits=NULL to use *all* digits before the decimal point?
+**** I now think max.digits is almost superfluous if  digits=NULL behaved as promised:
+    We have in R code comments  __digits = NULL : use as many digits "as needed"__ ,
+    and in help man/formatMpfr.Rd
+ __The default, \code{NULL}, uses enough digits to represent the full precision, often one or two digits more than you would expect.__
+** DONE 56) Add regr.tests for new dgamma(<mpfr>) !!
+** DONE 55a) .getPrec(), .mpfr_erange, .mpfr_erange_set, .mpfr_maxPrec, .mpfr_minPrec etc are documented now.
+

@@ -6,6 +6,7 @@
 /* imax2() */
 
 #include "Rmpfr_utils.h"
+extern
 #include "Syms.h"
 
 //Dbg: #define DEBUG_Rmpfr
@@ -19,6 +20,7 @@
 # define R_PRT(_X_) mpfr_out_str (R_Outputfile, 10, 0, _X_, MPFR_RNDD)
 #endif
 
+// Currently not in the API (hence "should be" (?) 'static') :
 int my_mpfr_beta (mpfr_t ROP, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND);
 int my_mpfr_lbeta(mpfr_t ROP, mpfr_t X, mpfr_t Y, mpfr_rnd_t RND);
 
@@ -325,7 +327,7 @@ SEXP R_mpfr_get_GMP_numb_bits(void) {// for diagnosing
 /* Set or get the C-global debugging level --
  * currently only used in R_mpfr_dbg_printf() --> ./Rmpfr_utils.h
  *
- * Called from R  .mpfr.debug(i = NA)
+ * Called from R  .mpfr_debug(i = NA)
 */
 SEXP R_mpfr_set_debug(SEXP I)
 {
@@ -348,28 +350,65 @@ SEXP R_mpfr_set_default_prec(SEXP prec) {
     return ScalarInteger(prev);
 }
 
+// is MPFR's exponent range 'erange' representable as R's  (32 bit) integer  [INT_MIN not allowed] :
+int mpfr_erange_int_p(void) {
+    mpfr_exp_t r = mpfr_get_emin();
+    int i_ok = (INT_MIN < r && r <= INT_MAX);
+    if(i_ok) {
+	r = mpfr_get_emax();
+	i_ok = (INT_MIN < r && r <= INT_MAX);
+    }
+    return i_ok;
+}
+/** R's .mpfr_erange_is_int() - workhorse
+ */
+SEXP R_mpfr_erange_int_p(void) {
+    return ScalarLogical(mpfr_erange_int_p());
+}
+
+/* MUST be sync'ed with  ../R/mpfr.R
+ *                       ~~~~~~~~~~~ and its  .mpfr_erange_kinds
+ */
 typedef enum { E_min = 1, E_max,
 	       min_emin, max_emin, min_emax, max_emax } erange_kind;
 
+// Called from R's  .mpfr.erange(), now allows 'kind' to be a vector
 SEXP R_mpfr_get_erange(SEXP kind_) {
-    erange_kind kind = asInteger(kind_);
-/* MUST be sync'ed with  ../R/mpfr.R
- *                       ~~~~~~~~~~~ and its  .erange.codes <-
- */
-    mpfr_exp_t r;
-    switch(kind) {
-    case E_min:    r = mpfr_get_emin();     break;
-    case E_max:    r = mpfr_get_emax();     break;
-    case min_emin: r = mpfr_get_emin_min(); break;
-    case max_emin: r = mpfr_get_emin_max(); break;
-    case min_emax: r = mpfr_get_emax_min(); break;
-    case max_emax: r = mpfr_get_emax_max(); break;
-    default:
-	error("invalid kind (code = %d) in R_mpfr_get_erange()", kind);
+    int k = LENGTH(kind_), nprot = 0;
+    erange_kind *kind;
+    if(TYPEOF(kind_) != INTSXP) {
+	SEXP kk = PROTECT(coerceVector(kind_, INTSXP)); nprot++;
+	kind = (erange_kind *) INTEGER(kk);
+    } else {
+	kind = (erange_kind *) INTEGER(kind_);
     }
-    R_mpfr_dbg_printf(1,"R_mpfr_get_erange(%d): %ld\n", kind, (long)r);
-    return (kind <= E_max && INT_MIN <= r && r <= INT_MAX) ? ScalarInteger((int) r)
-	: ScalarReal((double) r);
+
+    mpfr_exp_t *r = (mpfr_exp_t *) R_alloc(k, sizeof(mpfr_exp_t));
+    Rboolean int_ok = TRUE;
+    for(int j = 0; j < k; j++) {
+	switch(kind[j]) { // keep the 'case' list in sync with 'erange_kind' enum above:
+	case E_min:    r[j] = mpfr_get_emin();     if(int_ok && (r[j] <= INT_MIN || r[j] > INT_MAX)) int_ok=FALSE; break;
+	case E_max:    r[j] = mpfr_get_emax();     if(int_ok && (r[j] <= INT_MIN || r[j] > INT_MAX)) int_ok=FALSE; break;
+	case min_emin: r[j] = mpfr_get_emin_min(); if(int_ok) int_ok=FALSE; break;
+	case max_emin: r[j] = mpfr_get_emin_max(); if(int_ok) int_ok=FALSE; break;
+	case min_emax: r[j] = mpfr_get_emax_min(); if(int_ok) int_ok=FALSE; break;
+	case max_emax: r[j] = mpfr_get_emax_max(); if(int_ok) int_ok=FALSE; break;
+	default:
+	    error("invalid kind[j(=%d)] (code = %d) in R_mpfr_get_erange()", j, kind);
+	}
+	R_mpfr_dbg_printf(1,"R_mpfr_get_erange(%d): %ld\n", kind[j], (long)r[j]);
+    }
+    SEXP ans;
+    // int_ok: only now know if we can return integer or need double
+    if(int_ok) {
+	int* R = INTEGER(ans = allocVector(INTSXP, k));
+	for(int j = 0; j < k; j++) R[j] = (int) r[j];
+    } else {
+	double* R = REAL(ans = allocVector(REALSXP, k));
+	for(int j = 0; j < k; j++) R[j] = (double) r[j];
+    }
+    if(nprot) UNPROTECT(nprot);
+    return ans;
 }
 
 SEXP R_mpfr_set_erange(SEXP kind_, SEXP val) {
@@ -406,6 +445,35 @@ SEXP R_mpfr_prec_range(SEXP ind) {
     return ScalarReal((double)r);
 }
 
+/** Get the  'base 2  exp slot' -- also in extended erange where it does not fit into integer
+ *  Directly called from  R's  .mpfr2exp(x)
+ */
+SEXP R_mpfr_2exp(SEXP x) {
+    int n = length(x);
+    mpfr_t R_i; mpfr_init(R_i);
+    SEXP val;
+    if(mpfr_erange_int_p()) { // integer is ok: 'exp' values won't be too large
+	val = PROTECT(allocVector(INTSXP,n));
+	int *exp = INTEGER(val);
+	for(int i=0; i < n; i++) {
+	    R_asMPFR(VECTOR_ELT(x, i), R_i);
+	    exp[i] = (int) mpfr_get_exp(R_i);
+	}
+    } else {
+	val = PROTECT(allocVector(REALSXP,n));
+	double *exp = REAL(val);
+	for(int i=0; i < n; i++) {
+	    R_asMPFR(VECTOR_ELT(x, i), R_i);
+	    exp[i] = (double) mpfr_get_exp(R_i);
+	}
+    }
+    mpfr_clear(R_i);
+    mpfr_free_cache();
+    UNPROTECT(1);
+    return val;
+}
+
+//----------------------------------------------------------------------------
 
 #define INIT_1_SETUP(_X_, _R_)			\
     mpfr_t _R_;					\
@@ -558,8 +626,18 @@ SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {		\
 R_MPFR_2_Numeric_Function(R_mpfr_atan2, mpfr_atan2)
 R_MPFR_2_Numeric_Function(R_mpfr_hypot, mpfr_hypot)
 
+#if (MPFR_VERSION >= MPFR_VERSION_NUM(3,2,0))
+R_MPFR_2_Numeric_Function(R_mpfr_igamma, mpfr_gamma_inc)
+#else
+SEXP R_mpfr_igamma(SEXP x, SEXP y, SEXP rnd_mode) {
+    error("mpfr_gamma_inc requires mpfr >= 3.2.0");
+    return R_NilValue;
+}
+#endif
+
 R_MPFR_2_Numeric_Function(R_mpfr_beta,  my_mpfr_beta)
 R_MPFR_2_Numeric_Function(R_mpfr_lbeta, my_mpfr_lbeta)
+
 
 
 /** For functions   FUN(x = <mpfr>, y = <integer>) :

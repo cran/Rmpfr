@@ -28,6 +28,7 @@ importFrom("stats"  # import *and* rename -- we extend these :
 	   ,stats__dnorm  = dnorm
 	   ,stats__dpois  = dpois
 	   ,stats__dbinom = dbinom
+	   ,stats__dgamma  = dgamma
 	   )
 
 importClassesFrom("gmp", "bigz", "bigq")
@@ -77,18 +78,21 @@ export(.mpfr, .mpfr.
        ## , ".dimCheck"
        , .getPrec
        , .getSign
-       , .mpfr.erange, .mpfr.erange.set, .mpfr.maxPrec, .mpfr.minPrec
+     , .mpfr_erange, .mpfr_erange_set, .mpfr_erange_kinds, .mpfr_erange_is_int
+     , .mpfr_maxPrec, .mpfr_minPrec
        ## , ".mA.subAssign"
        ## , ".matmult.R"
-       ## , ".mpfr.debug"
-       , ".mpfr.negative"
-       ## , ".mpfr.negative.R"
-       ## , ".mpfr.repl"
-       , ".mpfr.sign"
-       ## , ".mpfr.subset"
+       ## , ".mpfr_debug"
+       , ".mpfr_negative"
+       ## , ".mpfr_negativeR"
+       ## , ".mpfr_repl"
+       , ".mpfr_sign"
+       ## , ".mpfr_subset"
        , ".mpfr2str"
+       , .mpfr_formatinfo
+       , .mpfr2exp
        ## , ".mpfrA.subset"
-       , .mpfrVersion, .mpfr.gmp.numbbits
+       , .mpfrVersion, .mpfr_gmp_numbbits
        , .mpfr2list, mpfrImport, mpfrXport # <- experimental: for a possible save format
        ## , ".packageName"
        ## , ".print.mpfr"
@@ -105,7 +109,7 @@ export(.mpfr, .mpfr.
        , "beta", "lbeta"
        ## S3 "c.mpfr"
        , "chooseMpfr", "chooseMpfr.all", "sumBinomMpfr"
-       , "dbinom", "dpois", "dnorm"
+       , "dbinom", "dpois", "dnorm", "dgamma"
        , "erf", "erfc"
        , "factorial"
        , "factorialMpfr"
@@ -114,6 +118,7 @@ export(.mpfr, .mpfr.
        , "getD"
        , "getPrec"
        , "hypot"
+       , igamma # working iff MPFR version >= 3.2.0  >>>  R/special-fun.R  <<<
        , "integrateR"
        , "j0" , "j1" , "jn"
        , "mpfr"
@@ -226,3 +231,5 @@ S3method(t, mpfr)
 S3method(t, mpfrMatrix)
 S3method(aperm, mpfrArray)
 
+## trying to get base::factor() to work:
+S3method(unique, mpfr)

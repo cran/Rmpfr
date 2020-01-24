@@ -6,7 +6,7 @@ doExtras <- function() {
 
 .onAttach <- function(libname, pkgname) {
     packageStartupMessage(sprintf("C code of R package 'Rmpfr': GMP using %d bits per limb\n",
-				  .mpfr.gmp.numbbits()))
+				  .mpfr_gmp_numbbits()))
 }
 
 .onLoad <- function(libname, pkgname) {

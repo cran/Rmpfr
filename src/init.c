@@ -29,6 +29,8 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(mpfr2d, 2),
     CALLDEF(mpfr2i, 2),
     CALLDEF(mpfr2str, 4),
+    CALLDEF(R_mpfr_formatinfo, 1),
+    CALLDEF(R_mpfr_2exp, 1),
     CALLDEF(str2mpfr1_list, 4),
 
     CALLDEF(Rmpfr_minus, 1),
@@ -51,9 +53,11 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(R_mpfr_set_debug, 1),
     CALLDEF(R_mpfr_set_default_prec, 1),
     CALLDEF(R_mpfr_get_default_prec, 0),
+    CALLDEF(R_mpfr_prec_range, 1),
     CALLDEF(R_mpfr_get_erange, 1),
     CALLDEF(R_mpfr_set_erange, 2),
-    CALLDEF(R_mpfr_prec_range, 1),
+    CALLDEF(R_mpfr_erange_int_p, 0),
+
     CALLDEF(R_mpfr_get_version, 0),
     CALLDEF(R_mpfr_get_GMP_numb_bits, 0),
 
@@ -66,6 +70,7 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(R_mpfr_is_zero, 1),      	CALLDEF(R_mpfr_is_zero_A, 1),
 
     CALLDEF(R_mpfr_atan2, 3),
+    CALLDEF(R_mpfr_igamma, 3),
     CALLDEF(R_mpfr_hypot, 3),
     CALLDEF(R_mpfr_beta, 3),
     CALLDEF(R_mpfr_lbeta, 3),
@@ -140,6 +145,7 @@ R_init_Rmpfr(DllInfo *dll)
     RREGDEF(R_mpfr_yn);
     RREGDEF(R_mpfr_atan2);
     RREGDEF(R_mpfr_hypot);
+    RREGDEF(R_mpfr_igamma);
     RREGDEF(R_mpfr_beta);
     RREGDEF(R_mpfr_lbeta);
     RREGDEF(R_mpfr_fac);

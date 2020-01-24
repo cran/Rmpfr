@@ -130,7 +130,7 @@ setAs("mpfr", "mpfr1", function(from) {
 mpfrXport <- function(x, names=FALSE) {
     if(!is(x, "mpfr")) stop("argument is not a \"mpfr\" object")
     structure(class = "mpfrXport",
-	      list(gmp.numb.bits = .mpfr.gmp.numbbits(),
+	      list(gmp.numb.bits = .mpfr_gmp_numbbits(),
 		   ## currently unused, but in case:
 		   mpfr.version	 = .mpfrVersion(),
 		   Machine  = .Machine[grepl("sizeof",names(.Machine))],
@@ -140,7 +140,7 @@ mpfrXport <- function(x, names=FALSE) {
 
 mpfrImport <- function(mxp) {
     if(!inherits(mxp, "mpfrXport")) stop("need an \"mpfrXport\" object")
-    nbits <- .mpfr.gmp.numbbits()
+    nbits <- .mpfr_gmp_numbbits()
     if(!identical(nbits, mxp$gmp.numb.bits))
 	stop("GMP bits not matching: 'x' has ", mxp$gmp.numb.bits,
 	     "; the loaded 'Rmpfr' package has ", nbits)
@@ -151,8 +151,8 @@ mpfrImport <- function(mxp) {
 .mpfr2str <- function(x, digits = NULL, maybe.full = !is.null(digits), base = 10L) {
     ## digits = NULL : use as many digits "as needed" for the precision
     stopifnot(is.null(digits) || (is.numeric(digits) && length(digits) == 1 && digits >= 0),
-              is.logical(maybe.full), !is.na(maybe.full),
-	      is.numeric(base), length(base) == 1, base == as.integer(base),
+              is.logical(maybe.full), length(maybe.full) == 1L, !is.na(maybe.full),
+	      is.numeric(base),       length(base)       == 1L, base == as.integer(base),
 	      2 <= base, base <= 62)
     if(!is.null(digits) && digits == 1 && base %in% 2L^(1:5)) {
 	## MPFR mpfr_get_str(): "N must be >= 2"; we found that N = 1 is ok unless
@@ -160,25 +160,38 @@ mpfrImport <- function(mxp) {
 	digits <- 2L
 	message(gettextf("base = %d, digits = 1 is increased to digits = 2", base))
     }
-    .Call(mpfr2str, x, digits, maybe.full, base)
+    .Call(mpfr2str, x, digits, maybe.full, base) # -> ../src/convert.c
 }
+
+##' very low level version, not exported :
+..mpfr2str <- function(x, digits = NULL, maybe.full = !is.null(digits), base = 10L)
+    .Call(mpfr2str, x, digits, maybe.full, base) # -> ../src/convert.c
+
+##' more efficient, just getting the (exp, finite, is0) list, 'exp'  wrt base = 2
+.mpfr_formatinfo <- function(x) .Call(R_mpfr_formatinfo, x)
+
+##' getting the 'exp' (wrt base = 2) only  [also for extended erange!]
+.mpfr2exp <- function(x) .Call(R_mpfr_2exp, x)
 
 formatMpfr <-
     function(x, digits = NULL, trim = FALSE, scientific = NA,
+	     maybe.full = !is.null(digits) && is.na(scientific),
              base = 10, showNeg0 = TRUE, max.digits = Inf,
 	     big.mark = "", big.interval = 3L,
 	     small.mark = "", small.interval = 5L,
              decimal.mark = ".",
              exponent.char = if(base <= 14) "e" else if(base <= 36) "E" else "|e",
+             exponent.plus = TRUE,
 	     zero.print = NULL, drop0trailing = FALSE, ...)
 {
     ## digits = NULL : use as many digits "as needed"
-    ## FIXME/TODO: If we have very large numbers, but not high precision, we should detect it
+    ff <- .mpfr2str(x, digits, maybe.full=maybe.full, base=base) # (checks its args!)
+    ## FIXME/TODO: If have very large numbers, but not high precision, should detect it
     ## ==========  and use  maybe.full = FALSE also for the default scientific = NA
     ## digs.x <- ceiling(.getPrec(x) / log2(base))
-    if((maybe.full <- !isTRUE(scientific)) && !isFALSE(scientific))
-	maybe.full <- !is.null(digits)
-    ff <- .mpfr2str(x, digits, maybe.full=maybe.full, base=base)
+
+    stopifnot(length(scientific) == 1L)
+### max.digits "doomed":  scientific := number, (~= getOption("scipen")) should replace it
     stopifnot(is.numeric(max.digits), max.digits > 0)
     if(is.numeric(digits)) stopifnot(digits <= max.digits)
 
@@ -189,7 +202,7 @@ formatMpfr <-
     r.dig <- nchar(r) # (in both cases, digits NULL or not)
     ## Note that r.dig[] entries may vary, notably for digits NULL when .getPrec(x) is non-constant
     if(any(Lrg <- r.dig > max.digits)) { ## now "cut down", e.g. in print() when max.digits < Inf
-	r    [Lrg] <- substr(r, 1L, max.digits)
+	r    [Lrg] <- substr(r[Lrg], 1L, max.digits)
 	r.dig[Lrg] <- max.digits
     }
     if(any(i0)) {
@@ -215,17 +228,39 @@ formatMpfr <-
 	paste(substr   (str, 1L, k),
 	      substring(str, k+1L), sep = decimal.mark)
 
-    if(is.na(scientific))
-	scientific <- as.numeric(getOption("scipen"))
+    ## scipen := penalty for using "scientific", i.e., exponential format
+    scipen <-
+        if(is.na(scientific))
+            as.numeric(getOption("scipen"))
+        else if(!(is.logical(scientific) ||
+                  (is.numeric(scientific) && round(scientific) == scientific)))
+            stop("'scientific' must be logical or a whole number")
+        else if(is.logical(scientific)) {
+            if(scientific) -32L
+            else max(Ex) + 64 # << penalize much
+        } else ## is.numeric(scientific)  and a whole number
+            scientific
+
     ## This very much depends on the desired format.
     ## if(scientific) --> all get a final "e<exp>"; otherwise, we
     ## adopt the following simple scheme :
+### TODO: new argument   jointly = (NA | TRUE | FALSE) or just (T | F)
+### ---- if(jointly) use scalar ("global") hasE and have things *align*
+    ## 'hasE' is *vector* (along 'x') :
     hasE <- {
-        ## RMH repaired: if(is.logical(scientific) && scientific) scientific else
-        ## MM: the above simplified is
-        if(isTRUE(scientific)) TRUE else
-	      isNum & (Ex < -4 + scientific | Ex > r.dig) }
-
+        if(isTRUE(scientific)) TRUE
+	## hasE := (wF <= wE + scipen) , where (in R's format.default, which has  jointly = TRUE ):
+        ##          ~~~~~~~~~~~~~~~~
+        ##      wE = neg + (d > 0) + d + 4 + e (width for E format); d = mxns - 1, mxns = max_i{nsig_i}
+        ##                                               e = #{digits of exponent} -1 (= 1 or 2 in R)
+        ##      wF = mxsl + rgt + (rgt != 0); rgt := max_i{ (digits right of ".")_i }
+        ##	     mxsl := max_i{sleft_i}; sleft_i = sign_i + (digits left of ".")_i
+        else { ## scientific = (FALSE | NA | number) --- for now :
+            if(is.na(scientific))
+                scientific <- as.numeric(getOption("scipen"))
+            isNum & (Ex < -4 + scientific | Ex > r.dig)
+        }
+    }
     if(aE <- any(ii <- isNum & hasE)) {
         ii <- which(ii)
 	i. <- 1L + hasMinus
@@ -233,10 +268,13 @@ formatMpfr <-
 	if(drop0trailing)
 	    ## drop 0's only after decimal mark (and drop it, if immediately there)
 	    r[ii] <- sub(paste0("\\", decimal.mark, "?0+$"), "", r[ii])
-	r[ii] <- paste(r[ii], as.character(Ex[ii]), sep = exponent.char)
+        chE <- if(exponent.plus)
+                   sprintf("%+.0f", Ex[ii]) # "%..f": also when Ex is outside integer range!
+               else  as.character(Ex[ii])
+	r[ii] <- paste(r[ii], chE, sep = exponent.char)
     }
     use.prettyN <- (base <= 14 && (!aE || exponent.char == "e"))
-    if(non.sci <- !all(hasE)) { ## "non-scientific" i.e. without final  e<nn> :
+    if(non.sci <- !all(hasE)) { ## "non-scientific" i.e. without final  e[+-]?<n>+ :
 	ii <- isNum & !hasE
 	## iNeg <- ex <= 0 & ii ## i.e., ex	 in {0,-1,-2,-3}
 	## iPos <- ex >  0 & ii ## i.e., ex	 in {1,2..., digits}

@@ -48,12 +48,21 @@
 extern       int R_mpfr_debug_;
 #endif
 
-/* A version of Rprintf() .. but only printing when .. is 'TRUE' :*/
+/* A version of Rprintf() .. but only printing when  R_mpfr_debug_ is large enough :*/
 static R_INLINE void R_mpfr_dbg_printf(int dbg_level, const char *format, ...)
 {
-    va_list(ap);
     if(R_mpfr_debug_ && R_mpfr_debug_ >= dbg_level) {
-	Rprintf("mpfr.debug[%d]: ", R_mpfr_debug_);
+	va_list(ap);
+	Rprintf(".mpfr_debug[%d]: ", R_mpfr_debug_);
+	va_start(ap, format);
+	REvprintf(format, ap);
+	va_end(ap);
+    }
+}
+static R_INLINE void R_mpfr_dbg_printf_0(int dbg_level, const char *format, ...)
+{
+    if(R_mpfr_debug_ && R_mpfr_debug_ >= dbg_level) {
+	va_list(ap);
 	va_start(ap, format);
 	REvprintf(format, ap);
 	va_end(ap);
@@ -122,6 +131,7 @@ SEXP mpfr2d(SEXP x, SEXP rnd_mode);
 SEXP mpfr2i(SEXP x, SEXP rnd_mode);
 SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybe_full, SEXP base);
 SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode);
+SEXP R_mpfr_formatinfo(SEXP x);
 
 #ifdef R_had_R_Outputfile_in_API
 # ifndef WIN32
@@ -159,11 +169,16 @@ SEXP MPFR_as_R(mpfr_t r);
 SEXP R_mpfr_set_debug(SEXP I);
 SEXP R_mpfr_set_default_prec(SEXP prec);
 SEXP R_mpfr_get_default_prec(void);
+int    mpfr_erange_int_p(void);
+SEXP R_mpfr_erange_int_p(void);
 SEXP R_mpfr_get_erange(SEXP kind);
 SEXP R_mpfr_set_erange(SEXP kind, SEXP val);
 SEXP R_mpfr_prec_range(SEXP ind);
 SEXP R_mpfr_get_version(void);
 SEXP R_mpfr_get_GMP_numb_bits(void);
+SEXP R_mpfr_2exp(SEXP x);
+
+
 
 SEXP const_asMpfr(SEXP I, SEXP prec, SEXP rnd_mode);
 
@@ -177,6 +192,7 @@ SEXP R_mpfr_atan2(SEXP x, SEXP y, SEXP rnd_mode);
 SEXP R_mpfr_hypot(SEXP x, SEXP y, SEXP rnd_mode);
 SEXP R_mpfr_beta (SEXP x, SEXP y, SEXP rnd_mode);
 SEXP R_mpfr_lbeta(SEXP x, SEXP y, SEXP rnd_mode);
+SEXP R_mpfr_igamma(SEXP a, SEXP x, SEXP rnd_mode);
 
 SEXP R_mpfr_jn(SEXP x, SEXP n, SEXP rnd_mode);
 SEXP R_mpfr_yn(SEXP x, SEXP n, SEXP rnd_mode);

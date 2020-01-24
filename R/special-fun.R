@@ -33,22 +33,27 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 	if(any(neg <- (q < 0))) ## swap those:	Phi(-z) = 1 - Phi(z)
 	    rr[neg] <- pnorm(-q[neg], lower.tail = !lower.tail, log.p=log.p)
 	if(any(pos <- !neg)) {
-	    q <- q[pos]
+	    q <- q[pos] #==> now  q >= 0
 	    prec.q <- max(.getPrec(q))
 	    two <- mpfr(2, prec.q)
 	    rt2 <- sqrt(two)
 	    rr[pos] <- if(lower.tail) {
-		eq2 <- erf(q/rt2)
-		if(log.p && any(sml <- abs(eq2) < .5)) {
+		if(log.p) {
 		    r <- q
-		    r[ sml] <- log1p(eq2[sml]) - log(two)
-		    r[!sml] <- log((1 + eq2[!sml])/2)
+		    sml <- q < 0.67448975
+		    if(any(sml)) {
+			eq2 <- erf(q[sml]/rt2) ## |eq2| < 1/2 <==> |q/rt2| < 0.47693627620447
+			##                        <==>  sml   <==>   |q|   < 0.67448975019608
+			r[ sml] <- log1p(eq2) - log(two)
+		    }
+		    if(any(!sml)) {
+			ec2 <- erfc(q[!sml]/rt2) ## ==> ec2 = 1-eq2 <= 1 - 1/2 = 1/2
+			r[!sml] <- log1p(-0.5*ec2)
+		    }
 		    r
 		}
-		else {
-		    r <- (1 + eq2)/2
-		    if(log.p) log(r) else r
-		}
+		else ## !log.p
+		    (1 + erf(q/rt2))/2
 	    } else { ## upper.tail
 		r <- erfc(q/rt2) / 2
 		if(log.p) log(r) else r
@@ -104,6 +109,48 @@ dbinom <- function (x, size, prob, log = FALSE) {
     } else
 	stop("(x,size, prob) must be numeric or \"mpfr\"")
 }## {dbinom}
+
+
+dgamma <- function(x, shape, rate = 1, scale = 1/rate, log = FALSE) {
+    missR <- missing(rate)
+    missS <- missing(scale)
+    if (!missR && !missS) { ## as stats::dgamma()
+        if (abs(rate * scale - 1) < 1e-15)
+            warning("specify 'rate' or 'scale' but not both")
+        else stop("specify 'rate' or 'scale' but not both")
+    }
+    ## and now use 'scale' only
+    if(is.numeric(x) && is.numeric(shape) && is.numeric(scale))
+        stats__dgamma(x, shape, scale=scale, log=log)
+    else if((sh.mp <- is(shape, "mpfr")) |
+	    (sc.mp <- is(scale, "mpfr")) || is(x, "mpfr")) {
+        ##     f(x)= 1/(s^a Gamma(a)) x^(a-1) e^-(x/s)  ; a=shape, s=scale
+        ## log f(x) = -a*log(s) - lgamma(a) + (a-1)*log(x) - (x/s)
+	if(!sh.mp || !sc.mp) {
+	    prec <- pmax(53, getPrec(shape), getPrec(scale), getPrec(x))
+	    if(!sh.mp)
+		shape <- mpfr(shape, prec)
+	    else ## !sc.mp :
+		scale <- mpfr(scale, prec)
+	}
+	## for now, "cheap", relying on "mpfr" arithmetic to be smart
+	## "TODO":  Use C.Loader's formulae via dpois_raw() ,  bd0() etc
+	## lgam.sh <- lgamma(shape)
+	## ldgamma <- function(x, shp, s) -shp*log(s) -lgam.sh + (shp-1)*log(x) - (x/s)
+        ldgamma <- function(x, shp, s) -shp*log(s) -lgamma(shp) + (shp-1)*log(x) - (x/s)
+	if(log)
+	    ldgamma(x, shape, scale)
+	else { ## use direct [non - log-scale] formula when applicable
+	    ## ok <- lgam.sh < log(2) * Rmpfr:::.mpfr.erange("Emax") & ## finite gamma(shape) := exp(lgam.sh)
+	    ##       is.finite(xsh1 <- x^(shape-1)) &
+	    ##       !is.na(r <- xsh1 * exp(-(x/scale)) / (scale^shape * exp(lgam.sh)))
+	    ## r[!ok] <- exp(ldgamma(x[!ok], shape[!ok], scale[!ok]))
+	    ## r
+	    exp(ldgamma(x, shape, scale))
+	}
+    } else
+	stop("(x, shape, scale) must be numeric or \"mpfr\"")
+}## {dgamma}
 
 
 
@@ -350,3 +397,52 @@ pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
 	      ## reduce the precision, in order to not "claim wrongly":
 	      precBits=precBits, match.arg(rnd.mode))
 }
+
+### MPFR version >= 3.2.0 :
+   "https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005fgamma_005finc"
+##
+## >>> Note: the current implementation of mpfr_gamma_inc is slow for large values of rop or op,
+## >>> ====  in which case some internal overflow might also occur.
+##
+##  mpfr_gamma_inc(a,x) =: igamma(a,x)    where
+##
+## igamma(a,x) = "upper" incomplete gamma  Γ(a,x) :=: Γ(a) - γ(a,x);
+##	γ(a,x) = "lower" incomplete gamma  γ(a,x) := ₀∫ˣ tᵃ⁻¹ e⁻ᵗ dt, and
+## R's  pgamma(x, a) :==  γ(a,x) / Γ(a)
+##
+## >>> ../man/igamma.Rd <<<
+igamma <- function(a,x, rnd.mode = c('N','D','U','Z','A')) {
+    if(mpfrVersion() < "3.2.0")
+	stop("igamma()'s MPFR equivalent needs mpfr version >= 3.2.0, but mpfrVersion()=",
+	     mpfrVersion())
+    if(is(a, "mpfrArray") || is.array(a)) {
+	if(is.array(a)) a <- mpfrArray(a, 128L, dim=dim(a), dimnames(a))
+	if(is.array(x)) x <- mpfrArray(x, 128L, dim=dim(x), dimnames(x))
+	if(is(x, "mpfrArray")) {
+	    if(dim(a) != dim(x))
+		stop("array dimensions differ")
+	    a@.Data[] <- .Call(R_mpfr_igamma, a, x, match.arg(rnd.mode))
+	    a
+	} else { ## x is not (mpfr)Array
+	    if(length(a) %% length(x) != 0)
+		stop("length of first argument (array) is not multiple of the second argument's one")
+	    a@.Data[] <- .Call(R_mpfr_igamma, a, as(x, "mpfr"), match.arg(rnd.mode))
+	    a
+	}
+    } else if(is(x, "mpfrArray")) {
+	if(length(x) %% length(a) != 0)
+	    stop("length of second argument (array) is not multiple of the first argument's one")
+	x@.Data[] <- .Call(R_mpfr_igamma, as(a, "mpfr"), x, match.arg(rnd.mode))
+	x
+    }
+    else
+	new("mpfr", .Call(R_mpfr_igamma, as(a, "mpfr"), as(x, "mpfr"), match.arg(rnd.mode)))
+}
+
+## only as long as we still may have   mpfrVersion() < "3.2.0", e.g. in Fedora 30 (2019f)
+
+## mpfrVersion() cannot be called at package build time  (underlying C entry point not ready):
+## if(mpfrVersion() < "3.2.0")
+## dummy .. to pacify "R CMD check"
+## R_mpfr_igamma <- quote(dummy) # gives NOTE  ‘R_mpfr_igamma’ is of class "name"
+

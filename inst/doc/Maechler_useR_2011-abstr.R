@@ -1,4 +1,5 @@
 ### R code from vignette source 'Maechler_useR_2011-abstr.Rnw'
+### Encoding: UTF-8
 
 ###################################################
 ### code chunk number 1: preliminaries

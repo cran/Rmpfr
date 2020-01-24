@@ -60,31 +60,34 @@ mpfr_default_prec <- function(prec) {
     }
 }
 
-.mpfr.minPrec <- function() .Call(R_mpfr_prec_range, 1L)
-.mpfr.maxPrec <- function() .Call(R_mpfr_prec_range, 2L)
+.mpfr_minPrec <- function() .Call(R_mpfr_prec_range, 1L)
+.mpfr_maxPrec <- function() .Call(R_mpfr_prec_range, 2L)
 
 ## must be sync'ed with enum def. in R_mpfr_get_erange in ../src/utils.c
-.erange.codes <- c("Emin", "Emax",
-                   "min.emin", "max.emin",
-                   "min.emax", "max.emax")
-.erange.codes <- setNames(seq_along(.erange.codes), .erange.codes)
-## FIXME? better function name ??
-.mpfr.erange <- function(kind) {
-    if(missing(kind) || length(kind) != 1 || is.na(match(kind, names(.erange.codes))))
-        stop("'kind' must be one of ",
-             paste(paste0('"', names(.erange.codes), '"'), collapse=", "))
-    .Call(R_mpfr_get_erange, .erange.codes[[kind]])
+.mpfr_erange_kinds <-
+    c("Emin", "Emax",
+      "min.emin", "max.emin",
+      "min.emax", "max.emax")
+## _erange_codes <- seq_along(.mpfr_erange_kinds)
+.mpfr_erange <- function(kind = c("Emin", "Emax"), names = TRUE) {
+    if(anyNA(ikind <- match(kind, .mpfr_erange_kinds)) || !length(kind))
+	stop("'kind' must have entries from ",
+	     paste(paste0('"', .mpfr_erange_kinds, '"'), collapse=", "))
+    r <- .Call(R_mpfr_get_erange, ikind)
+    if(names) names(r) <- .mpfr_erange_kinds[ikind]
+    r
 }
 
 
-.mpfr.erange.set <- function(kind = c("Emin", "Emax"), value) {
+.mpfr_erange_set <- function(kind = c("Emin", "Emax"), value) {
     kind <- match.arg(kind)
-    ## value can be double precision, and need be for "64-bit long"
-    .Call(R_mpfr_set_erange, .erange.codes[[kind]], value)
+    ## value can be double, and need be for "64-bit long"
+    .Call(R_mpfr_set_erange, match(kind, .mpfr_erange_kinds), value)
 }
 
+.mpfr_erange_is_int <- function() .Call(R_mpfr_erange_int_p)
 
-.mpfr.gmp.numbbits <- function() .Call(R_mpfr_get_GMP_numb_bits)
+.mpfr_gmp_numbbits <- function() .Call(R_mpfr_get_GMP_numb_bits)
 
 .mpfrVersion <- function() .Call(R_mpfr_get_version)
 mpfrVersion <- function()
@@ -116,12 +119,16 @@ if(.Platform$OS.type != "windows") {## No R_Outputfile (in C) on Windows
 ## a faster version of getDataPart(.) - as we *KNOW* we have a list
 ## !! If ever the internal representation of such S4 objects changes, this can break !!
 getD <- function(x) { attributes(x) <- NULL; x }
+getD <- function(x) `attributes<-`(x, NULL)
 
 ## Get or Set the C-global  'R_mpfr_debug_' variable:
-.mpfr.debug <- function(i = NA) .Call(R_mpfr_set_debug, as.integer(i))
+.mpfr_debug <- function(i = NA) .Call(R_mpfr_set_debug, as.integer(i))
 
+## CAREFUL: keep  digits, max.digits, ... defaults in sync  with
+##          print.mpfrArray() in ./array.R
 print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE, right = TRUE,
-                       max.digits = getOption("Rmpfr.print.max.digits", 9999L),
+                       max.digits = getOption("Rmpfr.print.max.digits", 999L),
+                       exponent.plus = getOption("Rmpfr.print.exponent.plus", TRUE),
                        ...) {
     stopifnot(is(x, "mpfr"), is.null(digits) || digits >= 1)
     ## digits = NULL --> the inherent precision of x will be used
@@ -133,10 +140,14 @@ print.mpfr <- function(x, digits = NULL, drop0trailing = TRUE, right = TRUE,
 		   if(rpr[1] != rpr[2]) paste("..",rpr[2]), " bits")
 	}
     cat(n, "'mpfr'", if(n == 1) "number" else "numbers", ch.prec, "\n")
-    if(n >= 1)
-	print(format(x, digits=digits, max.digits=max.digits,
-		     drop0trailing=drop0trailing),
-	      ..., right=right, quote = FALSE)
+    if(n >= 1) {
+        ## drop arguments for print.default(*):
+	lFormat <- function(x, na.print, print.gap, max, useSource, ...)
+	    format(x, digits=digits, max.digits=max.digits,
+                   drop0trailing=drop0trailing, exponent.plus=exponent.plus,
+		   ...)
+	print(lFormat(x, ...), ..., right=right, quote = FALSE)
+    }
     invisible(x)
 }
 setMethod(show, "mpfr", function(object) print.mpfr(object))
@@ -298,9 +309,11 @@ sapplyMpfr <- function(X, FUN, ...) new("mpfr", unlist(lapply(X, FUN, ...), recu
 ## sort() works too  (but could be made faster via faster
 ## ------  xtfrm() method !  [ TODO ]
 
-setMethod("unique", signature(x = "mpfr", incomparables = "missing"),
-	  function(x, incomparables = FALSE, ...)
-	  new("mpfr", unique(getD(x), incomparables, ...)))
+## to have this also work *inside* base function factor(), we need S3 method {AARGH!}
+unique.mpfr <- function(x, incomparables = FALSE, ...)
+    new("mpfr", unique(getD(x), incomparables, ...))
+setMethod("unique", signature(x = "mpfr", incomparables = "ANY"), unique.mpfr)
+
 
 ## This is practically identical to  grid's rep.unit :
 rep.mpfr <- function(x, times = 1, length.out = NA, each = 1, ...)

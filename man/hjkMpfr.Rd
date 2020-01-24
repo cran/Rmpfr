@@ -94,7 +94,6 @@ rosenbrock <- function(x) {
     n <- length(x)
     sum (100*((x1 <- x[1:(n-1)])^2 - x[2:n])^2 + (x1 - 1)^2)
 }
-
 par0 <- rep(0, 10)
 str(rb.db <- hjkMpfr(rep(0, 10), rosenbrock, control=list(info=TRUE)))
 \donttest{

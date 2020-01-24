@@ -1,13 +1,14 @@
 Package: Rmpfr
 Title: R MPFR - Multiple Precision Floating-Point Reliable
-Version: 0.7-2
-Date: 2019-01-18
-DateNote: Previous CRAN version 0.7-1 on 2018-07-24
+Version: 0.8-1
+Date: 2020-01-14
+DateNote: Previous CRAN version 0.7-2 on 2019-01-18
 Type: Package
-Authors@R: c(
-  person("Martin","Maechler", role=c("aut","cre"),
-	email="maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
-  )
+Authors@R: c(person("Martin","Maechler", role = c("aut","cre"),
+	     email = "maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
+	, person(c("Richard", "M."), "Heiberger", role = "ctb", email="rmh@temple.edu",
+					comment = "formatHex(), *Bin, *Dec")
+	)
 SystemRequirements: gmp (>= 4.2.3), mpfr (>= 3.0.0)
 SystemRequirementsNote: 'MPFR' (MP Floating-Point Reliable Library,
         http://mpfr.org/) and 'GMP' (GNU Multiple Precision library,
@@ -24,9 +25,11 @@ Description: Arithmetic (via S4 classes and methods) for
   the 'LGPL' licensed 'MPFR' (Multiple Precision Floating-Point Reliable) Library
   which itself is based on the 'GMP' (GNU Multiple Precision) Library.
 License: GPL (>= 2)
+Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2019-01-18 16:24:15 UTC; maechler
-Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>)
+Packaged: 2020-01-14 13:55:54 UTC; maechler
+Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
+  Richard M. Heiberger [ctb] (formatHex(), *Bin, *Dec)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2019-01-22 22:00:02 UTC
+Date/Publication: 2020-01-24 14:30:13 UTC

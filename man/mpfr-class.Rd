@@ -109,7 +109,9 @@
 \alias{is.infinite,mpfrArray-method}
 \alias{is.na,mpfrArray-method}
 \alias{is.nan,mpfrArray-method}
-\alias{unique,mpfr,missing-method}
+\alias{unique,mpfr-method}% <---  wanted        by  R CMD check
+\alias{unique,mpfr,ANY-method}% not sufficient for  R CMD ..
+\alias{unique.mpfr}
 %
 \alias{all.equal,mpfr,mpfr-method}
 \alias{all.equal,mpfr,ANY-method}
@@ -348,8 +350,12 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
     \item{coerce}{\code{signature(from = "mpfr", to = "numeric")}: ... }
     \item{coerce}{\code{signature(from = "mpfr", to = "character")}: ... }
 
-    \item{unique}{\code{signature(x = "mpfr")}: and}
-    \item{duplicated}{\code{signature(x = "mpfr")}: just work as with numbers.}
+    \item{unique}{\code{signature(x = "mpfr")}, and corresponding S3 method
+      (such that \code{unique(<mpfr>)} works inside \pkg{base} functions),
+      see \code{\link{unique}}.
+
+      Note that \code{\link{duplicated}()} works for \code{"mpfr"} objects
+      without the need for a specific method.}
 
     \item{t}{\code{signature(x = "mpfr")}: makes \code{x} into an \eqn{n
 	\times 1}{n x 1} \code{\linkS4class{mpfrMatrix}}.}
@@ -440,5 +446,33 @@ stopifnot(identical(which.min(m0), integer(0)),
 	  max(m0) == mpfr(-Inf, 53), # (53 is not a feature, but ok)
 	  min(m0) == mpfr(+Inf, 53),
 	  sum(m0) == 0, prod(m0) == 1)
+
+## unique(), now even base::factor()  "works" on <mpfr> :
+set.seed(17)
+p <- rlnorm(20) * mpfr(10, 100)^-999
+pp <- sample(p, 50, replace=TRUE)
+str(unique(pp)) # length 18 .. (from originally 20)
+## Class 'mpfr' [package "Rmpfr"] of length 18 and precision 100
+## 5.56520587824e-999 4.41636588227e-1000 ..
+facp <- factor(pp)
+str(facp) # the factor *levels* are a bit verbose :
+# Factor w/ 18 levels "new(\"mpfr1\", ...........)" ...
+# At least *some* factor methods work :
+stopifnot(exprs = {
+  is.factor(facp)
+  identical(unname(table(facp)),
+            unname(table(asNumeric(pp * mpfr(10,100)^1000))))
+})
+
+## ((unfortunately, the expressions are wrong; should integer "L"))
+#
+## More useful: levels with which to *invert* factor() :
+## -- this is not quite ok:
+## simplified from 'utils' :
+deparse1 <- function(x, ...) paste(deparse(x, 500L, ...), collapse = " ")
+if(FALSE) {
+ str(pp.levs <- vapply(unclass(sort(unique(pp))), deparse1, ""))
+ facp2 <- factor(pp, levels = pp.levs)
+}
 }
 \keyword{classes}

@@ -4,7 +4,97 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
-\section{Changes in version 0.7-2 [2019-01-14, r298]}{
+\section{Changes in version 0.8-1 [2020-01-14, r323]}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item Provide dummy C function in the case MPFR library is older than
+      3.2.0, thanks to Brian Ripley.  Should work around check \code{NOTE}s.
+    }
+  }
+}
+
+\section{Changes in version 0.8-0 [2019-12-05, r321]}{
+  \subsection{USER-VISIBLE CHANGES}{
+    \itemize{
+      \item Formatting incl \code{print()}ing by default uses a \code{"+"}
+      after the exponential character (\code{"e"} by default).
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item Provide new low-level utilities \code{.mpfr_formatinfo()},
+      \code{.mpfr2exp()}, and \code{.mpfr_erange_is_int()}.
+
+      \item Renamed low-level utility functions to use \code{_} instead of
+      \code{.} keeping initial \code{"."}, e.g.,
+      \code{.mpfr.gmp.numbbits()} to \code{.mpfr_gmp_numbbits()}.
+
+      \item \code{formatMpfr()} gets a new optional \code{decimal.plus = TRUE} which
+      adds a \code{"+"} before positive exponents when in exponential (aka
+      \dQuote{scientific}) representation.
+
+      The \code{mpfr} and \code{mpfrArray} \code{print()} methods get
+      a corresponding \code{decimal.plus} argument with a default that can
+      be set by \code{options(Rmpfr.print.decimal.plus = *)} to allow
+      strict back compatibility where needed.
+
+      \item For MPFR (C library) version >= 3.2.0 (not by default in Fedora 30!),
+      provide the \emph{incomplete} gamma function \code{igamma(a,x)}
+      which is closely related to \code{pgamma(x,a)}, see help page.% and DO
+      % provide an MPFR pgamma() version, too
+      %  ==> then even MPFR pchisq() with *non*centrality maybe!
+
+      \item Now also export S3 method of \code{unique()} for \code{"mpfr"},
+      such that \pkg{base} \code{factor(<mpfr>)} \dQuote{works}.% -> ../man/mpfr-class.Rd
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{formatMpfr()} and hence all \code{print()}ing suffered
+      from an integer overflow bug with very large (base 2) exponents.
+
+      \item \code{.mpfr2str(x, *)} is no longer dependent on the
+      \emph{order} of the elements in \code{x}; consequently
+      \code{format()} and \code{print()} may use less digits in case the
+      precision decreases along \code{x}.
+
+      \item adapt to new C compiler default behavior \code{-fno-common},
+      using \code{extern #include <Syms.h>} in most \file{*.c} files.
+    }
+  }
+}
+
+\section{Changes in version 0.7-3 [2019-08-06, r305]}{
+  \subsection{USER-VISIBLE CHANGES}{
+    \itemize{
+      \item Decreased the default for \code{max.digits} to 999.
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item Provide \code{dgamma(x, shape)} version, e.g., for small shape
+      parameter where most of the mass is on very small \code{x} not
+      representable as double precision numbers.
+
+      \item Low-level formatting function \code{.mpfr2str()} --- called by
+      \code{format()} and hence \code{print()} methods for \code{"mpfr"}
+      objects --- now finally obeys its \code{maybe.full} argument when it
+      is \code{FALSE}, internally in C's \code{mpfr2str()}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{pnorm(<large>, log.p=TRUE)} no longer underflows much too
+      early, thanks to reports by Jerry Lewis.
+
+      \item \code{print.mpfrArray()} now also uses a finite
+      \code{max.digits} default, preventing, e.g., \code{cbind(x, y)} to
+      use too many digits.
+    }
+  }
+}
+
+\section{Changes in version 0.7-2 [2019-01-18, r299]}{
   \subsection{BUG FIXES}{
     \itemize{
       \item \code{str(<mpfr>)} no longer calls \code{formatMpfr(x, digits, *)}
@@ -30,6 +120,7 @@
     }
   }
 }
+
 
 \section{Changes in version 0.7-1 [2018-07-24, r291]}{
   \subsection{BUG FIXES}{

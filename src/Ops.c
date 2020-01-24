@@ -10,6 +10,7 @@
 /* imax2() */
 
 #include "Rmpfr_utils.h"
+extern
 #include "Syms.h"
 
 

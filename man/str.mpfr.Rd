@@ -34,7 +34,8 @@
   \item{\dots}{further arguments, passed to \code{\link{formatMpfr}()}.}
 }
 \seealso{
-  \code{\link{mpfrIs0}} for many more utilities.
+  \code{\link{.mpfr2list}()} puts the internal structure into a
+  \code{\link{list}}, and its help page documents many more (low level) utilities.
 }
 \examples{
 (x <- c(Const("pi", 64), mpfr(-2:2, 64)))
@@ -46,6 +47,6 @@ str(x ^ -1e4, digits=NULL) # full precision
 str(x, internal = TRUE) # internal low-level (for experts)
 
 uu <- Const("pi", 16)# unaccurate
-str(uu) # not using default of 12 digits
+str(uu) # very similar to just   'uu'
 }
 \keyword{utilities}

@@ -59,7 +59,7 @@ sumBinomMpfr(n, f, n0 = 0, alternating = TRUE, precBits = 256,
 \references{
   Wikipedia (2012)
   The N\"orlund-Rice integral,
-  \url{http://en.wikipedia.org/wiki/Rice_integral}
+  \url{https://en.wikipedia.org/wiki/Rice_integral}
 
   Flajolet, P. and Sedgewick, R. (1995)
   Mellin Transforms and Asymptotics: Finite Differences and Rice's Integrals,

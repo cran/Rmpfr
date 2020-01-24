@@ -57,19 +57,19 @@ setMethod("Logic", signature(e1 = "numeric", e2 = "mpfr"),
 ###-- 2) ----------- Arith --------------------------------------------------
 
 ## R version, no longer used:
-.mpfr.negative.R <- function(x) {
+.mpfr_negativeR <- function(x) {
     xD <- getDataPart(x)# << currently [2011] *faster* than  x@Data
     for(i in seq_along(x))
 	slot(xD[[i]], "sign", check=FALSE) <- - xD[[i]]@sign
     setDataPart(x, xD, check=FALSE) ## faster than  x@Data <- xD
 }
-.mpfr.negative <- function(x) .Call(Rmpfr_minus, x)
+.mpfr_negative <- function(x) .Call(Rmpfr_minus, x)
 
 setMethod("Arith", signature(e1 = "mpfr", e2="missing"),
 	  function(e1,e2) {
 	    switch(.Generic,
 		   "+" = e1,
-		   "-" = .mpfr.negative(e1),
+		   "-" = .mpfr_negative(e1),
 		   stop(paste("Unary operator", .Generic,
 			      "not defined for \"mpfr\" numbers"))
 		   )

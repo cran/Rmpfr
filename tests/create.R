@@ -78,10 +78,14 @@ cbind(y, as.data.frame(.mpfr2str(Y, 20))[,c("exp","str")])
 s <- mpfr(43208,  14)# low precision
 eps8 <- 8 * .Machine$double.eps
 ## checking  mpfr -> character -> mpfr:
-stopifnot(all.equal(y, as.numeric(format(Y, digits=20)), tol= eps8),
-	  all.equal(Y, as(format(Y), "mpfr"), tol= eps8),
-	  identical(sapply(1:5, formatMpfr, x=s),
-		    c("4.e4", "4.3e4", "4.32e4", "43210.", "43208.")))
+i1..5f <- c("4.e+4", "4.3e+4", "4.32e+4", "43210.", "43208.")
+stopifnot(exprs = {
+    all.equal(y, as.numeric(format(Y, digits=20)), tol= eps8)
+    all.equal(Y, as(format(Y), "mpfr"), tol= eps8)
+    identical(sapply(1:5, formatMpfr, x=s), i1..5f)
+    identical(sapply(1:5, formatMpfr, x=s, exponent.plus=FALSE),
+              sub("e[+]", "e", i1..5f))
+})
 
 
 ## More  character -> mpfr  checking :

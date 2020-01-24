@@ -9,5 +9,13 @@
 # To find things in non-default location, when the user uses something like
 # R CMD INSTALL --configure-args="--with-mpfr-lib=/*/mpfr-3.1.5/lib --with-mpfr-include=/*/mpfr-3.1.5/include"
 # then  CPPFLAGS and PKG_LDFLAGS should be set from ../configure
-PKG_CPPFLAGS=$(CPPFLAGS)
+# PKG_CPPFLAGS=$(CPPFLAGS)
+
+#-- "Regularly" --
+PKG_CFLAGS=$(CFLAGS)
 PKG_LIBS=$(PKG_LDFLAGS) -lmpfr -lgmp
+#--MM-- "Works to get newest" (for me via PKG_CONFIG_PATH & sym.link in /usr/local.nfs/app/pkgconfig)
+# PKG_CFLAGS = `pkg-config --cflags mpfr`
+# PKG_LIBS   = `pkg-config --libs mpfr`
+# PKG_LDFLAGS = `pkg-config --libs-only-L mpfr` $(LDFLAGS)
+

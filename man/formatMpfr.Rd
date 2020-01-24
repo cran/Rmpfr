@@ -2,6 +2,7 @@
 \title{Formatting MPFR (multiprecision) Numbers}
 \alias{formatMpfr}
 \alias{formatN.mpfr}
+\alias{.mpfr2str}
 \description{
   Flexible formatting of \dQuote{multiprecision numbers}, i.e., objects
   of class \code{\linkS4class{mpfr}}.  \code{formatMpfr()} is also the
@@ -10,16 +11,25 @@
   The \code{formatN()} methods for \code{\linkS4class{mpfr}} numbers
   renders them differently than their double precision equivalents, by
   appending \code{"_M"}.
+
+  Function \code{.mpfr2str()} is the low level work horse for
+  \code{formatMpfr()} and hence all \code{\link{print}()}ing of
+  \code{"\linkS4class{mpfr}"} objects.
 }
 \usage{
 formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
+           maybe.full = !is.null(digits) && is.na(scientific),
 	   base = 10, showNeg0 = TRUE, max.digits = Inf,
 	   big.mark = "", big.interval = 3L,
 	   small.mark = "", small.interval = 5L,
            decimal.mark = ".",
            exponent.char = if(base <= 14) "e" else if(base <= 36) "E" else "|e",
+           exponent.plus = TRUE,
            zero.print = NULL, drop0trailing = FALSE, ...)
+
 \S3method{formatN}{mpfr}(x, drop0trailing = TRUE, \dots)
+
+.mpfr2str(x, digits = NULL, maybe.full = !is.null(digits), base = 10L)
 }
 \arguments{
   \item{x}{an MPFR number (vector or array).}
@@ -34,8 +44,10 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
     are suppressed.}
   \item{scientific}{either a logical specifying whether
     MPFR numbers should be encoded in scientific
-    format, or an integer penalty (see \code{\link{options}("scipen")}).
+    format (\dQuote{exponential representation}), or an integer penalty
+    (see \code{\link{options}("scipen")}).
     Missing values correspond to the current default penalty.}
+  \item{maybe.full}{\code{\link{logical}}, passed to \code{\link{.mpfr2str}()}.}
   \item{base}{an integer in \eqn{2,3,..,62}; the base (\dQuote{basis})
     in which the numbers should be represented.  Apart from the default
     base 10, binary (\code{base = 2}) or hexadecimal (\code{base = 16})
@@ -48,6 +60,12 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
     \code{base} \eqn{B \ge 15}{B >= 15}, \code{"e"} is part of the
     (mantissa) digits and the same is true for \code{"E"} when
     \eqn{B \ge 37}{B >= 37}.}
+  \item{exponent.plus}{\code{\link{logical}} indicating if \code{"+"}
+    should be for positive exponents in exponential (aka
+    \dQuote{scientific}) representation.  This used to be hardcoded to
+    \code{FALSE}; the new default is compatible to \R's
+    \code{\link{format}()}ing of numbers and helps to note visually when
+    exponents are in use.}
   \item{max.digits}{a (large) positive number to limit the number of
     (mantissa) digits, notably when \code{digits} is \code{NULL} (as by
     default).  Otherwise, a numeric \code{digits} is \emph{preferred} to
@@ -76,8 +94,8 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
 }
 \references{
   The MPFR manual's description of \samp{mpfr_get_str()} which is the
-  C-internal workhorse for the (internal) \R function \code{.mpfr2str()}
-  on which \code{formatMpfr} builds.
+  C-internal workhorse for \code{.mpfr2str()} (on which \code{formatMpfr()}
+  builds).% as we say in description{..} already
 }
 \author{Martin Maechler}
 \seealso{
@@ -87,6 +105,10 @@ formatMpfr(x, digits = NULL, trim = FALSE, scientific = NA,
   utility on which \code{formatMpfr} is based as well.
   The S3 generic function \code{\link[gmp]{formatN}} from package
   \pkg{gmp}.
+
+  \code{\link{.mpfr_formatinfo}(x)} provides the (cheap) non-string parts of
+  \code{.mpfr2str(x)}; the (base 2) \code{exp} exponents are also available
+  via   \code{\link{.mpfr2exp}(x)}.
 }
 \examples{
  ## Printing of MPFR numbers  uses formatMpfr() internally.

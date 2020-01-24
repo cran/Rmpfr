@@ -22,8 +22,8 @@ eps8 <-   8 * .Machine$double.eps
 eps32 <- 32 * .Machine$double.eps
 
 ## must take the *larger* of the two precisions:
-stopifnot(format(mpfr(1, 60) / mpfr(7, 160)) ==
-          "0.1428571428571428571428571428571428571428571428571")# (previously had an extra "2" at end)
+stopifnot(substr(format(mpfr(1, 60)/mpfr(7, 160)), 1,51) == # format() may show more digits
+          "0.1428571428571428571428571428571428571428571428571")# again has extra "2" at end
 
 (x <- mpfr(0:7, 100) / 7)
 ix <- x^-1000
