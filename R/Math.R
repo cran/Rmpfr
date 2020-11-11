@@ -119,6 +119,7 @@ setMethod("factorial", "mpfr",
 factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))),
                           rnd.mode = c('N','D','U','Z','A'))
 {
+    if(!length(n)) return(as(n, "mpfr"))
     stopifnot(n >= 0)
     new("mpfr", .Call(R_mpfr_fac, n, precBits, match.arg(rnd.mode)))
 }
@@ -129,6 +130,7 @@ factorialMpfr <- function(n, precBits = max(2, ceiling(lgamma(n+1)/log(2))),
 ##' We want to do this well for *integer* n, only the general case is using
 ##' P(a,x) := Gamma(a+x)/Gamma(x)
 pochMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
+    if(!length(n)) return(a[FALSE])
     stopifnot(is.integer(n <- as.integer(n)), n >= 0)
     if(!is(a, "mpfr")) ## use a high enough default precision (and recycle ..)
         a <- mpfr(a, precBits = pmax(1,n)*getPrec(a))
@@ -142,6 +144,7 @@ pochMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
 ##' Binomial Coefficient choose(a,n)
 ##' We want to do this well for *integer* n
 chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
+    if(!length(n)) return(a[FALSE])
     stopifnot(is.integer(n <- as.integer(n)), n >= 0)
     if(!is(a, "mpfr")) { ## use high enough default precision
         lc <- lchoose(a,n)
@@ -155,7 +158,7 @@ chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
 
 chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
     ## return   chooseMpfr(n, k0:n) or (-1)^k * choose...  "but smartly"
-    if(!is.numeric(n) || (n <- as.integer(n)) < 1)
+    if(length(n) != 1 || !is.numeric(n) || is.na(n) || (n <- as.integer(n)) < 1)
 	stop("n must be integer >= 1")
     stopifnot(is.numeric(n. <- k0), n. == (k0 <- as.integer(k0)),
               k0 <= n)
@@ -185,7 +188,7 @@ chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
 }## {chooseMpfr.all}
 
 
-## http://en.wikipedia.org/wiki/N%C3%B6rlund%E2%80%93Rice_integral
+## https://en.wikipedia.org/wiki/N%C3%B6rlund%E2%80%93Rice_integral
 ## also deals with these alternating binomial sums
 ##'
 ##' version 1: already using the 'alternating' arg in chooseMpfr.all()

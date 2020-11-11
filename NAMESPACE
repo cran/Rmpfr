@@ -2,8 +2,10 @@ useDynLib(Rmpfr, .registration=TRUE)
 
 ##-- From 'gmp' (on which we 'Depend' ------------------------------------------
 
-## cheap, somewhat experimental -- hence the "."
-export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr)
+## The user can and typically should just use  mpfr(<bigz>)  or  mpfr(<bigq>)
+export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr,
+       ## e.g., for use in gmp :: Math.bigz & Math.bigq :
+       ..bigz2mpfr, ..bigq2mpfr)
 
 ## Import all we need, but not more
 
@@ -29,6 +31,7 @@ importFrom("stats"  # import *and* rename -- we extend these :
 	   ,stats__dpois  = dpois
 	   ,stats__dbinom = dbinom
 	   ,stats__dgamma  = dgamma
+	   ,stats__dnbinom = dnbinom
 	   )
 
 importClassesFrom("gmp", "bigz", "bigq")
@@ -42,6 +45,8 @@ importFrom("gmp"
 if(packageVersion("gmp") >= "0.5.8")
     importFrom("gmp", is.matrixZQ, #-> R/gmp-convert.R
                which.min, which.max)# the generics
+if(packageVersion("gmp") >= "0.6-1")
+    importFrom("gmp", c_bigz, c_bigq)# for sapply() like usage
 ##------------------------------------------------------------------------------
 
 exportClasses("mpfr1", "mpfr"
@@ -110,6 +115,7 @@ export(.mpfr, .mpfr.
        ## S3 "c.mpfr"
        , "chooseMpfr", "chooseMpfr.all", "sumBinomMpfr"
        , "dbinom", "dpois", "dnorm", "dgamma"
+       , "dnbinom"
        , "erf", "erfc"
        , "factorial"
        , "factorialMpfr"
@@ -120,7 +126,10 @@ export(.mpfr, .mpfr.
        , "hypot"
        , igamma # working iff MPFR version >= 3.2.0  >>>  R/special-fun.R  <<<
        , "integrateR"
-       , "j0" , "j1" , "jn"
+     , is.mpfr
+     , "j0" , "j1" , "jn"
+     , log1mexp, log1pexp
+     , matmult
        , "mpfr"
        , mpfrIs0, .mpfr.is.whole # as substitutes of
        , "mpfr.is.0", "mpfr.is.integer" # <-- now (Aug. 2015) deprecated

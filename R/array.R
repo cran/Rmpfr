@@ -60,7 +60,10 @@ mpfrArray <- function(x, precBits, dim = length(x), dimnames = NULL,
 		   else dimnames)
 }
 
-setAs("array", "mpfr", function(from) mpfr(from, 128L))
+setAs("array", "mpfr",        function(from) mpfr(from, 128L))
+setAs("array", "mpfrArray",   function(from) mpfr(from, 128L))
+setAs("matrix", "mpfrMatrix", function(from) mpfr(from, 128L))
+
 ## and for "base" functions to work:
 as.array.mpfr <- function(x, ...) {
     if(is(x, "mpfrArray")) x else ## is(x, "mpfr") :
@@ -208,19 +211,19 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 ## FIXME : should happen in C, where we could "cut & paste" much of
 ## -----  do_matprod() and matprod() from ~/R/D/r-devel/R/src/main/array.c
 ##/* "%*%" (op = 0), crossprod (op = 1) or tcrossprod (op = 2) */
-.matmult.R <- function(x,y, op = 0)
+.matmult.R <- function(x,y, op = 0L, fPrec = 1, precBits = fPrec * max(getPrec(x), getPrec(y)))
 {
-    if(!(is.numeric(x) || is(x,"mpfr")))
+    if(!(is.numeric(x) || is.mpfr(x)))
 	stop("'x' must be numeric or mpfr(Matrix)")
     sym <- missing(y)
-    if (sym && (op > 0)) y <- x
-    else if(!(is.numeric(y) || is(y,"mpfr")))
+    if (sym && (op > 0L)) y <- x
+    else if(!(is.numeric(y) || is.mpfr(y)))
 	stop("'y' must be numeric or mpfr(Matrix)")
     ldx <- length(dx <- dim(x))
     ldy <- length(dy <- dim(y))
     ## "copy, paste & modify" from  do_matprod():
     if (ldx != 2 && ldy != 2) {		#* x and y non-matrices */
-	if (op == 0) {
+	if (op == 0L) {
 	    nrx <- 1L; ncx <- length(x)
 	} else {
 	    nrx <- length(x); ncx <- 1L
@@ -232,7 +235,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	nry <- dy[1]
 	ncy <- dy[2]
 	nrx <- ncx <- 0L
-	if (op == 0) {
+	if (op == 0L) {
 	    if (length(x) == nry) {	#* x as row vector */
 		nrx <- 1L
 		ncx <- nry # == length(x)
@@ -242,13 +245,13 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 		ncx <- 1L # == nry
 	    }
 	}
-	else if (op == 1) { #* crossprod
+	else if (op == 1L) { #* crossprod
 	    if (length(x) == nry) {	#* x is a col vector */
 		nrx <- nry # = length(x)
 		ncx <- 1L
 	    }
 	}
-	else { # op == 2: tcrossprod
+	else { # op == 2L: tcrossprod
 	    if (length(x) == ncy) {	#* x as row vector */
 		nrx <- 1L
 		ncx <- ncy # == length(x)
@@ -263,7 +266,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	nrx <- dx[1]
 	ncx <- dx[2]
 	nry <- ncy <- 0L
-	if (op == 0) {
+	if (op == 0L) {
 	    if (length(y) == ncx) {	#* y as col vector */
 		nry <- ncx # = length(y)
 		ncy <- 1L
@@ -273,13 +276,13 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 		ncy <- length(y)
 	    }
 	}
-	else if (op == 1) { #* crossprod
+	else if (op == 1L) { #* crossprod
 	    if (length(y) == nrx) {	#* y is a col vector */
 		nry <- nrx # = length(y)
 		ncy <- 1L
 	    }
 	}
-	else { # op == 2: tcrossprod	y is a col vector
+	else { # op == 2L: tcrossprod	y is a col vector
 	    nry <- length(y)
 	    ncy <- 1L
 	}
@@ -295,8 +298,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
     z <- new("mpfrMatrix")
     z0 <- as(0, "mpfr")
 
-    precBits <- max(getPrec(x), getPrec(y))
-    if (op == 0) { ## %*%
+    if (op == 0L) { ## %*%
 	if (ncx != nry) stop("non-conformable arguments")
 
 	z@Dim <- c(nrx, ncy)
@@ -308,7 +310,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 		    z[i + k * nrx] <-
 			## sum(x[i + j * nrx] * y[1L+ j + k * nry])
 			new("mpfr",
-			    .Call(R_mpfr_sumprod,
+			    .Call(R_mpfr_sumprod, # --> ../src/Summary.c
 				  x[i + j * nrx], y[1L+ j + k * nry],
 				  precBits, alternating=FALSE))
 	    }
@@ -316,7 +318,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	else	    #/* zero-extent operations should return zeroes */
 	    for(i in seq_len(nrx*ncy)) z[i] <- z0
     }
-    else if (op == 1) { ## crossprod() :  x' %*% y
+    else if (op == 1L) { ## crossprod() :  x' %*% y
 	if (nrx != nry) stop("non-conformable arguments")
 
 	z@Dim <- c(ncx, ncy)
@@ -336,7 +338,7 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 	} else
 	    for(i in seq_len(ncx*ncy)) z[i] <- z0
     }
-    else { ## op == 2 :	 tcrossprod() :	 x %*% y'
+    else { ## op == 2L :	 tcrossprod() :	 x %*% y'
 	if (ncx != ncy) stop("non-conformable arguments")
 
 	z@Dim <- c(nrx, nry)
@@ -362,53 +364,55 @@ setMethod(show, "mpfrArray", function(object) print.mpfrArray(object))
 ## "FIXME"?  make working also with "Matrix" class matrices ..
 ##                             ----------------------------
 
+## An 'explicit' %*% function (with >= 2 arguments) :
+matmult <- function(x,y, ...) .matmult.R(x,y, op = 0L, ...)
 
 setMethod("%*%", signature(x = "mpfrMatrix", y = "mpfrMatrix"),
-	  function(x,y) .matmult.R(x,y, op= 0))
+	  function(x,y) .matmult.R(x,y, op= 0L))
 setMethod("%*%", signature(x = "mpfrMatrix", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 0))
+	  function(x,y) .matmult.R(x,y, op= 0L))
 setMethod("%*%", signature(x = "mpfr", y = "mpfrMatrix"),
-	  function(x,y) .matmult.R(x,y, op= 0))
+	  function(x,y) .matmult.R(x,y, op= 0L))
 setMethod("%*%", signature(x = "mpfr", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 0))
+	  function(x,y) .matmult.R(x,y, op= 0L))
 ## These cover vectors, etc (!) :
 setMethod("%*%", signature(x = "mpfr", y = "Mnumber"),
-	  function(x,y) .matmult.R(x,y, op= 0))
+	  function(x,y) .matmult.R(x,y, op= 0L))
 setMethod("%*%", signature(x = "Mnumber", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 0))
+	  function(x,y) .matmult.R(x,y, op= 0L))
 
 
 setMethod("crossprod", signature(x = "mpfrMatrix", y = "mpfrMatrix"),
-	  function(x,y) .matmult.R(x,y, op= 1))
+	  function(x,y, ...) .matmult.R(x,y, op= 1L, ...))
 setMethod("crossprod", signature(x = "mpfrMatrix", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 1))
+	  function(x,y, ...) .matmult.R(x,y, op= 1L, ...))
 setMethod("crossprod", signature(x = "mpfr", y = "mpfrMatrix"),
-	  function(x,y) .matmult.R(x,y, op= 1))
+	  function(x,y, ...) .matmult.R(x,y, op= 1L, ...))
 setMethod("crossprod", signature(x = "mpfr", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 1))
+	  function(x,y, ...) .matmult.R(x,y, op= 1L, ...))
 setMethod("crossprod", signature(x = "mpfr", y = "Mnumber"),
-	  function(x,y) .matmult.R(x,y, op= 1))
+	  function(x,y, ...) .matmult.R(x,y, op= 1L, ...))
 setMethod("crossprod", signature(x = "Mnumber", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 1))
-## one argument-case:
+	  function(x,y, ...) .matmult.R(x,y, op= 1L, ...))
+## one argument-case: [FIXME: not copying 'x' and using x_i^2  is more efficient]
 setMethod("crossprod", signature(x = "mpfr", y = "missing"),
-	  function(x,y) .matmult.R(x,x, op= 1))
+	  function(x,y, ...) .matmult.R(x,x, op= 1L, ...))
 
 setMethod("tcrossprod", signature(x = "mpfrMatrix", y = "mpfrMatrix"),
-	  function(x,y) .matmult.R(x,y, op= 2))
+	  function(x,y, ...) .matmult.R(x,y, op= 2L, ...))
 setMethod("tcrossprod", signature(x = "mpfrMatrix", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 2))
+	  function(x,y, ...) .matmult.R(x,y, op= 2L, ...))
 setMethod("tcrossprod", signature(x = "mpfr", y = "mpfrMatrix"),
-	  function(x,y) .matmult.R(x,y, op= 2))
+	  function(x,y, ...) .matmult.R(x,y, op= 2L, ...))
 setMethod("tcrossprod", signature(x = "mpfr", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 2))
+	  function(x,y, ...) .matmult.R(x,y, op= 2L, ...))
 setMethod("tcrossprod", signature(x = "mpfr", y = "Mnumber"),
-	  function(x,y) .matmult.R(x,y, op= 2))
+	  function(x,y, ...) .matmult.R(x,y, op= 2L, ...))
 setMethod("tcrossprod", signature(x = "Mnumber", y = "mpfr"),
-	  function(x,y) .matmult.R(x,y, op= 2))
-## one argument-case:
+	  function(x,y, ...) .matmult.R(x,y, op= 2L, ...))
+## one argument-case: [FIXME: not copying 'x' and using x_i^2  is more efficient]
 setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
-	  function(x,y) .matmult.R(x,x, op= 2))
+	  function(x,y, ...) .matmult.R(x,x, op= 2L, ...))
 
 
 .mpfrA.subset <- function(x,i,j, ..., drop) {
@@ -505,6 +509,9 @@ for(it in c("ANY", "missing"))
 				   n.a=nargs(), isMpfr = FALSE))
 rm(it,jt)
 
+## In the Matrix package we have  Diagonal()  for *constructing* a diagonalMatrix;
+## in any case, we do only want to support the   diag(<matrix>)    case.
+
 setMethod("diag", signature(x = "mpfrMatrix"),
 	  function(x, nrow, ncol) {
 	      n <- min(dim(x)); i <- seq_len(n); x[cbind(i,i)] })
@@ -519,6 +526,22 @@ setMethod("diag<-", signature(x = "mpfrMatrix"),
 
 setGeneric("cbind", signature = "...")# -> message about override & deparse.level
 setGeneric("rbind", signature = "...")
+
+## inside such cbind() / rbind() S4 methods,  match.call() does *not* work correctly,
+## this works *only* for top-level calls :
+bind_match.call <- function() sys.call(1L)
+## so use our "hack" :
+bind_match.call <- function() {
+    nc <- length(scs <- sys.calls()) # last one is bind_match.call() itself
+    ## want the one call *above*  standardGeneric("...") :
+    if(is.symbol(fn <- scs[[nc-1L]][[1L]])) { # e.g. 'cbind'
+        Gcall <- call("standardGeneric", as.character(fn)) # e.g. standardGeneric("cbind")
+        i. <- which(vapply(scs, identical, NA, Gcall))
+        scs[[if(!length(i.) || i. < 2L) 1L else i. - 1L ]]
+    } else # try "better"
+        match.call()
+}
+
 
 setMethod("cbind", "Mnumber",
 	  function(..., deparse.level = 1) {
@@ -549,29 +572,70 @@ setMethod("cbind", "Mnumber",
 	      NC <- sum(widths	<- vapply(args, W, integer(1)))
 	      r <- setDataPart(new("mpfrMatrix"), vector("list", NR*NC))
 	      r@Dim <- as.integer(c(NR, NC))
-	      if(deparse.level >= 1 && !is.null(nms <- names(widths)))
-		  r@Dimnames[[2]] <- nms
+	      hasDim <- !vapply(args, function(a) is.null(dim(a)), NA)
+	      do.colnames <- deparse.level || any(hasDim)
+	      if(do.colnames) {
+		  nms <- character(NC)
+		      ## help(cbind)  has in 'Value' :
+		      ##      For ‘cbind’ (‘rbind’) the column (row) names are taken from the
+		      ##      colnames (rownames) of the arguments if these are matrix-like.
+		      ##      Otherwise from the names of the arguments or where those are not
+		      ##      supplied and ‘deparse.level > 0’, by deparsing the expressions
+		      ##      given, for ‘deparse.level = 1’ only if that gives a sensible name
+		      ##      (a symbol, see is.symbol).
+		  nV <- names(widths) # == names(args), possibly NULL
+		  hasV <- !is.null(nV)
+		  ## argN <- substitute(...)## "fails" here same as match.call()
+		  fcall <- bind_match.call()
+		  if(!missing(deparse.level)) # must remove: it could be "anywhere"
+		      fcall <- fcall[names(fcall) != "deparse.level"]
+		  ## cat("fcall: "); str(fcall)
+		  ## browser()
+		  ## argN <- fcall[-1] # but that makes 1st arg into fn.name!
+		  ## vapply(fcall[-1], deparse1, "") ## is what we'd need, incl. *names*
+		  ## not ok when called as  selectMethod("cbind","mpfr")(x, ....)
+                  fcall.ok <- (length(fcall) == 1L + ...length()) ## == 1 + length(args)
+	      }
 	      j <- 0
 	      prec <- .Machine$double.digits
 	      for(ia in seq_along(args)) {
 		  w <- widths[ia]
 		  a <- args[[ia]]
-		  if(is(a,"mpfr")) {
+                  isM <- hasDim[[ia]] # == !is.null(dim(a)) ; true iff matrix-like
+		  if(is.mpfr(a)) {
 		      prec <- max(prec, .getPrec(a))
 		  } else { ## not "mpfr"
 		      a <- mpfr(a, prec)
 		  }
 		  if((li <- lengths[ia]) != 1 && li != NR) { ## recycle
-		      if(!is.null(dim(a)))
+		      if(isM)
 			  stop("number of rows of matrices must match")
 		      ## else
 		      if(NR %% li)
 			  warning("number of rows of result is not a multiple of vector length")
 		      a <- a[rep(seq_len(li), length.out = NR)]
 		  }
-		  r[, j+ 1:w] <- a
+		  ii <- j+ seq_len(w)
+		  r[, ii] <- a
+		  if(do.colnames) {
+		      nms[ii] <-
+			  if(isM)
+			      colnames(a) %||% ""
+			  else {
+			      if(hasV && nzchar(n. <- nV[[ia]]))
+				  n.
+			      else if(fcall.ok) { ## deparsed argument "arg"[[ia]]
+				  a <- fcall[[ia+1L]]
+				  if(is.symbol(a) || deparse.level == 2)
+				      deparse1(a)
+				  else ""
+			      } else ""
+			  }
+		  }
 		  j <- j + w
 	      }
+	      if(do.colnames && any(nzchar(nms)))
+		  r@Dimnames[[2L]] <- nms
 	      r
 	  })
 
@@ -602,33 +666,60 @@ setMethod("rbind", "Mnumber",
 	      ## the number of rows of the result : {for now require integer}
 	      NR <- sum(lengths <- vapply(args, L, integer(1)))
 	      NC <- max(widths	<- vapply(args, W, integer(1)))
-
 	      r <- setDataPart(new("mpfrMatrix"), vector("list", NR*NC))
 	      r@Dim <- as.integer(c(NR, NC))
-	      if(deparse.level >= 1 && !is.null(nms <- names(widths)))
-		  r@Dimnames[[1]] <- nms
+	      hasDim <- !vapply(args, function(a) is.null(dim(a)), NA)
+	      do.rownames <- deparse.level || any(hasDim)
+	      if(do.rownames) {
+		  nms <- character(NR)
+		  nV <- names(lengths) # == names(args), possibly NULL
+		  hasV <- !is.null(nV)
+		  fcall <- bind_match.call()
+		  if(!missing(deparse.level)) # must remove: it could be "anywhere"
+		      fcall <- fcall[names(fcall) != "deparse.level"]
+		  ## not ok when called as  selectMethod("cbind","mpfr")(x, ....)
+                  fcall.ok <- (length(fcall) == 1L + ...length()) ## == 1 + length(args)
+	      }
 	      i <- 0
 	      prec <- .Machine$double.digits
 	      for(ia in seq_along(args)) {
 		  le <- lengths[ia]
 		  a <- args[[ia]]
-		  if(is(a,"mpfr")) {
+		  isM <- hasDim[[ia]] # == !is.null(dim(a)) ; true iff matrix-like
+		  if(is.mpfr(a)) {
 		      prec <- max(prec, .getPrec(a))
 		  } else { ## not "mpfr"
 		      a <- mpfr(a, prec)
 		  }
-
 		  if((wi <- widths[ia]) != 1 && wi != NC) { ## recycle
-		      if(!is.null(dim(a)))
+		      if(isM)
 			  stop("number of rows of matrices must match")
 		      ## else
 		      if(NC %% wi)
 			  warning("number of columns of result is not a multiple of vector length")
 		      a <- a[rep(seq_len(wi), length.out = NC)]
 		  }
-		  r[i+ 1:le, ] <- a
+		  ii <- i+ seq_len(le)
+		  r[ii, ] <- a
+		  if(do.rownames) {
+		      nms[ii] <-
+			  if(isM)
+			      rownames(a) %||% ""
+			  else {
+			      if(hasV && nzchar(n. <- nV[[ia]]))
+				  n.
+			      else if(fcall.ok) { ## deparsed argument "arg"[[ia]]
+				  a <- fcall[[ia+1L]]
+				  if(is.symbol(a) || deparse.level == 2)
+				      deparse1(a)
+				  else ""
+			      } else ""
+			  }
+		  }
 		  i <- i + le
 	      }
+	      if(do.rownames && any(nzchar(nms)))
+		  r@Dimnames[[1L]] <- nms
 	      r
 	  })
 

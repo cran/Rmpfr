@@ -1,5 +1,9 @@
 stopifnot(require("Rmpfr"))
 
+(f.chk <- system.file("check-tools.R", package="Rmpfr", mustWork=TRUE))
+source(f.chk, keep.source=FALSE)
+## -> Matrix test-tools +  all.eq.finite(), all.EQ()
+
 x <- mpfr(0:7, 64)/7
 mx <- x
 dim(mx) <- c(4,2)
@@ -28,6 +32,10 @@ stopifnot(all.equal(m2, mpfr(m.x, 64), tol=0), # not identical(..)
 .N <- function(x) { if(!is.null(dim(x))) as(x,"array") else as(x,"numeric") }
 noDN <- function(.) { dimnames(.) <- NULL ; . }
 allEQ <- function(x,y) all.equal(x,y, tol=1e-15)
+
+## FIXME write "functions" that take  x -> {mx , m.x}  and run the following as *function*
+## ----  then use previous case *and* cases with NA's !
+##       and use  higher precision via  fPrec = 2 etc ...
 
 stopifnot(allEQ(m.x, noDN(.N(mx))),
 	  allEQ(m.y, noDN(.N(my))),
@@ -148,15 +156,24 @@ stopifnot(is(mx, "mpfrMatrix"),
 
 ## Ensure that apply() continues to work with 'bigz'/'bigq'
 A <- matrix(2^as.bigz(1:12), 3,4)
-
-stopifnot(
+mA <- as(A, "mpfr") # failed {as dim(A) is "double", not "integer"}
+(Qm <- A / (A^2 - 1)) # big rational matrix
+MQ <- mpfr(Qm, precBits = 64)
+stopifnot(exprs = {
+    mA == A
+    mA == mpfr(A, precBits=16)
+    mA == asNumeric(A)
+    is.bigq(Qm)
+    is(MQ, "mpfrMatrix")
+    all.equal(Qm, MQ, tol = 1e-18)
+    all.equal(dim(mA), dim(A ), tol=0)
+    all.equal(dim(mA), dim(Qm), tol=0)
     identical(asNumeric(apply(A,  1, min)),
               apply(asNumeric(A), 1, min))
-   ,
-    identical(asNumeric(apply(A,  1, min)),
-              apply(asNumeric(A), 1, min))
-)
-## failed up to Rmpfr 0.6.0
+    identical(asNumeric(apply(A,  1, max)),
+              apply(asNumeric(A), 1, max))
+})
+## mA etc, failed up to Rmpfr 0.8-1; the apply() parts failed up to Rmpfr 0.6.0
 
 if(FALSE) ## Bug in gmp <= 0.5-12 :
 stopifnot(

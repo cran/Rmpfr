@@ -411,12 +411,12 @@ SEXP R_mpfr_get_erange(SEXP kind_) {
     return ans;
 }
 
+// R's  .mpfr_erange_set() -- here, set *one* of Emin and Emax:
 SEXP R_mpfr_set_erange(SEXP kind_, SEXP val) {
     erange_kind kind = asInteger(kind_);
     mpfr_exp_t exp_val;
     if(isInteger(val))
 	exp_val = asInteger(val);// assume this is always valid to set
-
     else { // we allow larger values from the R side
 	PROTECT(val = coerceVector(val, REALSXP));
 	exp_val = (mpfr_exp_t) asReal(val);

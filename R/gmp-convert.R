@@ -31,7 +31,7 @@ if(packageVersion("gmp") < "0.5.8")## <-> ../NAMESPACE
     if(is.null(precB)) precB <- 4L*nchar(cx)
     if(is.matrixZQ(x))
 	new("mpfrMatrix", .Call(str2mpfr1_list, cx, precB, b, rnd.mode),
-	    Dim = dim(x))# "bigz" has no dimnames
+	    Dim = as.integer(dim(x)))# "bigz" has no dimnames
     else
 	new("mpfr", .Call(str2mpfr1_list, cx, precB, b, rnd.mode))
 }
@@ -45,7 +45,7 @@ setAs("bigz", "mpfr", function(from) ..bigz2mpfr(from))
 as.bigz.mpfr <-
 .mpfr2bigz <- function(x, mod=NA) {
     if(is.null(mod)) mod <- NA_integer_
-    stopifnot(is(x, "mpfr"),
+    stopifnot(is.mpfr(x),
 	      is.na(mod) || (length(mod) == 1L && is.numeric(mod)))
     dx <- dim(x)
 ### FIXME or rather  roundMpfr()  [or even round "RND" as in mpfr_get_z() above] ??

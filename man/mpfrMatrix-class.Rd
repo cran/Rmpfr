@@ -1,5 +1,5 @@
 \name{mpfrMatrix}
-\title{Classes "mpfrMatrix" and "mpfrArray"}
+\title{Classes "mpfrMatrix" and "mpfrArray"}% <--> ./mpfrArray.Rd
 \docType{class}
 \alias{mpfrMatrix-class}
 \alias{mpfrArray-class}
@@ -21,8 +21,10 @@
 \alias{rowMeans,mpfrArray-method}
 \alias{as.vector,mpfrArray,missing-method}
 \alias{coerce,mpfrArray,array-method}
+\alias{coerce,array,mpfrArray-method}
 \alias{coerce,mpfrArray,matrix-method}
 \alias{coerce,mpfrMatrix,matrix-method}
+\alias{coerce,matrix,mpfrMatrix-method}
 %% the following two from the same setAs(); the 2nd one is auto-produced
 %% *and* needed by codoc().  Behavior seems a bit bogous :
 \alias{coerce,mpfrArray,vector-method}

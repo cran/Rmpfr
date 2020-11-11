@@ -7,7 +7,7 @@
   %% TODO:  hjkb() A bounded and an unbounded version are provided. --> ~/R/Pkgs/dfoptim/R/
 
   This is a slight adaption \code{\link[dfoptim]{hjk}()} from package
-  \pkg{dfoptim}
+  \CRANpkg{dfoptim}.
 }
 \usage{
 hjkMpfr(par, fn, control = list(), ...)

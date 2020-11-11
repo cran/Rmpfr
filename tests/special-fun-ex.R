@@ -176,18 +176,16 @@ for(i in (-20):(-1)) {
     Bab <- beta(a, b.)
     stopifnot(is.nan(beta(a, (i1:0))), is.nan(lbeta(a, (i1:0))),
 	      all.equal(Bab, Bi2(a, b.),             tol=1e-20),
-	      all.equal(lbeta(a, b.), log(abs(Bab)), tol=1e-20))
+	      all.equal(lbeta(a, b.), log(abs(Bab)), tol=1e-20), allow.logical0 = TRUE)
 }
 
 ## (a,b) all positive
 c10 <- b10 + 0.25
 for(a in c(0.1, 1, 1.5, 2, 20)) {
     stopifnot(all.equal( B(a,b10), (bb <-  beta(a, b10))),
-	      all.equal(lB(a,b10), (lb <- lbeta(a, b10))),
-	      all.equal(lb, log(bb)),
+	      all.equal(lB(a,b10), (lb <- lbeta(a, b10))), all.equal(lb, log(bb)),
 	      all.equal( B(a,c10), (bb <-  beta(a, c10))),
-	      all.equal(lB(a,c10), (lb <- lbeta(a, c10))),
-	      all.equal(lb, log(bb)),
+	      all.equal(lB(a,c10), (lb <- lbeta(a, c10))), all.equal(lb, log(bb)),
 	      TRUE)
 }
 
@@ -306,12 +304,17 @@ xP <- function(x, d) x - d*(x > d)
 aEQformat <- function(xy, ...) format(xy, digits = 7, ...)
 allEQ_0 <- function (target, current, ...)
     all.equal(target, current, tolerance = 0, formatFUN = aEQformat, ...)
+stopIfNot <-
+    if("allow.logical0" %in% names(formals(stopifnot))) { # experimental (MM only)
+        stopifnot
+    } else function(exprs, allow.logical0) stopifnot(exprs=exprs)
+
 for(shp in c(2^c(-20, -3, -1:1, 4, 10, 50))) {
     cat("shape = 2^", log2(shp), ":\n-------------\n")
     d.dg  <- dgamma(xP(2 ^ xe, shp), shape=shp)
     m.dg  <- dgamma(xP(two^xe, shp), shape=shp)
     m.ldg <- dgamma(xP(two^xe, shp), shape=shp, log=TRUE)
-    stopifnot(exprs = {
+    stopIfNot(exprs = {
         !is.unsorted(xe)
         is.finite(m.dg)
         m.dg >= 0
@@ -329,7 +332,7 @@ for(shp in c(2^c(-20, -3, -1:1, 4, 10, 50))) {
               allEQ_0  (log(m.dg[pos.d]), m.ldg[pos.d]),"\n")
               all.equal(log(m.dg[pos.d]), m.ldg[pos.d], tol = 1e-14)
         }
-    })
+    }, allow.logical0 = TRUE)
 }
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"

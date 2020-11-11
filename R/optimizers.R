@@ -17,9 +17,9 @@ optimizeR <- function(f, lower, upper, ..., tol = 1e-20,
     fun <- match.fun(f)
     f <- if(maximum) function(x) -fun(x, ...) else function(x) fun(x, ...)
 
-    a <- if(!is(lower,"mpfr")) mpfr(lower, precBits = precBits)
+    a <- if(!is.mpfr(lower)) mpfr(lower, precBits = precBits)
 	 else if(.getPrec(lower) < precBits) roundMpfr(lower, precBits)
-    b <- if(!is(upper,"mpfr")) mpfr(upper, precBits = precBits)
+    b <- if(!is.mpfr(upper)) mpfr(upper, precBits = precBits)
 	 else if(.getPrec(upper) < precBits) roundMpfr(upper, precBits)
     method <- match.arg(method)
     n <- 0; convergence <- TRUE

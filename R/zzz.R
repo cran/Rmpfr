@@ -16,3 +16,14 @@ doExtras <- function() {
 		"  Consider installing a newer version of MPFR (e.g., from mpfr.org),\n",
 		"  and re-install the R package Rmpfr after that.", call.=FALSE)
 }
+
+
+if(packageVersion("gmp") < "0.6-1") local({ ## need c_bigz() and c_bigq() already now
+    env <- asNamespace("gmp")
+    getGmp <- function(x) get(x, envir=env, inherits=FALSE)
+    biginteger_c  <- getGmp("biginteger_c")
+    bigrational_c <- getGmp("bigrational_c")
+    rm(env, getGmp)
+    c_bigz <<- function(L) .Call(biginteger_c, L)
+    c_bigq <<- function(L) .Call(bigrational_c, L)
+})

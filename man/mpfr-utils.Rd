@@ -188,6 +188,9 @@ mpfrImport(mxp)
   \code{\link{integer}} limits, i.e., has absolute values not larger than
   \code{\link{.Machine}$integer.max} (\eqn{ = 2^{31} - 1}).
 
+  \code{.mpfr_erange_set()} \emph{invisibly} (see
+  \code{\link{invisible}()}) returns \code{TRUE} iff the change was successful.
+
   \code{.mpfr_formatinfo(x)} returns conceptually a subset of
   \code{\link{.mpfr2str}()}'s result, a list with three components
   \item{exp}{the base-2 exponents of \code{x}, identical to \code{.mpfr2exp(x)}.}

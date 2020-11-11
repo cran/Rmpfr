@@ -34,7 +34,7 @@ igamma(a, x, rnd.mode = c("N", "D", "U", "Z", "A"))
 }
 \references{
   NIST Digital Library of Mathematical Functions, section 8.2.
-  \url{http://dlmf.nist.gov/8.2.i}
+  \url{https://dlmf.nist.gov/8.2.i}
 
   Wikipedia (2019). \emph{Incomplete gamma function};
   \url{https://en.wikipedia.org/wiki/Incomplete_gamma_function}

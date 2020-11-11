@@ -56,18 +56,18 @@ further note the first vignette (below).
 
 Further information is available in the following vignettes:
 \tabular{ll}{
-  % An overview of how to use the package, including the most important functions:
-  \code{Rmpfr-pkg} \tab Rmpfr (source, pdf)\cr
+  \code{Rmpfr-pkg} \tab Arbitrarily Accurate Computation with R: The 'Rmpfr' package (source, pdf)\cr
+
   \code{log1mexp-note} \tab Acccurately Computing log(1 - exp(.)) -- Assessed by Rmpfr (source, pdf)\cr
 }
 }%- end{details}
 \author{Martin Maechler}
 \references{
   MPFR (MP Floating-Point Reliable Library),
-  \url{http://mpfr.org/}
+  \url{https://www.mpfr.org/}% or http://mpfr.org/  (unfortunately the % http*s* needs the "www")
 
   GMP (GNU Multiple Precision library),
-  \url{http://gmplib.org/}
+  \url{https://gmplib.org/}
 
   and see the vignettes mentioned above.
 }

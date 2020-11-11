@@ -202,34 +202,34 @@ SEXP R_mpfr_sumprod(SEXP x, SEXP y, SEXP minPrec, SEXP alternating_)
 
     for(int i=0; i < n; i++)
     {
-	Rboolean NA_res;
 	double xi = 0., yi = 0.; // Wall
+#define IF_NA_set_and_continue(_NA_COND_)	\
+	if(_NA_COND_) {				\
+	    mpfr_set_nan(Summ);			\
+	    continue;/* -> "next i"  */		\
+	}
+
 	switch(R_case) {
 	case M_M :
 	    R_asMPFR(VECTOR_ELT(x, i), x_i);
 	    R_asMPFR(VECTOR_ELT(y, i), y_i);
-	    NA_res = (mpfr_nan_p(x_i) || mpfr_nan_p(y_i));
+	    IF_NA_set_and_continue(mpfr_nan_p(x_i) || mpfr_nan_p(y_i));
 	    xy_prec = imax2(mpfr_get_prec(x_i),
 			    mpfr_get_prec(y_i));
 	    break;
 	case M_n :
 	    R_asMPFR(VECTOR_ELT(x, i), x_i);
 	    yi = yy[i];
-	    NA_res = (mpfr_nan_p(x_i) || ISNA(yi));
+	    IF_NA_set_and_continue(mpfr_nan_p(x_i) || ISNA(yi));
 	    xy_prec = imax2(mpfr_get_prec(x_i), 53);
 	    break;
 	case n_M :
 	    xi = xx[i];
 	    R_asMPFR(VECTOR_ELT(y, i), y_i);
-	    NA_res = (ISNA(xi) || mpfr_nan_p(y_i));
+	    IF_NA_set_and_continue(ISNA(xi) || mpfr_nan_p(y_i));
 	    xy_prec = imax2(53, mpfr_get_prec(y_i));
 	    break;
 	} // switch()
-
-	if(NA_res) {
-	    mpfr_set_nan(Summ);
-	    continue; // no need to continue the loop
-	}
 
 	if(S_prec < xy_prec) {/* increase it, since it will store the result */
 	    mpfr_prec_round (Summ, xy_prec, MPFR_RNDN);

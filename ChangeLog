@@ -132,7 +132,7 @@ __FIXME__ add checking code!
 2012-06-04  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/optimizers.R (optimizeR): new simple golden ratio, thanks to
-	Hans Borchert.
+	Hans Werner Borchers.
 
 2012-05-22  Martin Maechler  <maechler@stat.math.ethz.ch>
 

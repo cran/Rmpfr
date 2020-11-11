@@ -2,7 +2,7 @@
 
 erf <- function(x) {
     if(is.numeric(x)) 2 * pnorm(x * sqrt(2)) - 1
-    else if(is(x, "mpfr")) { # maybe also mpfrMatrix
+    else if(is.mpfr(x)) { # maybe also mpfrMatrix
 	##new("mpfr", .Call(Math_mpfr, x, .Math.codes[["erf"]]))
 	x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erf"]])
 	x
@@ -16,7 +16,7 @@ erf <- function(x) {
 ##==> pnorm(x., lower=TRUE)  = erfc(x./sqrt(2))/2
 erfc <- function(x) {
     if(is.numeric(x)) 2 * pnorm(x * sqrt(2), lower.tail = FALSE)
-    else if(is(x, "mpfr")) {
+    else if(is.mpfr(x)) {
 	x@.Data[] <- .Call(Math_mpfr, x, .Math.codes[["erfc"]])
 	x
     }
@@ -27,7 +27,7 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 {
     if(is.numeric(q) && is.numeric(mean) && is.numeric(sd))
 	stats__pnorm(q, mean, sd, lower.tail=lower.tail, log.p=log.p)
-    else if((q.mp <- is(q, "mpfr")) || is(mean, "mpfr") || is(sd, "mpfr")) {
+    else if((q.mp <- is.mpfr(q)) || is.mpfr(mean) || is.mpfr(sd)) {
 	stopifnot(length(lower.tail) == 1L, length(log.p) == 1L)
 	rr <- q <- ((if(q.mp) q else as(q, "mpfr")) - mean) / sd
 	if(any(neg <- (q < 0))) ## swap those:	Phi(-z) = 1 - Phi(z)
@@ -66,7 +66,7 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
     if(is.numeric(x) && is.numeric(mean) && is.numeric(sd))
 	stats__dnorm(x, mean, sd, log=log)
-    else if((x.mp <- is(x, "mpfr")) || is(mean, "mpfr") || is(sd, "mpfr")) {
+    else if((x.mp <- is.mpfr(x)) || is.mpfr(mean) || is.mpfr(sd)) {
 	## stopifnot(length(log) == 1)
 	prec <- pmax(53, getPrec(x), getPrec(mean), getPrec(sd))
 	if(!x.mp) x <- mpfr(x, prec)
@@ -74,7 +74,7 @@ dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
 	twopi <- 2*Const("pi", prec)
 	## f(x) =  1/(sigma*sqrt(2pi)) * exp(-1/2 x^2)
 	if(log) ## log( f(x) ) = -[ log(sigma) + log(2pi)/2 + x^2 / 2]
-	    -(log(if(is(sd,"mpfr")) sd else mpfr(sd, prec))  + (log(twopi) + x*x)/2)
+	    -(log(if(is.mpfr(sd)) sd else mpfr(sd, prec))  + (log(twopi) + x*x)/2)
 	else exp(-x^2/2) / (sd*sqrt(twopi))
     } else stop("invalid arguments (x,mean,sd)")
 }
@@ -82,7 +82,7 @@ dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
 dpois <- function (x, lambda, log = FALSE) {
     if(is.numeric(x) && is.numeric(lambda)) ## standard R
 	stats__dpois(x, lambda, log=log)
-    else if((l.mp <- is(lambda, "mpfr")) | (x.mp <- is(x, "mpfr"))) {
+    else if((l.mp <- is.mpfr(lambda)) | (x.mp <- is.mpfr(x))) {
 	prec <- pmax(53, getPrec(lambda), getPrec(x))
 	if(!l.mp) lambda <- mpfr(lambda, prec)
 	if(!x.mp) x <- mpfr(x, prec)
@@ -95,8 +95,8 @@ dpois <- function (x, lambda, log = FALSE) {
 dbinom <- function (x, size, prob, log = FALSE) {
     if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) ## standard R
 	stats__dbinom(x, size, prob, log=log)
-    else if((s.mp <- is(size, "mpfr")) |
-	    (p.mp <- is(prob, "mpfr")) || is(x, "mpfr")) {
+    else if((s.mp <- is.mpfr(size)) |
+	    (p.mp <- is.mpfr(prob)) || is.mpfr(x)) {
 	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
         if(!is.integer(x)) x <- as.integer(x) # chooseMpfr() needs
 	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
@@ -110,6 +110,36 @@ dbinom <- function (x, size, prob, log = FALSE) {
 	stop("(x,size, prob) must be numeric or \"mpfr\"")
 }## {dbinom}
 
+dnbinom <- function (x, size, prob, mu, log = FALSE) {
+    if(!missing(mu)) {
+        if (!missing(prob))
+            stop("'prob' and 'mu' both specified")
+        ## Using argument 'mu' instead of 'prob'
+        if (size == Inf)
+            return( dpois(x, lambda=mu, log) )
+        else
+            prob <- size/(size+mu)  #  and continue :
+    }
+    if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) { ## standard R
+        if(!missing(mu))
+            stats__dnbinom(x, size, mu=mu,     log=log)
+        else
+            stats__dnbinom(x, size, prob=prob, log=log)
+    } else if((s.mp <- is.mpfr(size)) |
+	    (p.mp <- is.mpfr(prob)) || is.mpfr(x)) {
+	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
+        if(!is.integer(x)) x <- as.integer(x) # chooseMpfr() needs
+	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
+	if(!s.mp) size <- mpfr(size, prec)
+	if(!p.mp) prob <- mpfr(prob, prec)
+	## n:= size, p:= prob,	compute	 P(x) = choose(n+x-1, x) * p^n * (1-p)^x
+	C.nx <- chooseMpfr(size+x-1, x)
+	if(log) log(C.nx) + size*log(prob) + x*log1p(-prob)
+	else C.nx * prob^size * (1-prob)^x
+    } else
+	stop("(x,size, prob | mu) must be numeric or \"mpfr\"")
+}## {dnbinom}
+
 
 dgamma <- function(x, shape, rate = 1, scale = 1/rate, log = FALSE) {
     missR <- missing(rate)
@@ -122,8 +152,8 @@ dgamma <- function(x, shape, rate = 1, scale = 1/rate, log = FALSE) {
     ## and now use 'scale' only
     if(is.numeric(x) && is.numeric(shape) && is.numeric(scale))
         stats__dgamma(x, shape, scale=scale, log=log)
-    else if((sh.mp <- is(shape, "mpfr")) |
-	    (sc.mp <- is(scale, "mpfr")) || is(x, "mpfr")) {
+    else if((sh.mp <- is.mpfr(shape)) |
+	    (sc.mp <- is.mpfr(scale)) || is.mpfr(x)) {
         ##     f(x)= 1/(s^a Gamma(a)) x^(a-1) e^-(x/s)  ; a=shape, s=scale
         ## log f(x) = -a*log(s) - lgamma(a) + (a-1)*log(x) - (x/s)
 	if(!sh.mp || !sc.mp) {
@@ -169,7 +199,7 @@ Bernoulli <- function(k, precBits = 128) {
     ## -----------------------------------------------------------
     ## Author: Martin Maechler, Date: 12 Dec 2008, 11:35
     stopifnot(all(k >= 0), k == as.integer(k))
-    r <- - k * zeta(if(is(k, "mpfr")) 1 - k else mpfr(1 - k, precBits=precBits))
+    r <- - k * zeta(if(is.mpfr(k)) 1 - k else mpfr(1 - k, precBits=precBits))
     if(any(k0 <- k == 0)) r[k0] <- mpfr(1, precBits=precBits)
     r
 }
@@ -347,7 +377,9 @@ hypot <- function(x,y, rnd.mode = c('N','D','U','Z','A')) {
 
 ## The Beta(a,b)  Cumulative Probabilities are exactly computable for *integer* a,b:
 pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
-		   precBits = NULL, rnd.mode = c('N','D','U','Z','A'))
+		   precBits = NULL,
+                   useRational = !log.p && !is.mpfr(q) && is.null(precBits),
+                   rnd.mode = c('N','D','U','Z','A'))
 {
     stopifnot(length(shape1) == 1, length(shape2) == 1,
 	      is.whole(shape1), is.whole(shape2),
@@ -364,17 +396,18 @@ pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
     if(is.na(b <- as.integer(shape2)) || (lower.tail && b > max.ab))
         stop("b = shape2 is too large for 'lower.tail=TRUE' and the current algorithm")
     n <- a + b - 1L
-    pr.x <- getPrec(q, bigq. = 256L)
-    if(is.null(precBits)) {
-        aq <- abs(as.numeric(q))
-        mq <- if(any(po <- aq > 0)) min(aq[po]) else 1 # ==> log = 0
-        ## -n*log(|x|): such that 1 - |x|^n does not completely cancel
-	precBits <- max(128L, pr.x, -as.numeric(n)*log(mq))
+    if(!useRational) {
+        pr.x <- getPrec(q, bigq. = 256L)
+        if(is.null(precBits)) {
+            aq <- abs(as.numeric(q))
+            mq <- if(any(po <- aq > 0)) min(aq[po]) else 1 # ==> log = 0
+            ## -n*log(|x|): such that 1 - |x|^n does not completely cancel
+            precBits <- max(128L, pr.x, -as.numeric(n)*log(mq))
+        }
+        if(pr.x < precBits || !is.mpfr(q))
+            q <- mpfr(q, precBits=precBits)
+        mpfr1 <- list(.Call(const_asMpfr, 1, 16L, "N")) # as prototype for vapply()
     }
-    if(pr.x < precBits || !is(q, "mpfr"))
-	q <- mpfr(q, precBits=precBits)
-
-    mpfr1 <- list(.Call(const_asMpfr, 1, 16L, "N")) # as prototype for vapply()
     F <- if(log.p) log else identity
     ## FIXME: logspace add sum   lsum(.) should be more accurate for large n ==> could use larger a,b
 
@@ -390,12 +423,17 @@ pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
         FUN.x <- function(x) sum(n.choose.k * x^k * (1-x)^(n-k))
     }
     n.choose.k <- chooseZ(n, k)
-    roundMpfr(F(
-	## "vapply() for "mpfr"
-	new("mpfr",
-	    vapply(q, FUN.x, mpfr1))),
-	      ## reduce the precision, in order to not "claim wrongly":
-	      precBits=precBits, match.arg(rnd.mode))
+    if(useRational) {
+        q <- as.bigq(q)
+        if(length(q) == 1L) FUN.x(q) else c_bigq(lapply(q, FUN.x))
+    } else { # mpfr
+        roundMpfr(F(
+            ## "vapply() for "mpfr"
+            new("mpfr",
+                vapply(q, FUN.x, mpfr1))),
+            ## reduce the precision, in order to not "claim wrongly":
+            precBits=precBits, match.arg(rnd.mode))
+    }
 }
 
 ### MPFR version >= 3.2.0 :
@@ -446,3 +484,49 @@ igamma <- function(a,x, rnd.mode = c('N','D','U','Z','A')) {
 ## dummy .. to pacify "R CMD check"
 ## R_mpfr_igamma <- quote(dummy) # gives NOTE  ‘R_mpfr_igamma’ is of class "name"
 
+
+## These are identical from package copuula/R/special-func.R -- where MM authored the function also:
+## We want to export these, but cannot easily import from copula which "weekly depends" on Rmpfr
+
+##' @title Compute  f(a) = log(1 - exp(-a))  stably
+##' @param a numeric vector of positive values
+##' @param cutoff  log(2) is optimal, see  Maechler (201x) .....
+##' @return f(a) == log(1 - exp(-a)) == log1p(-exp(-a)) == log(-expm1(-a))
+##' @author Martin Maechler, May 2002 .. Aug. 2011
+##' @references Maechler(2012)
+##' Accurately Computing log(1 - exp(-|a|)) Assessed by the Rmpfr package.
+##' http://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
+## MM: ~/R/Pkgs/Rmpfr/inst/doc/log1mexp-note.Rnw
+##--> ../man/log1mexp.Rd
+log1mexp <- function(a, cutoff = log(2)) ## << log(2) is optimal >>
+{
+    if(has.na <- any(ina <- is.na(a))) {
+	y <- a
+	a <- a[ok <- !ina]
+    }
+    if(any(a < 0))## a == 0  -->  -Inf	(in both cases)
+	warning("'a' >= 0 needed")
+    tst <- a <= cutoff
+    r <- a
+    r[ tst] <- log(-expm1(-a[ tst]))
+    r[!tst] <- log1p(-exp(-a[!tst]))
+    if(has.na) { y[ok] <- r ; y } else r
+}
+
+##' @title Compute  f(x) = log(1 + exp(x))  stably and quickly
+##--> ../man/log1mexp.Rd
+log1pexp <- function(x, c0 = -37, c1 = 18, c2 = 33.3)
+{
+    if(has.na <- any(ina <- is.na(x))) {
+	y <- x
+	x <- x[ok <- !ina]
+    }
+    r <- exp(x)
+    if(any(i <- c0 < x & (i1 <- x <= c1)))
+	r[i] <- log1p(r[i])
+    if(any(i <- !i1 & (i2 <- x <= c2)))
+	r[i] <- x[i] + 1/r[i] # 1/exp(x) = exp(-x)
+    if(any(i3 <- !i2))
+	r[i3] <- x[i3]
+    if(has.na) { y[ok] <- r ; y } else r
+}

@@ -4,6 +4,66 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.8-2 [2020-11-10, r337]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item The workhorse for all matrix multiplication (\code{\%*\%},
+      \code{crossprod()}, and \code{tcrossprod()}), i.e., \code{.matmult.R(x, y, *)}
+      (not exported), gets new optional arguments \code{fPrec = 1} and
+      \code{precBits}, which defaults to the maximum of \code{getPrec(x)}
+      and \code{getPrec(y)}.
+      To get correct \code{crossprod()} and tcrossprod() generics (with a
+      formal \code{\dots} argument), need a new \CRANpkg{gmp} release, as
+      we get these two generics from \pkg{gmp}.
+
+      \item \code{matmult(x,y)} is identical to \code{x \%*\% y}, but
+      \code{matmult()} has further optional arguments \code{fPrec} and
+      \code{precBits}, see above.
+
+      \item New \code{is.mpfr(x)} function; simple, with fast pre-test.
+
+      \item In \code{pbetaI(q, ..)}, when \code{q} is a bigrational, i.e.,
+      of class \code{"bigq"} (package \CRANpkg{gmp}), the computations are
+      \emph{exact} now, using big rational arithmetic.
+
+      \item New \code{dnbinom()} function (with corresponding new
+      \code{\link{conflicts}()} with the \pkg{stats} package base \R
+      function), providing an \code{"mpfr"}-number version of the negative
+      binomial probabilities.
+
+      \item \code{.mpfr_erange_set()} now can set \emph{both} exponent
+      range limits simultaneously, and now returns invisibly \code{TRUE} if
+      the change succeeded.
+
+      \item New \code{log1mexp()} and \code{log1pexp()}, as "from"
+      \CRANpkg{copula}, notably as the vignette has been here, and authored
+      by me.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{mpfr(mm)} (and similar) now works for \code{"bigq"} or
+      \code{"bigz"} matrices, thanks to a report by Jerry Lewis.
+
+      \item Arithmetic and other \code{"\link{Ops}"} between \code{"mpfr"}
+      and \code{"bigq"} aka bigrational numbers, now use the
+      \dQuote{inherent} precision of the bigrational.
+
+      \item \code{chooseMpfr(a, n)} and similar now \dQuote{work} when
+      \code{n} is of length zero \emph{and} when an experimental version of
+      \code{stopifnot(*, allow.logical0=FALSE)} is used.
+
+      \item Our \code{cbind()} and \code{rbind()} methods with
+      \code{signature = "mNumber"} now keep and construct column and row
+      names as the corresponding base functions, obeying
+      \code{deparse.level}.
+
+      \item Fixed "not-yet"-as-cran \file{NOTE}
+      \emph{Undeclared packages \pkg{dfoptim}, \pkg{pracma} in Rd xrefs}.
+    }
+  }
+}
+
 \section{Changes in version 0.8-1 [2020-01-14, r323]}{
   \subsection{BUG FIXES}{
     \itemize{
@@ -352,6 +412,28 @@
   \subsection{BUG FIXES}{
     \itemize{
       \item .
+    }
+  }
+}
+
+
+%% The first CRAN release
+\section{Changes in version 0.1-5 [2009-08-06]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item First CRAN release on 'Publication:' 2009-08-14 20:24:02
+
+      \item new \code{pmin()} and \code{pmax()}, improving \code{seqMpfr()}.
+
+      \item new \code{"Math"} and \code{"Math2"} group methods, notably for
+      \code{round()} and \code{signif()}.
+
+      \item \code{as(. , "integer")} now works (via C \code{mpfr2i}).
+    }
+  }
+  \subsection{More details for old versions up to Feb. 2015:}{
+    \itemize{
+      \item See file \file{ChangeLog} %% ../ChangeLog <<<
     }
   }
 }

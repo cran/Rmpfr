@@ -1,6 +1,7 @@
 \name{mpfr}
 \title{Create "mpfr" Numbers (Objects)}
 \alias{mpfr}
+\alias{is.mpfr}
 \alias{mpfr.default}
 \alias{mpfr.mpfr}% and more
 \alias{Const}
@@ -15,6 +16,8 @@ mpfr(x, precBits, \dots)
 
 Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L,
       rnd.mode = c("N","D","U","Z","A"))
+
+is.mpfr(x)
 }
 \arguments{
   \item{x}{a \code{\link{numeric}}, \code{\linkS4class{mpfr}},
@@ -46,6 +49,8 @@ Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L,
   \code{mpfr(x)} when \code{x} is an array,
   \code{\linkS4class{mpfrMatrix}}, or \code{\linkS4class{mpfrArray}}
   which the user should just as a normal numeric vector or array.
+
+  \code{is.mpfr()} returns \code{TRUE} or \code{FALSE}.
 }
 \details{
   The \code{"\linkS4class{mpfr}"} method of \code{mpfr()} is a simple
@@ -79,8 +84,8 @@ Const(name = c("pi", "gamma", "catalan", "log2"), prec = 120L,
 \references{
   The MPFR team. (201x).
   \emph{GNU MPFR -- The Multiple Precision Floating-Point Reliable
-    Library}; see \url{http://www.mpfr.org/mpfr-current/#doc} or directly
-  \url{http://www.mpfr.org/mpfr-current/mpfr.pdf}.
+    Library}; see \url{https://www.mpfr.org/mpfr-current/#doc} or directly
+  \url{https://www.mpfr.org/mpfr-current/mpfr.pdf}.
 }
 \author{Martin Maechler}
 \seealso{The class documentation \code{\linkS4class{mpfr}} contains more

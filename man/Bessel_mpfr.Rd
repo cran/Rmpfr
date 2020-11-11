@@ -57,7 +57,7 @@ if(mpfrVersion() >= "3.0.0") { ## Ai() not available previously
   plot(x, aix, log="y", type="l", col=2)
   stopifnot(
     all.equal(Ai (0) , 1/(3^(2/3) * gamma(2/3)))
-    , # see http://dlmf.nist.gov/9.2.ii
+    , # see https://dlmf.nist.gov/9.2.ii
     all.equal(Ai(100), mpfr("2.6344821520881844895505525695264981561e-291"), tol=1e-37)
   )
   two3rd <- 2/mpfr(3, 144)

@@ -20,10 +20,14 @@ Bernoulli(k, precBits = 128)
   an \code{\linkS4class{mpfr}} class vector of the same length as
   \code{k}, with i-th component the \code{k[i]}-th Bernoulli number.
 }
-\references{\url{http://en.wikipedia.org/wiki/Bernoulli_number}
+\references{\url{https://en.wikipedia.org/wiki/Bernoulli_number}
 }
 \author{Martin Maechler}
 \seealso{\code{\link{zeta}} is used to compute them.
+
+  The next version of package \CRANpkg{gmp} is to contain %\code{\link[gmp]{BernoulliQ}()}
+  \code{BernoulliQ()}, providing exact Bernoulli numbers as
+  big rationals (class \code{"bigq"}).
 }
 \examples{
 \dontshow{sessionInfo()

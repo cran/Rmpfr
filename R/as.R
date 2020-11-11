@@ -17,6 +17,9 @@ if(getRversion() < "3.2")
     lengths <- function(x, use.names = TRUE) vapply(x, length, 1L, USE.NAMES = use.names)
 }
 
+##' fast pre-test (for numeric, bigz, bigq, ..):
+is.mpfr <- function(x) isS4(x) && is(x, "mpfr")
+
 mpfr <- function(x, precBits, ...) UseMethod("mpfr")
 
 mpfr.mpfr <- function(x, precBits, rnd.mode = c('N','D','U','Z','A'), ...)
@@ -128,7 +131,7 @@ setAs("mpfr", "mpfr1", function(from) {
 
 ## and then
 mpfrXport <- function(x, names=FALSE) {
-    if(!is(x, "mpfr")) stop("argument is not a \"mpfr\" object")
+    if(!is.mpfr(x)) stop("argument is not a \"mpfr\" object")
     structure(class = "mpfrXport",
 	      list(gmp.numb.bits = .mpfr_gmp_numbbits(),
 		   ## currently unused, but in case:
@@ -257,7 +260,7 @@ formatMpfr <-
         ##	     mxsl := max_i{sleft_i}; sleft_i = sign_i + (digits left of ".")_i
         else { ## scientific = (FALSE | NA | number) --- for now :
             if(is.na(scientific))
-                scientific <- as.numeric(getOption("scipen"))
+                scientific <- scipen
             isNum & (Ex < -4 + scientific | Ex > r.dig)
         }
     }

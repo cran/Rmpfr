@@ -203,10 +203,12 @@ SEXP d2mpfr1_list(SEXP x, SEXP prec, SEXP rnd_mode)
 
    completely parallel to the d2mpfr*() functions above
 
-   *BUT* we cannot easily do the [R package gmp C++ code]-part of
-   SEXP -> mpz !
+   *BUT* we cannot easily do the [R package gmp C++ code]-part of  SEXP -> mpz !
 
-   MM: still do it .. should not be so hard to "guess"
+   MM - FIXME: still do it .. should not be so hard to "guess"
+
+... horrifically,
+... for now, R's  ..bigq2mpfr(), ..bigz2mpfr()  "simply" go via character strings
 */
 
 
@@ -623,3 +625,22 @@ SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybeFull, SEXP base) {
     UNPROTECT(6);
     return val;
 }
+
+
+// TODO : get *exact* as.bigq.mpfr(), i.e, "mpfr" --> "bigq". (R's "bigq" is C 'mpq')
+// ---- inside the GMP library, have
+//                   _________
+// -- Function: void mpq_set_f (mpq_t ROP, const mpf_t OP)
+//                   ^^^^^^^^^
+//       Set ROP to the value of OP.
+//       There is no rounding, this conversion is **exact**.
+
+/*
+  ---not-yet---
+#include <mpf2mpfr.h>
+*/
+/* maybe we only need very little of the above, such as
+#define mpf_t mpfr_t
+--------------------- ?
+*/
+

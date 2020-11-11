@@ -69,14 +69,16 @@ optimizeR(f, lower, upper, ..., tol = 1e-20,
 % \references{
 % }
 \author{
-  \code{"GoldenRatio"} is based on Hans W Borchert's
-  \code{\link[pracma]{golden_ratio}};
+  \code{"GoldenRatio"} is based on Hans Werner Borchers'
+  \code{\link[pracma]{golden_ratio}} (package \CRANpkg{pracma});
   modifications and \code{"Brent"} by Martin Maechler.
 }
 % \note{
 % }
 \seealso{
-  \R's standard \code{\link{optimize}}; \pkg{Rmpfr}'s \code{\link{unirootR}}.
+  \R's standard \code{\link{optimize}};
+  for multivariate optimization, \pkg{Rmpfr}'s \code{\link{hjkMpfr}()};
+  for root finding, \pkg{Rmpfr}'s \code{\link{unirootR}}.
 }
 \examples{
 ## The minimum of the Gamma (and lgamma) function (for x > 0):

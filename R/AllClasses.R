@@ -132,7 +132,7 @@ if(FALSE) { ## if we did this, then ... {see below}
 		function(object) {
 		    if(is.numeric(object) ||
 		       is.logical(object) ||
-		       is(object, "mpfr")) return(TRUE)
+		       is.mpfr(object)) return(TRUE)
 		    ## else
 		    "Not a valid 'Mnumber' class object"
 		})
@@ -154,7 +154,7 @@ setValidity("mNumber",
             function(object) {
                 if(is.numeric(object) ||
                    is.logical(object) ||
-                   is(object, "mpfr")) return(TRUE)
+                   is.mpfr(object)) return(TRUE)
                 ## else
                 "Not a valid 'mNumber' class object"
 		})
