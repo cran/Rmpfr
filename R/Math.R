@@ -154,7 +154,7 @@ chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
     } else if((ln <- length(n)) != 1 && ln != length(a))
 	a <- a + 0*n
     setDataPart(a, .Call(R_mpfr_choose, a, n, match.arg(rnd.mode)))
-}
+} ##                     ------------- => ../src/utils.c
 
 chooseMpfr.all <- function(n, precBits=NULL, k0=1, alternating=FALSE) {
     ## return   chooseMpfr(n, k0:n) or (-1)^k * choose...  "but smartly"

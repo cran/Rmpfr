@@ -1,5 +1,10 @@
 	-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
 * Very Short Term
+** TODO 61) Q: Why is quantile() so slow [hence summary() very slow!]?  A: because sort() |--> rank() is so slow (in C code!)
+   l2x <- seqMpfr(mpfr(4, 1024), 513, by=1/16) # 8000 numbers of 1024 bits
+   system.time(ql2x <- quantile(l2x, names=FALSE)) # user: 10.735 (nb-mm5, Nov.2020)
+*** quantile() -> sort(*, partial=.) -> xtfrm.default() -> rank(l2x) is so slow
+*** Partial SOLUTION (not yet implemented):  use  is.unsorted(.) which is *fast* FALSE for sorted vetors (as 'l2x' above)
 ** TODO 55b) possibly more documentation on .mpfr* functions, e.g. .getSign(), at least *internally* (roxygen)
 ** TODO 31) Valgrind problems + leaks: Brian's e-mail 2014-06-19; ~/R/Pkgs/Rmpfr.Rcheck_valgrind/
 ** TODO 11) format() method for "mpfr", "mpfrArray" (and hence "mpfrMatrix") which nicely
@@ -15,6 +20,7 @@
 * Short or Mid Term
 *** TODO Split this section into  Short | Mid  (?)
 ** TODO 60) Should have *exact* as.bigq.mpfr(), i.e, "mpfr" --> "bigq". (R's "bigq" is C 'mpq')
+** TODO 62) integrateR(): option 'all.sums=TRUE' --> R/integrate-Romberg.R
 ***  Inside the GMP library, have
 # -- Function: void mpq_set_f (mpq_t ROP, const mpf_t OP)
 #      Set ROP to the value of OP.  There is no rounding, this conversion is exact.
@@ -24,7 +30,7 @@
  already use all the numerical tricks including R_Log1_Exp(x) .. :
  R_Log1_Exp(x) := ((x) > -M_LN2 ? log(-expm1(x)) : log1p(-exp(x)))
 ** TODO 54) zapsmall() would be nice, base::zapsmall() fails
-** TODO 59) dhyper() and phyper() -- exact via gmp::chooseZ(), or then chooseMpfr()
+** DONE 59) *exact* dhyper(), phyper().. -> in package 'DPQmpfr' dhyperQ() etc exact via 'gmp' exact rationals
 ** TODO 35) tests/bit-repr.R : Bits() fails to work with 2^k
 
 ** TODO 37) mpfrXport()/*Import() should work for arrays.  Test Windows-portability:

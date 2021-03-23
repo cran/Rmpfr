@@ -22,6 +22,7 @@ setMethod("Summary", "mpfr",
 stats__quantile.default <- stats:::quantile.default
 
 setMethod("quantile", "mpfr", stats__quantile.default)
+## FIXME: is *slow*  *and* uses double precision epsilon internally .Machine$double.epsilon
 ##
 ## Not perfect: has the "0%" "25%" "50%" ... names but not as slot ... hmm ...
 ## 'mpfr' numbers do not have 'names' slot ... (etc) -- but "work" with names

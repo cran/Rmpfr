@@ -4,6 +4,8 @@
  */
 #include <Rmath.h>
 /* imax2() */
+# include <R_ext/Utils.h>
+//-> void R_CheckUserInterrupt(void);
 
 #include "Rmpfr_utils.h"
 extern
@@ -12,8 +14,6 @@ extern
 //Dbg: #define DEBUG_Rmpfr
 #ifdef DEBUG_Rmpfr
 /* ONLY for debugging  !! */
-# include <R_ext/Utils.h>
-//-> void R_CheckUserInterrupt(void);
 # ifndef WIN32
 #  include <Rinterface.h>
 # endif
@@ -251,6 +251,7 @@ int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mpfr_rnd_t RND)
     if(n > 0) {
 	mpfr_set(r, X, RND);
 	for(i=1; i < n; ) {
+	    if(!(i % 100000)) R_CheckUserInterrupt(); // for *large* n
 	    mpfr_sub_si(x, x, 1L, RND); // x = X - i
 	    mpfr_mul   (r, r, x, RND); // r := r * x = X(X-1)..(X-i)
 	    mpfr_div_si(r, r, ++i, RND);

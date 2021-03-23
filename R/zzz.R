@@ -27,3 +27,9 @@ if(packageVersion("gmp") < "0.6-1") local({ ## need c_bigz() and c_bigq() alread
     c_bigz <<- function(L) .Call(biginteger_c, L)
     c_bigq <<- function(L) .Call(bigrational_c, L)
 })
+
+if(getRversion() < "4.0") {
+    ## deparse(.) returning *one* string
+    deparse1 <- function(expr, collapse = " ", width.cutoff = 500L, ...)
+        paste(deparse(expr, width.cutoff, ...), collapse=collapse)
+}

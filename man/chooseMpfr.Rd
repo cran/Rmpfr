@@ -40,10 +40,12 @@ pochMpfr(a, n, rnd.mode = c("N","D","U","Z","A"))
     \emph{alternating sign} coefficients should be returned, see below.}
 }
 \note{
-  If you need high precision \code{choose(a,n)} (or Pochhammer(a,n)) for
-  large \code{n}, maybe better work with the corresponding
-  \code{\link{factorial}(mpfr(..))}, or \code{\link{gamma}(mpfr(..))}
-  terms.
+  Currently this works via a (C level) \code{for(i in 1:n)}-loop which
+  really slow for large \code{n}, say \eqn{10^6}, with computational cost
+  \eqn{O(n^2)}.  In such cases, if you need high precision
+  \code{choose(a,n)} (or Pochhammer(a,n)) for large \code{n}, preferably
+  work with the corresponding \code{\link{factorial}(mpfr(..))}, or
+  \code{\link{gamma}(mpfr(..))} terms.
 }
 \value{
   For
@@ -106,5 +108,34 @@ legend("topleft", c("chooseMpfr.all(n)", "chooseMpfr(n, 1:n)"),
 
 ## Currently, chooseMpfr.all() is faster only for large n (>= 300)
 ## That would change if we used C-code for the *.all() version
-}
+
+## If you want to measure more:
+measureMore <- TRUE
+measureMore <- FALSE
+if(measureMore) { ## takes ~ 2 minutes (on "lynne", Intel i7-7700T, ~2019)
+  n.s <- 2^(5:20)
+  r <- lapply(n.s, function(n) {
+      N <- ceiling(10000/n)
+      cat(sprintf("n=\%9g => N=\%d: ",n,N))
+      ct <- system.time(C <- replicate(N, chooseMpfr(n, n/2)))
+      cat("[Ok]\n")
+      list(C=C, ct=ct/N)
+  })
+  print(ct.n <- t(sapply(r, `[[`, "ct")))
+  hasSfS <- requireNamespace("sfsmisc")
+  plot(ct.n[,"user.self"] ~ n.s, xlab=quote(n), ylab="system.time(.) [s]",
+       main = "CPU Time for  chooseMpfr(n, n/2)",
+       log ="xy", type = "b", axes = !hasSfS)
+  if(hasSfS) for(side in 1:2) sfsmisc::eaxis(side)
+  summary(fm <- lm(log(ct.n[,"user.self"]) ~ log(n.s), subset = n.s >= 10^4))
+  ## --> slope ~= 2  ==>  It's  O(n^2)
+  nn <- 2^seq(11,21, by=1/16) ; Lcol <- adjustcolor(2, 1/2)
+  bet <- coef(fm)
+  lines(nn, exp(predict(fm, list(n.s = nn))), col=Lcol, lwd=3)
+  text(500000,1, substitute(AA \%*\% n^EE,
+                            list(AA = signif(exp(bet[1]),3),
+                                 EE = signif(    bet[2], 3))), col=2)
+} # measure more
+}% example
+
 \keyword{arith}

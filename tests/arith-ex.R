@@ -225,6 +225,20 @@ stopifnot(
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
 
+## Was reproducible BUG in Rmpfr-addition (on Linux, MPFR 4.x.y) -- ## but the bug was Rmpfr,
+## in ../src/Ops.c, detecting if *integer*, i.e., long can be used
+dn <- 1e20
+dOO <- 9223372036854775808; formatC(dOO) # "9.2...e18"
+(r <- dn / (dn + dOO)) # 0.915555  (double prec arithmetic)
+## but *so* strange when switching to Rmpfr :  addition accidentally *subtract*!!
+n <- mpfr(dn, precBits = 99)
+(rM <- n / (n + dOO)) # wrongly gave " 1 'mpfr' .... 99 bits; 1.101605140483951.....
+stopifnot(exprs = {
+    all.equal(n + dOO, dn + dOO)
+    all.equal(n / (n + dOO), r)
+})
+
+
 ###------Standard Statistics Functions --------------------------------------------------------
 
 x <- c(del, 1000)
