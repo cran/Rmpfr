@@ -4,6 +4,26 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.8-4 [2021-03-24, r341]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{dpois(x, *)} now also gets an explicit optional argument
+      \code{useLog} instead of just switching to log-scale by the same
+      test as defines \code{useLog}'s default.
+
+      \item The default method of \code{mpfr(r)} now also works when
+      \code{r} is a \code{list} of \code{"mpfr1"} objects, e.g., resulting
+      from \code{Vectorize(.)} or similar applied to mpfr-vectors.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item fixed problem detected by clang-UBSAN testing in \file{src/Ops.c}
+      (from arithmetic bug fix in 0.8-3). % ../tests/arith-ex.Rout_clang-UBSAN
+    }
+  }
+}
+
 \section{Changes in version 0.8-3 [2021-03-22, r340]}{
   \subsection{NEW FEATURES}{
     \itemize{

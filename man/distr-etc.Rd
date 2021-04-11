@@ -8,7 +8,7 @@
 \alias{dpois}
 \alias{mpfr-distr}% <- alternative for \link
 \usage{%				>>>>  ../R/special-fun.R  <<<<
-dpois (x, lambda, log = FALSE)
+dpois (x, lambda, log = FALSE, useLog = )
 dbinom (x, size, prob,     log = FALSE, useLog = )
 dnbinom(x, size, prob, mu, log = FALSE, useLog = any(x > 1e6))
 dnorm (x, mean = 0, sd = 1, log = FALSE)

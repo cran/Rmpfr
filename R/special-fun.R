@@ -79,18 +79,20 @@ dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
     } else stop("invalid arguments (x,mean,sd)")
 }
 
-dpois <- function (x, lambda, log = FALSE) {
+dpois <- function (x, lambda, log = FALSE,
+                   useLog = { ## MPFR overflow:
+                       ln2 <- log(2)
+                       any(lambda >= -.mpfr_erange("Emin")*ln2) ||
+                           any(x*log(lambda) >= .mpfr_erange("Emax")*ln2)
+                   })
+{
     if(is.numeric(x) && is.numeric(lambda)) ## standard R
 	stats__dpois(x, lambda, log=log)
     else if((l.mp <- is.mpfr(lambda)) | (x.mp <- is.mpfr(x))) {
 	prec <- pmax(53, getPrec(lambda), getPrec(x))
 	if(!l.mp) lambda <- mpfr(lambda, prec)
 	if(!x.mp) x <- mpfr(x, prec)
-        if(log || { ## MPFR overflow:
-            ln2 <- log(2)
-            any(lambda >= -.mpfr_erange("Emin")*ln2) ||
-            any(x*log(lambda) >= .mpfr_erange("Emax")*ln2)
-        }) {
+        if(log || useLog) {
             r <-  -lambda  + x*log(lambda) - lfactorial(x)
             if(log) r else exp(r)
         }

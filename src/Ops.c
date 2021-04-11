@@ -534,13 +534,16 @@ SEXP Arith_mpfr_d(SEXP x, SEXP y, SEXP op)
     SET_MISMATCH;
     for(i=0; i < n; i++) {
 	double yi = yy[i % ny];
-	int y_is_int = (yi == (long)yi);
-
+ 	/* this fails for yi =  'dOO <- 9223372036854775808', see ../tests/arith-ex.R ,
+	 * (because in double precision 9223372036854775807 == 9223372036854775808 !!):
+	 * int y_is_int = (yi == trunc(yi) && LONG_MIN <= yi && yi <= LONG_MAX);
+ 	   				   ==> use '<' instead of '<='  twice !  */
+	int y_is_int = (yi == trunc(yi)  &&  LONG_MIN < yi && yi < LONG_MAX);
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);
 	if(y_is_int) { /* can use <mpfr> o <integer>  routines */
 #ifdef DEBUG_Rmpfr
-	    REprintf("y[i] (= %.20g is int in [L_MIN, L_MAX]=[%ld,%ld]: (long)* = %ld\n",
-		     LONG_MIN, LONG_MAX, yi, (long)yi);
+	    REprintf("yi: %.20g, (long)yi: %ld; yi is int. in [L_MIN, L_MAX]=[%ld,%ld]\n",
+		     yi, (long)yi, LONG_MIN, LONG_MAX);
 #endif
 	    switch(i_op) {
 	    case  1: /*  +  */ mpfr_add_si(x_i, x_i, (long)yi, MPFR_RNDN); break;

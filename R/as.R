@@ -53,8 +53,11 @@ mpfr.default <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z','A
 	stopifnot(missing(precBits) || precBits >= 2)
 	## else warning("unrecognized raw 'x'") # <- ?? {see use in ../tests/create.R }
         ## {but 'raw' is treated below}
+    } else { ## typically the result of Vectorize() or similar on "mpfr"
+        if(is.list(x) && all(lengths(lc <- lapply(x, class)) == 1L) &&
+           all(unlist(lc) == "mpfr1"))
+        return(new("mpfr", x))
     } ## else
-
     if(missing(precBits)) {
 	precBits <- getPrec(x, base = base, doNumeric = FALSE)
     }
