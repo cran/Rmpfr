@@ -79,6 +79,39 @@ dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
     } else stop("invalid arguments (x,mean,sd)")
 }
 
+## 'ncp': not yet -- checked in  ../tests/special-fun-ex.R
+dt <- function (x, df, ncp, log = FALSE) {
+    if(is.numeric(x) && is.numeric(df) && (missing(ncp) || is.numeric(ncp)))
+	stats__dt(x, df, ncp, log=log)
+    else if (missing(ncp) || all(ncp == 0)) {
+        stopifnot(length(log) == 1)
+        if((x.mp <- is.mpfr(x)) | (df.mp <- is.mpfr(df)) || missing(ncp) || is.mpfr(ncp)) {
+            prec <- pmax(53L, getPrec(x), getPrec(df), if(missing(ncp)) 0L else getPrec(ncp))
+            if(! x.mp)  x <- mpfr( x, prec)
+            if(!df.mp) df <- mpfr(df, prec)
+            twopi <- 2*Const("pi", prec)
+        ## From Catherine Loader's comment in src/nmath/dt.c  (n := df) :
+        ## the following form should be "stable" ["contrary" to the direct formula]:
+        ##
+        ##   f_n(x) = sqrt(n/2) / ((n+1)/2) * Gamma((n+3)/2) / Gamma((n+2)/2)
+        ##              * (1+x^2/n)^(-n/2)
+        ##              / sqrt( 2 pi (1+x^2/n) )
+            ##
+            ## MM "FIXME": consider pkg 'DPQ's b_chi() and lb_chi() {and old c_nu()}
+            ## ---------  for the constant
+            if(log) {
+                log(df/2)/2 - log((df+1)/2) + lgamma((df+3)/2) - lgamma((df+2)/2) +
+                    (-df/2)*log1p(x^2/df) - log( twopi*(1+x^2/df) )/2
+            } else {
+                sqrt(df/2) / ((df+1)/2) * gamma((df+3)/2) / gamma((df+2)/2) *
+                    (1+x^2/df)^(-df/2) / sqrt( twopi*(1+x^2/df) )
+            }
+
+        } else stop("invalid arguments (x,df,ncp)")
+    }
+    else stop("ncp != 0 not yet implemented")
+}
+
 dpois <- function (x, lambda, log = FALSE,
                    useLog = { ## MPFR overflow:
                        ln2 <- log(2)
@@ -93,6 +126,8 @@ dpois <- function (x, lambda, log = FALSE,
 	if(!l.mp) lambda <- mpfr(lambda, prec)
 	if(!x.mp) x <- mpfr(x, prec)
         if(log || useLog) {
+            ## NB: For large lambda, x ~= lambda this has a *LOT* of cancellation, e.g., for
+            ## --  lambda = 1e100,  prec = 256  is *NOT* sufficient !!
             r <-  -lambda  + x*log(lambda) - lfactorial(x)
             if(log) r else exp(r)
         }
@@ -147,14 +182,14 @@ dnbinom <- function (x, size, prob, mu, log = FALSE, useLog = any(x > 1e6)) {
             stats__dnbinom(x, size, mu=mu,     log=log)
         else
             stats__dnbinom(x, size, prob=prob, log=log)
-    } else if((s.mp <- is.mpfr(size)) |
-	    (p.mp <- is.mpfr(prob)) || is.mpfr(x)) {
+    } else if((s.mp <- is.mpfr(size)) | (p.mp <- is.mpfr(prob)) | (x.mp <- is.mpfr(x))) {
 	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
         if(!is.integer(x) && !useLog)
             x <- as.integer(x) # chooseMpfr() needs it
 	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
 	if(!s.mp) size <- mpfr(size, prec)
 	if(!p.mp) prob <- mpfr(prob, prec)
+        if(!x.mp && !is.integer(x)) x <- mpfr(x, prec)
 	## n:= size, p:= prob,	compute	 P(x) = choose(n+x-1, x) * p^n * (1-p)^x
         if(!useLog) {
             C.nx <- chooseMpfr(size+x-1, x)

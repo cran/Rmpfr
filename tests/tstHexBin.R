@@ -118,10 +118,12 @@ nmsMkDF <- c("Hex", "Bin", "BinF", "Dec", "Dec4", "Dec.", "Dec.4")
 
 TenFrac <- matrix((1:10)/10, dimnames=list(1:10, expression(1/x)))
 TenFrac
-formatHex(TenFrac)
-formatBin(TenFrac)
-formatBin(TenFrac, scientific=FALSE)
-formatDec(TenFrac)
+stopifnot(exprs = {
+    is.matrix(print(formatHex(TenFrac))) # stays a matrix
+    is.matrix(print(formatBin(TenFrac)))
+    is.matrix(print(formatBin(TenFrac, scientific=FALSE)))
+    is.matrix(print(formatDec(TenFrac)))
+})
 
 TenFrac9 <- mpfr(TenFrac, precBits=9)
 TenFrac9
@@ -130,10 +132,24 @@ data.frame(Hex = formatHex(TenFrac9), ## checking as.data.frame.Ncharacter as we
            BinF= formatBin(TenFrac9, scientific=FALSE),
            Dec = formatDec(TenFrac9)) -> d9
 d9
-##
-stopifnot(getPrec(TenFrac ) == 53,
-	  getPrec(TenFrac9) ==  9,
-	  inherits(d9, "data.frame"), all.equal(dim(d9), c(10,4)))
+## Does not print the column names but the colnames of each 1-col. matrix ("1/x").
+## This is how R in general works { in format.data.frame() }
+## now use vectors:
+tenfrac9 <- as.vector(TenFrac9)
+stopifnot(identical(tenfrac9, c(TenFrac9)))
+data.frame(Hex = formatHex(tenfrac9),
+           Bin = formatBin(tenfrac9),
+           BinF= formatBin(tenfrac9, scientific=FALSE),
+           Dec = formatDec(tenfrac9)) -> dl9
+dl9 # (now prints as d9  had printed in the past)
+
+stopifnot(exprs = {
+    getPrec(TenFrac ) == 53
+    getPrec(TenFrac9) ==  9
+    colnames(d9) == c("Hex", "Bin", "BinF", "Dec")
+    inherits(d9, "data.frame")
+    all.equal(dim(d9), c(10,4))
+})
 
 (Ten <- matrix(1:10 + 0.0, dimnames=list(1:10, "x"))) ## + 0.0 forces double precision
 

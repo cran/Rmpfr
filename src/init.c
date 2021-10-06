@@ -31,6 +31,8 @@ static R_CallMethodDef CallEntries[] = {
     CALLDEF(mpfr2str, 4),
     CALLDEF(R_mpfr_formatinfo, 1),
     CALLDEF(R_mpfr_2exp, 1),
+    CALLDEF(R_mpfr_frexp, 2),
+    CALLDEF(R_mpfr_ldexp, 3),
     CALLDEF(str2mpfr1_list, 4),
 
     CALLDEF(Rmpfr_minus, 1),

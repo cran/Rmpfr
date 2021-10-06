@@ -25,7 +25,8 @@
 # -- Function: void mpq_set_f (mpq_t ROP, const mpf_t OP)
 #      Set ROP to the value of OP.  There is no rounding, this conversion is exact.
 ***  MPFR documents 'mpf2mpfr.h' after which you can compile any mpf_ program..
-
+** DONE 63) R interface to mpfr's functions `mpfr_get_ld_2exp()` and `mpfr_frexp()`
+   compatibly to DPQ's `ldexp(f, E)` and `frexp(x)`: -> frexpMpfr() and ldexpMpfr().
 ** TODO 53) plogis() {and dlogis, qlogis} are "easy": do use <R>/src/nmath/[dpq]logis.c, as they
  already use all the numerical tricks including R_Log1_Exp(x) .. :
  R_Log1_Exp(x) := ((x) > -M_LN2 ? log(-expm1(x)) : log1p(-exp(x)))

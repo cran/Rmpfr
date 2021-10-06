@@ -1,8 +1,8 @@
 Package: Rmpfr
 Title: R MPFR - Multiple Precision Floating-Point Reliable
-Version: 0.8-4
-Date: 2021-04-08
-DateNote: Previous CRAN version 0.8-3 on 2021-03-23
+Version: 0.8-5
+Date: 2021-10-05
+DateNote: Previous CRAN version 0.8-4 on 2021-04-08
 Type: Package
 Authors@R: c(person("Martin","Maechler", role = c("aut","cre"),
 	     email = "maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
@@ -35,7 +35,7 @@ BugReports: https://r-forge.r-project.org/tracker/?group_id=386
 License: GPL (>= 2)
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2021-04-08 06:52:13 UTC; maechler
+Packaged: 2021-10-05 10:06:49 UTC; maechler
 Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Richard M. Heiberger [ctb] (formatHex(), *Bin, *Dec),
   John C. Nash [ctb] (hjkMpfr(), origin of unirootR()),
@@ -43,4 +43,4 @@ Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
     hjkMpfr())
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2021-04-11 15:40:02 UTC
+Date/Publication: 2021-10-06 07:40:02 UTC

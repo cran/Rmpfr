@@ -306,9 +306,22 @@ setReplaceMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing",
 c.mpfr <- function(...)
     new("mpfr", unlist(lapply(list(...), as, Class = "mpfr"),
 		       recursive = FALSE))
-## and the same trick can be used to implement an
+## and the same trick can be used to implement a *simplistic*
 sapplyMpfr <- function(X, FUN, ...) new("mpfr", unlist(lapply(X, FUN, ...), recursive = FALSE))
-
+##' more carefully, also returing mpfrArray when appropriate:
+sapplyMpfr <- function(X, FUN, ...) {
+    L <- lapply(X, FUN, ...)
+    if((n <- length(L)) && all((ll <- lengths(L)) == ll[1])) {
+        if(is.null(d <- dim(L[1])) || !all(d == sapply(L, dim)))
+           new("mpfrMatrix", unlist(L, recursive = FALSE),
+               Dim = c(n,ll[1]), Dimnames = list(names(L), names(L[1])))
+        else # L[i] have dim(), all the same ones
+           new("mpfrArray", unlist(L, recursive = FALSE),
+               Dim = c(n,d), Dimnames = list(names(L), dimnames(L[1])))
+    } else {
+        new("mpfr", unlist(L, recursive = FALSE))
+    }
+}
 
 ##  duplicated() now works, checked in ../man/mpfr-class.Rd
 

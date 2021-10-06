@@ -6,6 +6,7 @@
 \alias{dnbinom}
 \alias{dgamma}
 \alias{dpois}
+\alias{dt}
 \alias{mpfr-distr}% <- alternative for \link
 \usage{%				>>>>  ../R/special-fun.R  <<<<
 dpois (x, lambda, log = FALSE, useLog = )
@@ -13,6 +14,7 @@ dbinom (x, size, prob,     log = FALSE, useLog = )
 dnbinom(x, size, prob, mu, log = FALSE, useLog = any(x > 1e6))
 dnorm (x, mean = 0, sd = 1, log = FALSE)
 dgamma(x, shape, rate = 1, scale = 1/rate, log = FALSE)
+dt (x, df, ncp, log = FALSE)
 
 pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 }
@@ -31,7 +33,7 @@ pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
   MPFR numbers, using \code{\link{.mpfr_erange_set}()}, see the examples.
 }
 \arguments{
-  \item{x,q, lambda, size,prob, mu, mean,sd, shape,rate,scale}{%
+  \item{x,q, lambda, size,prob, mu, mean,sd, shape,rate,scale, df,ncp}{%
     \code{\link{numeric}} or \code{\linkS4class{mpfr}} vectors.  % for the function call.
     All of these are \dQuote{recycled} to the length of the longest one.
     For their meaning/definition, see the corresponding standard R
@@ -49,6 +51,7 @@ pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
   the corresponding standard \R function.
 }
 \seealso{\code{\link[stats:Normal]{pnorm}},
+  \code{\link[stats]{dt}},
   \code{\link[stats]{dbinom}},
   \code{\link[stats]{dnbinom}},
   \code{\link[stats]{dgamma}},

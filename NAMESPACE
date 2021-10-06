@@ -32,6 +32,7 @@ importFrom("stats"  # import *and* rename -- we extend these :
 	   ,stats__dbinom = dbinom
 	   ,stats__dgamma  = dgamma
 	   ,stats__dnbinom = dnbinom
+	   ,stats__dt     = dt
 	   )
 
 importClassesFrom("gmp", "bigz", "bigq")
@@ -116,11 +117,13 @@ export(.mpfr, .mpfr.
        , "chooseMpfr", "chooseMpfr.all", "sumBinomMpfr"
        , "dbinom", "dpois", "dnorm", "dgamma"
        , "dnbinom"
+       , dt
        , "erf", "erfc"
        , "factorial"
        , "factorialMpfr"
        , "format"
        , formatMpfr, formatBin, formatDec, formatHex
+       , frexpMpfr, ldexpMpfr
        , "getD"
        , "getPrec"
        , "hypot"

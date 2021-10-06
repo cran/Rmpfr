@@ -1,12 +1,12 @@
 # autoconf this file --> configure
-AC_INIT([Rmpfr])
+AC_INIT
+AC_CONFIG_SRCDIR([Rmpfr])
 AC_CONFIG_SRCDIR([DESCRIPTION])
 
 dnl Select an optional include path, from a configure option
 dnl or from an environment variable  >> mpfr_INCLUDE <<
 AC_ARG_WITH([mpfr-include],
-            AC_HELP_STRING([--with-mpfr-include=INCLUDE_PATH],
-                           [the location of MPFR header files]),
+            AS_HELP_STRING([--with-mpfr-include=INCLUDE_PATH],[the location of MPFR header files]),
             [mpfr_include_path=$withval])
 
 if test -n "$mpfr_include_path" ; then
@@ -17,8 +17,7 @@ fi
 
 dnl Ditto for a library path  environment variable  >> mpfr_LDFLAGS <<
 AC_ARG_WITH([mpfr-lib],
-            AC_HELP_STRING([--with-mpfr-lib=LIB_PATH],
-                           [the location of MPFR libraries]),
+            AS_HELP_STRING([--with-mpfr-lib=LIB_PATH],[the location of MPFR libraries]),
             [mpfr_lib_path=$withval])
 
 if test -n "$mpfr_lib_path" ; then

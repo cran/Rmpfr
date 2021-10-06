@@ -263,14 +263,14 @@ eLimits == c(-1,1, -1,1) * (2^62 - 1)
 i8 <- mpfr(-2:5, 32)
 x4 <- mpfr(c(NA, NaN, -Inf, Inf), 32)
 ## The output of the following depends on the GMP "numb" size
-## (32 bit vs. 64 bit), and may be even more platform specifics:
+## (32 bit vs. 64 bit), and may be even more platform specific:
 str( .mpfr2list(i8) )
 str( .mpfr2list(x4, names = TRUE) )
 
 str(xp4 <- mpfrXport(x4, names = TRUE))
 stopifnot(identical(x4, mpfrImport(mpfrXport(x4))),
           identical(i8, mpfrImport(mpfrXport(i8))))
-if(FALSE) ## FIXME: not yet working:
-  stopifnot(identical(B6, mpfrImport(mpfrXport(B6))))
+## FIXME, need c(.), as dim(.)  "get lost":
+stopifnot(identical(c(B6), mpfrImport(mpfrXport(B6))))
 }
 \keyword{utilities}

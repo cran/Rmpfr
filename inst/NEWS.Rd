@@ -4,6 +4,34 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.8-5 [2021-10-05, r349]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item New mpfr-ized \code{dt(x, df, ..)}; noncentrality \code{ncp}
+      not yet supported.
+
+      \item New arithmetic functions \code{frexpMpfr()} and
+      \code{ldexpMpfr()}, corresponding to C's (and CRAN package
+      \CRANpkg{DPQ}'s) \code{ldexp()} and \code{frexp()} functions.
+
+      \item \code{sapplyMpfr()} now also returns \code{"mpfrMatrix"} or
+      \code{"mpfrArray"} when appropriate.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item Improved \code{`[.Ncharacter`} method for \code{formatHex()} etc.
+    }
+  }
+  \subsection{Misc}{
+    \itemize{
+      \item No longer include \file{Rdefines.h} as it is somewhat deprecated.
+
+      \item update \file{configure{.ac}} (for \command{autoconf 2.71}).
+    }
+  }
+}
+
 \section{Changes in version 0.8-4 [2021-03-24, r341]}{
   \subsection{NEW FEATURES}{
     \itemize{
@@ -31,7 +59,6 @@
       \code{x} is too large to be coerced to \code{integer} \emph{and} they
       get a new optional argument \code{useLog} (with a smart default) in
       order to choose log-scale computation also for \code{log=FALSE}.
-      %% FIXME:  add tests/* :  dnbinom(1e300, prob=1-mpfr(2, 256)^-12, %% size=1e307,log=TRUE)
     }
   }
   \subsection{BUG FIXES}{

@@ -276,23 +276,50 @@ stopifnot(identical(bb, beta(mpfr(2,99), 1:4)),
 dx <- 1400+ 0:10
 mx <- mpfr(dx, 120)
 nx <- sort(c(c(-32:32)/2, 50*(-8:8)))
-stopifnot(
+
+xL <- 2^(989+(0:139)/4) # "close" to double.xmax
+dnbD   <- dnbinom(xL, prob=1-1/4096, size=1e307, log=TRUE)# R's own
+iF <- -(130:140) # index of finite dnbD[]
+dnbx8  <- dnbinom(xL, prob=1-mpfr(2, 2^ 8)^-12, size=1e307, log=TRUE)
+dnbx10 <- dnbinom(xL, prob=1-mpfr(2, 2^10)^-12, size=1e307, log=TRUE)
+dnbx13 <- dnbinom(xL, prob=1-mpfr(2, 2^13)^-12, size=1e307, log=TRUE)
+
+stopifnot(exprs = {
     all.equal(dpois(dx, 1000), dpois(mx, 1000), tol = 3e-13) # 64b Lnx: 7.369e-14
-    ,
     all.equal(dbinom(0:16, 16, pr = 4 / 5),
               dbinom(0:16, 16, pr = 4/mpfr(5, 128)) -> db, tol = 5e-15)# 64b Lnx: 4.3e-16
-    ,
     all.equal(dnorm(     -3:3,       m=10, s=1/4),
               dnorm(mpfr(-3:3, 128), m=10, s=1/4), tol = 1e-15) # 64b Lnx: 6.45e-17
-    ,
     all.equal(dnorm(nx), dnorm(mpfr(nx, 99)), tol = 1e-15)
-    ,
     all.equal(dnorm(     nx,      m = 4, s = 1/4),
               dnorm(mpfr(nx, 99), m = 4, s = 1/4), tol = 1e-15)
-    ,
     all.equal(dnorm(     nx,      m = -10, s = 1/4, log=TRUE),
               dnorm(mpfr(nx, 99), m = -10, s = 1/4, log=TRUE), tol = 1e-15)
-)
+    ## t-distrib. :
+    all.equal(dt(nx, df=3), dt(mpfr(nx, 99), df=3), tol = 1e-15)
+    all.equal(dt(     nx,      df = 0.75),
+              dt(mpfr(nx, 99), df = 0.75), tol = 1e-15)
+    all.equal(dt(     nx,      df = 2.5, log=TRUE),
+              dt(mpfr(nx, 99), df = 2.5, log=TRUE), tol = 1e-15)
+    ## negative binomial  dnbinom():
+    all.equal(dnbx13, dnbx10, tol = 2^-999) # see 2^-1007, but not 2^-1008
+    all.equal(dnbx13, dnbx8,  tol = 2^-238) # see 2^-239,  but not 2^-240
+    all.equal(dnbx10[iF], dnbD[iF], tol = 6e-16) # R's *is* accurate here (seen 2.9e-16)
+})
+
+## plot dt() "error" of R's implementation
+nx <- seq(-100, 100, by=1/8)
+dtd <- dt(     nx,       df= .75)
+dtM  <- dt(mpfr(nx,  256), df= .75)
+system.time(
+dtMx <- dt(mpfr(nx, 2048), df= .75)
+) # 2.4 sec
+stopifnot(all.equal(dtMx, dtM, tol = 2^-254)) # almost all of dtM's 256 bits are correct !?
+relE <- asNumeric(dtd/dtM - 1)
+plot(relE ~ nx,      type="l", col=2)
+plot(abs(relE) ~ nx, type="l", col=2, log="y", ylim=c(5e-17, 1.5e-15))
+
+## dnbinom() -- has mode as expected, but with huge size, the scales are "off reality" ..
 
 
 ### dgamma(): ----------------------------------------------------

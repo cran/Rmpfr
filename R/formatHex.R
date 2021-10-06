@@ -101,7 +101,7 @@ sprintfMpfr <- function(x, bits, style = "+", expAlign=TRUE, showNeg0 = TRUE) {
 			   c("", "+")[1+(isNum & (Ex >= 0))][isNum], Exp[isNum])
 	r
     }
-    else {
+    else { ## bits <= 52
 	nX <- as.character(hexdigits)
 	if(!showNeg0) {
 	    negzero <- substr(format(x), 1L, 2L) == "-0"
@@ -256,6 +256,15 @@ mpfr.Ncharacter <- function(x, precBits = attr(x, "precBits"), ...) {
 
 `[.Ncharacter` <- ## == base :: `[.listof`
     function (x, ...) structure(NextMethod("["), class = class(x))
+## more sophisticated; should work for matrix subsetting as with base ..
+`[.Ncharacter` <- function (x, ...) {
+    ax <- attributes(x) ## and *drop* some
+    ax <- ax[setdiff(names(ax), c("dim", "dimnames", "names"))]
+    if(length(ax)) {
+        r <- NextMethod("[") # may have dim, dimnames | names
+        `attributes<-`(r, c(attributes(r), ax))
+    } else   NextMethod("[")
+}
 
 ## Don't seem to get these to work correctly (at least not easily):
 ## cbind.Bcharacter <- cbind.Hcharacter <-

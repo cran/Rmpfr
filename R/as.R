@@ -179,6 +179,17 @@ mpfrImport <- function(mxp) {
 ##' getting the 'exp' (wrt base = 2) only  [also for extended erange!]
 .mpfr2exp <- function(x) .Call(R_mpfr_2exp, x)
 
+ldexpMpfr <- function(f, E, rnd.mode = c('N','D','U','Z','A')) {
+    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
+    .Call(R_mpfr_ldexp, f, E, match.arg(rnd.mode))
+}
+
+frexpMpfr <- function(x, rnd.mode = c('N','D','U','Z','A')) {
+    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
+    .Call(R_mpfr_frexp, x, match.arg(rnd.mode))
+}
+
+
 formatMpfr <-
     function(x, digits = NULL, trim = FALSE, scientific = NA,
 	     maybe.full = !is.null(digits) && is.na(scientific),
