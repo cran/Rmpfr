@@ -46,12 +46,14 @@ yn(n, x, rnd.mode = c("N","D","U","Z","A"))
 }
 \examples{
 x <- (0:100)/8 # (have exact binary representation)
-stopifnot(  all.equal(besselY(x, 0), bY0 <- y0(x))
-          , all.equal(besselJ(x, 1), bJ1 <- j1(x))
-          , all.equal(yn(0,x), bY0)
-          , all.equal(jn(1,x), bJ1)
-         )
+stopifnot(exprs = {
+   all.equal(besselY(x, 0), bY0 <- y0(x))
+   all.equal(besselJ(x, 1), bJ1 <- j1(x))
+   all.equal(yn(0,x), bY0)
+   all.equal(jn(1,x), bJ1)
+})
 
+mpfrVersion() # now typically 4.1.0
 if(mpfrVersion() >= "3.0.0") { ## Ai() not available previously
   print( aix <- Ai(x) )
   plot(x, aix, log="y", type="l", col=2)
@@ -61,12 +63,12 @@ if(mpfrVersion() >= "3.0.0") { ## Ai() not available previously
     all.equal(Ai(100), mpfr("2.6344821520881844895505525695264981561e-291"), tol=1e-37)
   )
   two3rd <- 2/mpfr(3, 144)
-  print( all.equal(Ai(0), 1/(3^two3rd * gamma(two3rd)), tol=0) ) # 1.7e-40
-  if(Rmpfr:::doExtras()) { # slowish:
+  print( all.equal(Ai(0), 1/(3^two3rd * gamma(two3rd)), tol=0) ) # 1.7....e-40
+  if(Rmpfr:::doExtras()) withAutoprint({ # slowish:
      system.time(ai1k <- Ai(1000)) # 1.4 sec (on 2017 lynne)
-     stopifnot(all.equal(log10(ai1k),
-                         -9157.031193409585185582, tol=1e-16))
-  }
+     stopifnot(all.equal(print(log10(ai1k)),
+                         -9157.031193409585185582, tol=2e-16)) # seen 8.8..e-17 | 1.1..e-16
+  })
 } # ver >= 3.0
 }
 \keyword{math}

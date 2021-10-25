@@ -702,16 +702,22 @@ SEXP R_mpfr_frexp(SEXP x, SEXP rnd_mode) {
     SET_VECTOR_ELT(ans, 0, r = PROTECT(duplicate(x)));
     // e: 2-exponents (integer or double see aboe)
     SET_VECTOR_ELT(ans, 1, e = PROTECT(allocVector(exp_SXP, n)));
+    int    *ei_;
+    double *ed_;
+    if(erange_is_int)
+	ei_ = INTEGER(e);
+    else
+	ed_ = REAL(e);
 
     mpfr_t x_i, y_i;
     mpfr_init(x_i);
     mpfr_init(y_i);
-    mpfr_exp_t *exp = (mpfr_exp_t *) R_alloc(n, sizeof(mpfr_exp_t));
+    mpfr_exp_t Ex = (mpfr_exp_t)0; // create and initialize "valgrindably"
     // Rboolean int_ok = TRUE;
     for(int i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), x_i);
 	mpfr_set_prec(y_i, mpfr_get_prec(x_i));
-	int ierr = mpfr_frexp (exp+i, y_i, x_i, rnd); // exp+i == &(exp[i])
+	int ierr = mpfr_frexp(&Ex, y_i, x_i, rnd);
 	/*-- Function: int mpfr_frexp (mpfr_exp_t *EXP, mpfr_t Y, mpfr_t X, mpfr_rnd_t RND)
 
 	  Set EXP (formally, the value pointed to by EXP) and Y such that
@@ -722,19 +728,18 @@ SEXP R_mpfr_frexp(SEXP x, SEXP rnd_mode) {
 	  undefined.
 	*/
 	if(ierr) {
+#define MPFR_CLEAR mpfr_clear(x_i); mpfr_clear(y_i); mpfr_free_cache()
+	    MPFR_CLEAR;
 	    error("R_mpfr_frexp(): mpfr_frexp(x[%d]) gave error code %d\n", i+1, ierr);
 	}
+	if(erange_is_int)
+	    ei_[i] = (int) Ex;
+	else
+	    ed_[i] = (double) Ex;
 
 	SET_VECTOR_ELT(r, i, MPFR_as_R(y_i));
     }
-    // only now we know if we can return integer or need double
-    if(erange_is_int) {
-	int *e_ = INTEGER(e);
-	for(int i=0; i < n; i++) e_[i] = (int) exp[i];
-    } else {
-	double *e_ = REAL(e);
-	for(int i=0; i < n; i++) e_[i] = (double) exp[i];
-    }
+    MPFR_CLEAR;
     UNPROTECT(3);
     return ans;
 }

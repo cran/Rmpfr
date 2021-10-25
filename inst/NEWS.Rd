@@ -4,6 +4,19 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.8-6 [2021-10-08, r351}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item In \file{convert.c}'s \code{R_mpfr_frexp()}, do
+      \code{mpfr_clear(*)}, fixing a valgrind-detectable leak.
+
+      \item additionally use single mpfr_exp_t and its pointer (and assign
+      to R allocated vector inside main loop, fixing a valgrind
+      "unitialized value" case.
+    }
+  }
+}
+
 \section{Changes in version 0.8-5 [2021-10-05, r349]}{
   \subsection{NEW FEATURES}{
     \itemize{
