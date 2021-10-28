@@ -4,6 +4,15 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.8-7 [2021-10-27, r353}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item In \file{Ops.c}'s \code{R_mpfr_mod()}, no longer allocate
+      but never use nor free \code{rr} - fixing YAL (yet another leak).
+    }
+  }
+}
+
 \section{Changes in version 0.8-6 [2021-10-08, r351}{
   \subsection{BUG FIXES}{
     \itemize{

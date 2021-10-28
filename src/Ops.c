@@ -274,8 +274,6 @@ static int R_mpfr_mod(mpfr_t r, mpfr_t x, mpfr_t y, mpfr_rnd_t RND)
 	mpfr_set_nan(r); return 0;
     }
 
-    mpfr_t rr; mpfr_init_set (rr, r, RND);// a copy
-
     int s = mpfr_fmod(r, x, y, RND);// CARE: if(r is x) will thrash x
     if((s_y > 0 && mpfr_sgn(r) < 0) || // as R :  (-5) %%   3   |-->  1
        (s_y < 0 && mpfr_sgn(r) > 0))   // as R :    5  %% (-3)  |--> -1
