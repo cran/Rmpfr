@@ -3,15 +3,21 @@
 
 ### "Arith", "Compare",..., are in ./Arith.R
 ###  ----                            ~~~~~~~
+if(FALSE)
+    print(getGroupMembers("Math"), width = 85)
+##  [1] "abs"      "sign"     "sqrt"     "ceiling"  "floor"    "trunc"    "cummax"
+##  [8] "cummin"   "cumprod"  "cumsum"   "exp"      "expm1"    "log"      "log10"
+## [15] "log2"     "log1p"    "cos"      "cosh"     "sin"      "sinh"     "tan"
+## [22] "tanh"     "acos"     "acosh"    "asin"     "asinh"    "atan"     "atanh"
+## [29] "cospi"    "sinpi"    "tanpi"    "gamma"    "lgamma"   "digamma"  "trigamma"
 
-## [1] "abs"    "sign"    "sqrt"    "ceiling" "floor" "trunc" "cummax"
-## [8] "cummin" "cumprod" "cumsum"  "exp"     "expm1" "log"   "log10"
-##[15] "log2"   "log1p"   "cos"     "cosh"    "sin"   "sinh"  "tan"
-##[22] "tanh"   "acos"    "acosh"   "asin"    "asinh" "atan"  "atanh"
-##[29] "gamma"  "lgamma"  "digamma" "trigamma"
-
-if(FALSE) ## here are the individual function
+if(FALSE) ## the individual functions
     dput(getGroupMembers("Math"))
+
+## NOTA BENE:  explicitly in {Math} in
+## >>>>  ../man/mpfr-class.Rd <<<<
+##          ~~~~~~~~~~~~~~~~~
+
 
 ## Uniform interface to C:
 ##

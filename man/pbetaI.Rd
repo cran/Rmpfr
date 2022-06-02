@@ -5,11 +5,17 @@
   For integers \eqn{a}, \eqn{b}, \eqn{I_x(a,b)}{I(x; a,b)} aka
   \code{pbeta(x, a,b)} is a polynomial in x with rational coefficients,
   and hence arbitarily accurately computable.
+
+  TODO (\emph{not yet}):
+  It's sufficient for \emph{one} of \eqn{a,b} to be integer
+  such that the result is a \emph{finite sum} (but the coefficients will no
+  longer be rational, see Abramowitz and Stegun, 26.5.6 and *.7, p.944).
+  % \url{https://personal.math.ubc.ca/~cbm/aands/page_944.htm}
 }
-\usage{
+\usage{%% code --> ../R/special-fun.R
 pbetaI(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
        precBits = NULL,
-       useRational = !log.p && !is.mpfr(q) && is.null(precBits),
+       useRational = !log.p && !is.mpfr(q) && is.null(precBits) && int2,
        rnd.mode = c("N","D","U","Z","A"))
 }
 \arguments{
@@ -46,9 +52,12 @@ pbetaI(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
   %% 1) determine a smart default  precBits        there
   %% 2) produce a  warning  when  cancellation is in the same order as precBits
 }
-%% \references{
-%% %% ~put references to the literature/web site here ~
-%% }
+\references{
+  Abramowitz, M. and Stegun, I. A. (1972)
+  \emph{Handbook of Mathematical Functions}. New York: Dover.
+  \url{https://en.wikipedia.org/wiki/Abramowitz_and_Stegun} provides
+  links to the full text which is in public domain.
+}
 \author{Martin Maechler}
 \seealso{
   \code{\link{pbeta}}, \code{\link{sumBinomMpfr}} \code{\link[gmp]{chooseZ}}.

@@ -435,7 +435,7 @@ setMethod("tcrossprod", signature(x = "mpfr", y = "missing"),
 	x@Dim <- D
 	x@Dimnames <- if(is.null(dn <- dimnames(r)))
 	    vector("list", length(D)) else dn
-	if(length(D) == 2 && class(x) != "mpfrMatrix")
+	if(length(D) == 2 && !inherits(x, "mpfrMatrix"))
 	    ## low-level "coercion" from mpfrArray to *Matrix :
 	    attr(x,"class") <- getClass("mpfrMatrix")@className
 	attributes(r) <- NULL

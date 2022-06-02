@@ -263,7 +263,7 @@ SEXP Math_mpfr(SEXP x, SEXP op)
 //  .... ok, now checked in ../tests/arith-ex.R
 //                          ~~~~~~~~~~~~~~~~~~~
 
-// CARE: caller can use  R_mpfr_mod(x, x, y) -- i.e., r == x as pointers!
+// NB: When using  R_mpfr_mod(x, x, y) -- i.e., r == x as pointers, thrashes x
 static int R_mpfr_mod(mpfr_t r, mpfr_t x, mpfr_t y, mpfr_rnd_t RND)
 {
     if(mpfr_nan_p(y) || mpfr_nan_p(x)) {
@@ -274,7 +274,7 @@ static int R_mpfr_mod(mpfr_t r, mpfr_t x, mpfr_t y, mpfr_rnd_t RND)
 	mpfr_set_nan(r); return 0;
     }
 
-    int s = mpfr_fmod(r, x, y, RND);// CARE: if(r is x) will thrash x
+    int s = mpfr_fmod(r, x, y, RND);
     if((s_y > 0 && mpfr_sgn(r) < 0) || // as R :  (-5) %%   3   |-->  1
        (s_y < 0 && mpfr_sgn(r) > 0))   // as R :    5  %% (-3)  |--> -1
 	s += mpfr_add(r, r, y, RND);

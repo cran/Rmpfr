@@ -7,6 +7,11 @@
 \title{Special Mathematical Functions (MPFR)}
 \description{
   Special Mathematical Functions, supported by the MPFR Library.
+
+  Note that additionally, all the \code{\link{Math}} and
+  \code{\link{Math2}} group member functions are \dQuote{mpfr-ified}, too;
+  ditto, for many more standard \R functions.  See see the methods listed
+  in \code{\linkS4class{mpfr}} (aka \code{?`\link{mpfr-class}`}). % ./mpfr-class.Rd
 }
 \usage{
 zeta(x)
@@ -40,8 +45,6 @@ erfc(x)
 \value{
   A vector of the same length as \code{x}, of class \code{\linkS4class{mpfr}}.
 }
-% \references{
-% }
 \seealso{\code{\link[stats:Normal]{pnorm}} in standard package \pkg{stats};
   the class description \code{\linkS4class{mpfr}} mentioning the
   generic arithmetic and mathematical functions (\code{sin}, \code{log},

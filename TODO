@@ -18,6 +18,7 @@
 
 
 * Short or Mid Term
+** DONE 64) formatMpfr(x, scientific=FALSE)  does *not* "work" e.g., for  `x <- Const("pi", 128) * 2^200`.
 *** TODO Split this section into  Short | Mid  (?)
 ** TODO 60) Should have *exact* as.bigq.mpfr(), i.e, "mpfr" --> "bigq". (R's "bigq" is C 'mpq')
 ** TODO 62) integrateR(): option 'all.sums=TRUE' --> R/integrate-Romberg.R

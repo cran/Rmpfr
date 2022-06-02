@@ -689,42 +689,36 @@ getPrec <- function(x, base = 10, doNumeric = TRUE, is.mpfr = NA, bigq. = 128L) 
     }
 }
 
+toMpfr <- function(x) if(is.atomic(x)) mpfr(x, getPrec(x)) else as(x, "mpfr")
 
 ### all.equal()
 
 ## TODO ?? <<<<<<<<<<<
 ## ====
 ## 2) instead of  as(., "mpfr")	 use  mpfr(., precBits = <smart>)
+## 3) make use of  'formatFUN' in all.equal.numeric() to show *less precise* error
+##
 
-## For two "mpfr"s, use a  "smart" default tolerance :
-setMethod("all.equal", signature(target = "mpfr", current = "mpfr"),
-	  function (target, current,
-		    tolerance =
-		    2^-(0.5 * min(mean(.getPrec(target)),
-				  mean(.getPrec(current)))), ...)
-      {
-	  ## to use "our" mean() :
-	  environment(all.equal.numeric) <- environment()
-	  all.equal.numeric(target, current, tolerance=tolerance, ...)
-      })
+## Utility, not exported:
+all.equalNum <- all.equal.numeric
+## use *our* mean() method inside all.equal*():
+environment(all.equalNum) <- environment() # = getNamespace("Rmpfr")
+all.equalMpfr <- function(target, current,
+                          formatFUN = function(err, what)
+                              formatMpfr(err, digits = getOption("digits")),
+                          ## smart default tolerance when *both* args are mpfr {getPrec() otherwise}
+                          tolerance = 2^-(0.5 * min(mean(.getPrec(target)),
+                                                    mean(.getPrec(current)))), ...)
+    all.equalNum(target, current, tolerance=tolerance, formatFUN=formatFUN, ...)
+
+setMethod("all.equal", signature(target = "mpfr", current = "mpfr"), all.equalMpfr)
 
 setMethod("all.equal", signature(target = "mpfr", current = "ANY"),
-	  function (target, current,
-		    tolerance = .Machine$double.eps^0.5, ...) {
-	      ## to use "our" mean() :
-	      environment(all.equal.numeric) <- environment()
-	      all.equal.numeric(target, as(current, "mpfr"),
-				tolerance=tolerance, ...)
-	  })
+          function(target, current, ...) all.equalMpfr(target, toMpfr(current), ...))
 
 setMethod("all.equal", signature(target = "ANY", current = "mpfr"),
-	  function (target, current,
-		    tolerance = .Machine$double.eps^0.5, ...) {
-	      ## to use "our" mean() :
-	      environment(all.equal.numeric) <- environment()
-	      all.equal.numeric(as(target, "mpfr"), current,
-				tolerance=tolerance, ...)
-	  })
+          function(target, current, ...) all.equalMpfr(toMpfr(target), current, ...))
+
 
 ##' This is almost identical to diff.default -- ~/R/D/r-devel/R/src/library/base/R/diff.R
 ##' But that uses unclass(x) unfortunately

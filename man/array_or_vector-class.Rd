@@ -2,7 +2,7 @@
 \docType{class}
 \alias{array_or_vector-class}
 
-\title{Auxiliary Class "array\_or\_vector"}
+\title{Auxiliary Class "array_or_vector"}
 \description{
   \code{"array_or_vector"} is the class union of
   \code{c("array", "matrix", "vector")} and exists for its use in

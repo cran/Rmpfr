@@ -4,6 +4,31 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+\section{Changes in version 0.8-8 [2022-06-01, r362}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item Our \dQuote{mpfr-ized} \code{all.equal()} is now based on
+      hidden \code{all.equalMpfr()} which uses a smart default
+      \code{tolerance} for all methods, and shows much less digits if there
+      are differences (compatibly to \code{all.equal.numeric()}).
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item Our \code{dpois(x, lambda, *)} now works \R-compatibly for
+      \code{lambda=+Inf} giving 0 or \code{-Inf} when \code{log=TRUE}.
+
+      \item \code{formatMpfr(x, scientific=FALSE)} now \dQuote{works}.
+      % tweaking default of 'maybe.full': true also if(isFALSE(scientific))
+    }
+  }
+  \subsection{Misc}{
+    \itemize{
+      \item \file{man/*.Rd}: get rid of some \code{\\} escapes (needed in past; wrong now)
+    }
+  }
+}
+
 \section{Changes in version 0.8-7 [2021-10-27, r353}{
   \subsection{BUG FIXES}{
     \itemize{

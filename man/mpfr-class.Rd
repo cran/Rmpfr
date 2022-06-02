@@ -268,7 +268,8 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
     \item{Math}{\code{signature(x = "mpfr")}: All the S4
       \code{\link[methods:S4groupGeneric]{Math}} group functions are
       defined, using multiple precision (MPFR) arithmetic, from
-      \code{\link{getGroupMembers}("Math")}, these are (in alphabetical order):
+      \code{\link{getGroupMembers}("Math")}, these are (in alphabetical
+      order): % keep in sync w/  >> ../R/Math.R <<
 
       \code{\link{abs}}, \code{\link{sign}}, \code{\link{sqrt}},
       \code{\link{ceiling}}, \code{\link{floor}}, \code{\link{trunc}},
@@ -279,7 +280,9 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
       \code{\link{sin}}, \code{\link{sinh}}, \code{\link{tan}},
       \code{\link{tanh}}, \code{\link{acos}}, \code{\link{acosh}},
       \code{\link{asin}}, \code{\link{asinh}}, \code{\link{atan}},
-      \code{\link{atanh}}, \code{\link{gamma}}, \code{\link{lgamma}},
+      \code{\link{atanh}},
+      \code{\link{cospi}}, \code{\link{sinpi}}, \code{\link{tanpi}},
+      \code{\link{gamma}}, \code{\link{lgamma}},
       \code{\link{digamma}}, and \code{\link{trigamma}}.
 
       Currently, \code{trigamma} is not provided by
@@ -392,18 +395,21 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
 }
 \examples{
 ## 30 digit precision
-str(x <- mpfr(c(2:3, pi), prec = 30 * log2(10)))
+(x <- mpfr(c(2:3, pi), prec = 30 * log2(10)))
+str(x) # str() displays *compact*ly => not full precision
 x^2
 x[1] / x[2] # 0.66666... ~ 30 digits
 
 ## indexing - as with numeric vectors
-stopifnot(identical(x[2], x[[2]]),
-	  ## indexing "outside" gives NA (well: "mpfr-NaN" for now):
-	  is.na(x[5]),
-	  ## whereas "[[" cannot index outside:
-	  is(try(x[[5]]), "try-error"),
-	  ## and only select *one* element:
-	  is(try(x[[2:3]]), "try-error"))
+stopifnot(exprs = {
+   identical(x[2], x[[2]])
+   ## indexing "outside" gives NA (well: "mpfr-NaN" for now):
+   is.na(x[5])
+   ## whereas "[[" cannot index outside:
+   inherits(tryCatch(x[[5]], error=identity), "error")
+   ## and only select *one* element:
+   inherits(tryCatch(x[[2:3]], error=identity), "error")
+})
 
 ## factorial() & lfactorial would work automagically via [l]gamma(),
 ## but factorial() additionally has an "mpfr" method which rounds

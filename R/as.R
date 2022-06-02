@@ -46,10 +46,7 @@ mpfr.default <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z','A
 {
     if(is.ch <- is.character(x))
 	stopifnot(length(base) == 1, 2 <= base, base <= 62)
-    stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
-    rnd.mode <- match.arg(rnd.mode)
-
-    if(is.raw(x)) { # is.raw() is faster
+    else if(is.raw(x)) { # is.raw() is faster
 	stopifnot(missing(precBits) || precBits >= 2)
 	## else warning("unrecognized raw 'x'") # <- ?? {see use in ../tests/create.R }
         ## {but 'raw' is treated below}
@@ -57,12 +54,14 @@ mpfr.default <- function(x, precBits, base = 10, rnd.mode = c('N','D','U','Z','A
         if(is.list(x) && all(lengths(lc <- lapply(x, class)) == 1L) &&
            all(unlist(lc) == "mpfr1"))
         return(new("mpfr", x))
-    } ## else
+    }
+
     if(missing(precBits)) {
 	precBits <- getPrec(x, base = base, doNumeric = FALSE)
     }
-    ## libmpfr would exit (after good error message) for precBits == 1
-    stopifnot(precBits >= 2)
+    stopifnot(precBits >= 2, ## libmpfr exits (after good error message) for precBits == 1
+              is.character(rnd.mode <- toupper(rnd.mode)))
+    rnd.mode <- match.arg(rnd.mode)
 
     ml <-
 	if(is.numeric(x) || is.logical(x) || is.raw(x))
@@ -192,7 +191,7 @@ frexpMpfr <- function(x, rnd.mode = c('N','D','U','Z','A')) {
 
 formatMpfr <-
     function(x, digits = NULL, trim = FALSE, scientific = NA,
-	     maybe.full = !is.null(digits) && is.na(scientific),
+	     maybe.full = (!is.null(digits) && is.na(scientific)) || isFALSE(scientific),
              base = 10, showNeg0 = TRUE, max.digits = Inf,
 	     big.mark = "", big.interval = 3L,
 	     small.mark = "", small.interval = 5L,
