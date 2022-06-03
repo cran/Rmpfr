@@ -63,7 +63,9 @@ pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 \examples{
 x <- 1400+ 0:10
 print(dpois(x, 1000), digits =18) ## standard R's double precision
-dpois(mpfr(x, 120), 1000)## more accuracy for the same
+(px <- dpois(mpfr(x, 120), 1000))## more accuracy for the same
+px. <- dpois(mpfr(x, 120), 1000, useLog=TRUE)# {failed in 0.8-8}
+stopifnot(all.equal(px, px., tol = 1e-31))
 dpois(0:5, mpfr(10000, 80)) ## very small exponents (underflowing in dbl.prec.)
 
 print(dbinom(0:8, 8, pr = 4 / 5), digits=18)

@@ -4,7 +4,16 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
-\section{Changes in version 0.8-8 [2022-06-01, r362}{
+\section{Changes in version 0.8-9 [2022-06-02, r363]}{
+  \subsection{BUG FIXES}{
+     \itemize{
+      \item Embarrassing thinko in \code{dpois} (in \code{useLog=TRUE}
+      case) fixed.
+    }
+  }
+}
+
+\section{Changes in version 0.8-8 [2022-06-01, r362]}{
   \subsection{NEW FEATURES}{
     \itemize{
       \item Our \dQuote{mpfr-ized} \code{all.equal()} is now based on
@@ -29,7 +38,7 @@
   }
 }
 
-\section{Changes in version 0.8-7 [2021-10-27, r353}{
+\section{Changes in version 0.8-7 [2021-10-27, r353]}{
   \subsection{BUG FIXES}{
     \itemize{
       \item In \file{Ops.c}'s \code{R_mpfr_mod()}, no longer allocate
@@ -38,7 +47,7 @@
   }
 }
 
-\section{Changes in version 0.8-6 [2021-10-08, r351}{
+\section{Changes in version 0.8-6 [2021-10-08, r351]}{
   \subsection{BUG FIXES}{
     \itemize{
       \item In \file{convert.c}'s \code{R_mpfr_frexp()}, do

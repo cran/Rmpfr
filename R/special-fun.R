@@ -128,6 +128,7 @@ dpois <- function (x, lambda, log = FALSE,
         if(log || useLog) {
             ## NB: For large lambda, x ~= lambda this has a *LOT* of cancellation, e.g., for
             ## --  lambda = 1e100,  prec = 256  is *NOT* sufficient !!
+            r <- x + 0*lambda
             isI <- is.infinite(lambda) # & is.finite(x) # x <= lambda = +Inf
             r[ isI] <- if(log) -Inf else 0
             ## "else"

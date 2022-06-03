@@ -13,16 +13,13 @@ all.eq.finite <- function(x,y, ...) {
 n <- 1000
 head(x <- mpfr(0:n, 100) / n)
 
-stopifnot(range(x) == 0:1
-	  ,all.equal(as.numeric(j0(x)),
-		     besselJ(as.numeric(x), 0), tol = 1e-14)
-	  ,all.equal(as.numeric(j1(x)),
-		     besselJ(as.numeric(x), 1), tol = 1e-14)
-	  ,all.equal(as.numeric(y0(x)),
-		     besselY(as.numeric(x), 0), tol = 1e-14)
-	  ,all.equal(as.numeric(y1(x)),
-		     besselY(as.numeric(x), 1), tol = 1e-14)
-	  )
+stopifnot(exprs = {
+    range(x) == 0:1
+    all.equal(as.numeric(j0(x)), besselJ(as.numeric(x), 0), tol = 1e-14)
+    all.equal(as.numeric(j1(x)), besselJ(as.numeric(x), 1), tol = 1e-14)
+    all.equal(as.numeric(y0(x)), besselY(as.numeric(x), 0), tol = 1e-14)
+    all.equal(as.numeric(y1(x)), besselY(as.numeric(x), 1), tol = 1e-14)
+})
 
 ### pnorm() -> erf() : ----------------------------------------------------------
 u <- 7*x - 2
