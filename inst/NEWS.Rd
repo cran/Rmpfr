@@ -4,6 +4,42 @@
 \title{Rmpfr News}
 \encoding{UTF-8}
 
+%% -- not yet in tar ball --
+      %% \item Start vignette about \code{gamma()} inaccuracies and possible
+      %% remedies (is \bold{unfinished}).
+
+
+\section{Changes in version 0.9-0 [2023-01-16, r382]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item Add the \code{extendInt="*"} option to \code{unirootR()}
+      adopting its addition in base \R \code{uniroot()}.
+      \cr
+      Also add an optional \code{verbDigits} argument only used in case
+      \code{verbose} is true.
+
+      \item New \code{qnormI()}, the normal quantile function, computed via
+      inversion of (our potentially arbitrarily accurate) \code{pnorm()},
+      using \code{unirootR()} root finding.
+
+      \item \code{sapplyMpfr()} gets \code{drop_1_ = TRUE} option,
+      \emph{changing} default behaviour to return an \code{"mpfr"} vector
+      instead of a 1-column \code{"mpfrMatrix"}.
+    }
+  }
+  \subsection{BUG FIXES}{
+     \itemize{
+       \item \code{sapplyMpfr()} now gets the correct dimension when it returns
+       an \code{"mpfrMatrix"} (or \code{"*array"}).
+
+       \item Fix \code{\\eqn{(\\gamma)}{}} - as requested by KH (June 9).
+
+       \item \code{.mpfr_gmp_numbbits()} is documented now (notably as I
+       see it is only 32 on Winbuilder (!)).
+    }
+  }
+}
+
 \section{Changes in version 0.8-9 [2022-06-02, r363]}{
   \subsection{BUG FIXES}{
      \itemize{

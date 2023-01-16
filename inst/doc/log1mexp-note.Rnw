@@ -50,7 +50,7 @@
 	ETH Zurich\\
 	8092 Zurich, Switzerland\\
 	E-mail: \email{maechler@stat.math.ethz.ch}\\
-	URL: \url{http://stat.ethz.ch/people/maechler}
+	URL: \url{https://stat.ethz.ch/~maechler}
 }
 %% It is also possible to add a telephone and fax number
 %% before the e-mail in the following format:
@@ -262,7 +262,7 @@ $\log\left(1 - e^x \right) = \log(1 - \exp(x))$ for $x < 0$, neither
 are uniformly sufficient for numerical evaluation.
 %% 1
 In (\ref{eq:f.log1p}), when $x$ approaches $0$, $\exp(x)$ approaches $1$
-and $\loglp(-\exp(x))$ loses accuracy.  
+and $\loglp(-\exp(x))$ loses accuracy.
 %% 2
 In (\ref{eq:f.expm1}), when $x$ is large, $\expml(x)$
 approaches $-1$ and similarly loses accuracy.

@@ -35,29 +35,30 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 	if(any(pos <- !neg)) {
 	    q <- q[pos] #==> now  q >= 0
 	    prec.q <- max(.getPrec(q))
-	    two <- mpfr(2, prec.q)
-	    rt2 <- sqrt(two)
-	    rr[pos] <- if(lower.tail) {
+	    two <- mpfr(2, prec.q + 4L)
+	    Irt2 <- sqrt(mpfr(0.5, prec.q + 4L)) # 1 / sqrt(2)
+	    rr[pos] <- roundMpfr(precBits = prec.q,
+              if(lower.tail) {
 		if(log.p) {
 		    r <- q
 		    sml <- q < 0.67448975
 		    if(any(sml)) {
-			eq2 <- erf(q[sml]/rt2) ## |eq2| < 1/2 <==> |q/rt2| < 0.47693627620447
+			eq2 <- erf(q[sml]*Irt2) ## |eq2| < 1/2 <==> |q*Irt2| < 0.47693627620447
 			##                        <==>  sml   <==>   |q|   < 0.67448975019608
 			r[ sml] <- log1p(eq2) - log(two)
 		    }
 		    if(any(!sml)) {
-			ec2 <- erfc(q[!sml]/rt2) ## ==> ec2 = 1-eq2 <= 1 - 1/2 = 1/2
+			ec2 <- erfc(q[!sml]*Irt2) ## ==> ec2 = 1-eq2 <= 1 - 1/2 = 1/2
 			r[!sml] <- log1p(-0.5*ec2)
 		    }
 		    r
 		}
 		else ## !log.p
-		    (1 + erf(q/rt2))/2
+		    (1 + erf(q*Irt2))/2
 	    } else { ## upper.tail
-		r <- erfc(q/rt2) / 2
+		r <- erfc(q*Irt2) / 2
 		if(log.p) log(r) else r
-	    }
+	    })
 	}
 	rr
     } else stop("(q,mean,sd) must be numeric or \"mpfr\"")

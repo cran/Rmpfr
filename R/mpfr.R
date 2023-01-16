@@ -303,21 +303,24 @@ setReplaceMethod("[", signature(x = "mpfrArray", i = "matrix", j = "missing",
 
 ## I don't see how I could use setMethod("c", ...)
 ## but this works "magically"  when the first argument is an mpfr :
+## NB: via as(., "mpfr") it currently makes all doubles to 128 bit prec;
+##     MM now would prefer something like 55 (just barely enough accurate)
 c.mpfr <- function(...)
     new("mpfr", unlist(lapply(list(...), as, Class = "mpfr"),
 		       recursive = FALSE))
+
 ## and the same trick can be used to implement a *simplistic*
 sapplyMpfr <- function(X, FUN, ...) new("mpfr", unlist(lapply(X, FUN, ...), recursive = FALSE))
 ##' more carefully, also returing mpfrArray when appropriate:
-sapplyMpfr <- function(X, FUN, ...) {
+sapplyMpfr <- function(X, FUN, ..., drop_1_ = TRUE) {
     L <- lapply(X, FUN, ...)
-    if((n <- length(L)) && all((ll <- lengths(L)) == ll[1])) {
-        if(is.null(d <- dim(L[1])) || !all(d == sapply(L, dim)))
+    if((n <- length(L)) && (!drop_1_ | (ll1 <- (ll <- lengths(L))[1L]) != 1L) && all(ll == ll1)) {
+        if(is.null(d <- dim(L1 <- L[[1L]])) || !all(d == sapply(L, dim)))
            new("mpfrMatrix", unlist(L, recursive = FALSE),
-               Dim = c(n,ll[1]), Dimnames = list(names(L), names(L[1])))
+               Dim = c(ll1, n), Dimnames = list(names(L1), names(L)))
         else # L[i] have dim(), all the same ones
            new("mpfrArray", unlist(L, recursive = FALSE),
-               Dim = c(n,d), Dimnames = list(names(L), dimnames(L[1])))
+               Dim = c(d,n), Dimnames = c(dimnames(L1), list(names(L))))
     } else {
         new("mpfr", unlist(L, recursive = FALSE))
     }

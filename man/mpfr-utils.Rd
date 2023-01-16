@@ -22,6 +22,7 @@
 \alias{.mpfr_erange_is_int}
 \alias{.mpfr_maxPrec}
 \alias{.mpfr_minPrec}
+\alias{.mpfr_gmp_numbbits}
 \description{
   This page documents utilities from package \pkg{Rmpfr} which are
   typically not called by the user, but may come handy in some
@@ -63,6 +64,8 @@ mpfrImport(mxp)
 .mpfr_erange_is_int()
 .mpfr_maxPrec()
 .mpfr_minPrec()
+
+.mpfr_gmp_numbbits()
 }
 \arguments{
   \item{x, from}{typically, an \R object of class \code{"\linkS4class{mpfr}"}, or
@@ -188,8 +191,14 @@ mpfrImport(mxp)
   \code{\link{integer}} limits, i.e., has absolute values not larger than
   \code{\link{.Machine}$integer.max} (\eqn{ = 2^{31} - 1}).
 
-  \code{.mpfr_erange_set()} \emph{invisibly} (see
-  \code{\link{invisible}()}) returns \code{TRUE} iff the change was successful.
+  \code{.mpfr_erange_set()} \emph{invisibly} (see \code{\link{invisible}()})
+  returns \code{TRUE} iff the change was successful.
+
+  \code{.mpfr_gmp_numbbits()} returns the \file{GMP} library \dQuote{numb}
+  size, which is either 32 or 64 bit (as \code{\link{integer}}, i.e.,
+  \code{64L} or \code{32L}).  If it is \emph{not} 64, you typically
+  cannot enlarge the exponential range of mpfr numbers via
+  \code{.mpfr_erange()}, see above.
 
   \code{.mpfr_formatinfo(x)} returns conceptually a subset of
   \code{\link{.mpfr2str}()}'s result, a list with three components

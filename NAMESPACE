@@ -27,6 +27,7 @@ importFrom("methods",
 importFrom("utils", str)
 importFrom("stats"  # import *and* rename -- we extend these :
 	   ,stats__pnorm  = pnorm
+	   ,stats__qnorm  = qnorm
 	   ,stats__dnorm  = dnorm
 	   ,stats__dpois  = dpois
 	   ,stats__dbinom = dbinom
@@ -145,6 +146,7 @@ export(.mpfr, .mpfr.
        , "pbetaI"
        , "pmax", "pmin"
        , "pnorm"
+     , qnormI
        , "pochMpfr"
        , "roundMpfr"
        , sapplyMpfr

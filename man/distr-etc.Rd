@@ -1,5 +1,5 @@
 \name{mpfr-distr-etc}
-\title{Distribution Functions etc (MPFR)}
+\title{Distribution Functions with MPFR Arithmetic}
 \alias{pnorm}
 \alias{dnorm}
 \alias{dbinom}
@@ -76,10 +76,19 @@ print(dnorm(     -5:5), digits=18)
 
 ## For pnorm() in the extreme tails, need an exponent range
 ## larger than the (MPFR and Rmpfr) default:
-(old_eranges <- .mpfr_erange()) # typically -/+ 2^30
+(old_eranges <- .mpfr_erange()) # typically -/+ 2^30:
+log2(abs(old_eranges))   # 30  30
 .mpfr_erange_set(value = (1-2^-52)*.mpfr_erange(c("min.emin","max.emax")))
+log2(abs(.mpfr_erange()))# 62  62  **iff** setup -- 2023-01: *not* on Winbuilder
 tens <- mpfr(10^(4:7), 128)
-pnorm(tens, lower.tail=FALSE, log.p=TRUE) # "works"
+pnorm(tens, lower.tail=FALSE, log.p=TRUE) # "works" (iff ...)
+## "the" boundary:
+pnorm(mpfr(- 38581.371, 128), log.p=TRUE) # still does not underflow {but *.372 does}
+## -744261105.599283824811986753129188937418  (iff ...)
+.mpfr_erange()*log(2) # the boundary
+##          Emin          Emax
+## -3.196577e+18  3.196577e+18 (iff ...)
+
 ## reset to previous
 .mpfr_erange_set( , old_eranges)
 pnorm(tens, lower.tail=FALSE, log.p=TRUE) # all but first underflow to -Inf

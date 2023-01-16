@@ -1,8 +1,8 @@
 Package: Rmpfr
 Title: R MPFR - Multiple Precision Floating-Point Reliable
-Version: 0.8-9
-Date: 2022-06-02
-DateNote: Previous CRAN version 0.8-8 on 2022-06-01
+Version: 0.9-0
+Date: 2023-01-15
+DateNote: Previous CRAN version 0.8-9 on 2022-06-02
 Type: Package
 Authors@R: c(person("Martin","Maechler", role = c("aut","cre"),
 	     email = "maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
@@ -25,17 +25,16 @@ SystemRequirementsNote: 'MPFR' (MP Floating-Point Reliable Library,
         library, https://gmplib.org/), see >> README.md
 Depends: gmp (>= 0.6-1), R (>= 3.5.0)
 Imports: stats, utils, methods
-Suggests: MASS, Bessel, polynom, sfsmisc (>= 1.0-20), Matrix
-SuggestsNote: MASS, polynom, sfsmisc: only for vignette; Matrix:
-        test-tools
-Enhances: dfoptim, pracma
-EnhancesNote: mentioned in Rd xrefs
+Suggests: MASS, Bessel, polynom, sfsmisc (>= 1.1-14)
+SuggestsNote: MASS, polynom, sfsmisc: only for vignette;
+Enhances: dfoptim, pracma, DPQ
+EnhancesNote: mentioned in Rd xrefs | used in example
 URL: https://rmpfr.r-forge.r-project.org/
 BugReports: https://r-forge.r-project.org/tracker/?group_id=386
 License: GPL (>= 2)
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2022-06-02 20:54:55 UTC; maechler
+Packaged: 2023-01-16 17:18:23 UTC; maechler
 Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Richard M. Heiberger [ctb] (formatHex(), *Bin, *Dec),
   John C. Nash [ctb] (hjkMpfr(), origin of unirootR()),
@@ -43,4 +42,4 @@ Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
     hjkMpfr())
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2022-06-03 17:10:22 UTC
+Date/Publication: 2023-01-16 18:00:02 UTC

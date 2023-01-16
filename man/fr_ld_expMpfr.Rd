@@ -43,13 +43,9 @@ ldexpMpfr(f, E, rnd.mode = c("N", "D", "U", "Z", "A"))
   On unix-alikes, typically \command{man frexp} and \command{man ldexp}
 }
 \author{Martin Maechler}
-%% \note{
-
-%% }
 \seealso{
   Somewhat related, \code{\link{.mpfr2exp}()}.
-  %_TODO_: that DPQ version is not yet on CRAN:
-  %\code{\link[DPQ]{frexp}()} and \code{ldexp()} in package \CRANpkg{DPQ}.
+  \code{\link[DPQ]{frexp}()} and \code{ldexp()} in package \CRANpkg{DPQ}.
 }
 \examples{
 set.seed(47)

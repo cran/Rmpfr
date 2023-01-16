@@ -1,9 +1,5 @@
 stopifnot(require("Rmpfr"))
 
-(f.chk <- system.file("check-tools.R", package="Rmpfr", mustWork=TRUE))
-source(f.chk, keep.source=FALSE)
-## -> Matrix test-tools +  all.eq.finite(), all.EQ()
-
 x <- mpfr(0:7, 64)/7
 mx <- x
 dim(mx) <- c(4,2)
@@ -156,36 +152,39 @@ stopifnot(is(mx, "mpfrMatrix"),
 
 ## Ensure that apply() continues to work with 'bigz'/'bigq'
 A <- matrix(2^as.bigz(1:12), 3,4)
+Aq <- as.bigq(A)
 mA <- as(A, "mpfr") # failed {as dim(A) is "double", not "integer"}
 (Qm <- A / (A^2 - 1)) # big rational matrix
 MQ <- mpfr(Qm, precBits = 64)
 stopifnot(exprs = {
     mA == A
+    mA == Aq
+    is.bigq(Aq)
     mA == mpfr(A, precBits=16)
     mA == asNumeric(A)
     is.bigq(Qm)
     is(MQ, "mpfrMatrix")
     all.equal(Qm, MQ, tol = 1e-18)
-    all.equal(dim(mA), dim(A ), tol=0)
-    all.equal(dim(mA), dim(Qm), tol=0)
+    identical(dim(mA), dim(A))
+    identical(dim(mA), dim(Qm))
     identical(asNumeric(apply(A,  1, min)),
               apply(asNumeric(A), 1, min))
     identical(asNumeric(apply(A,  1, max)),
               apply(asNumeric(A), 1, max))
+    identical(asNumeric(apply(A,  2, max)),
+              apply(asNumeric(A), 2, max))
+    identical(asNumeric(apply(A,  2, min)),
+              apply(asNumeric(A), 2, min))
 })
 ## mA etc, failed up to Rmpfr 0.8-1; the apply() parts failed up to Rmpfr 0.6.0
 
-if(FALSE) ## Bug in gmp <= 0.5-12 :
+if(FALSE) ## Bug in gmp :  apply(*, range) does *not* return matrix
 stopifnot(
           identical(asNumeric(apply(A,  1, range)),
                     apply(asNumeric(A), 1, range))
 )
-if(FALSE) ## Bug in gmp <= 0.5-12 :
-stopifnot(
-          identical(asNumeric(apply(A,  2, max)),
-                    apply(asNumeric(A), 2, max))
-)
-if(FALSE) ## Bug in gmp <= 0.5-12 :
+
+if(FALSE) ## Bug in gmp : --- no mean method for bigz, just mean.bigq
 stopifnot(
           all.equal(asNumeric(apply(A,  1, mean)),
                     apply(asNumeric(A), 1, mean))

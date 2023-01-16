@@ -5,12 +5,15 @@
 unirootR(f, interval, \dots,
         lower = min(interval), upper = max(interval),
         f.lower = f(lower, ...), f.upper = f(upper, ...),
-        verbose = FALSE,
-        tol = .Machine$double.eps^0.25, maxiter = 1000,
-        warn.no.convergence = TRUE,
+        extendInt = c("no", "yes", "downX", "upX"),
+        trace = 0, verbose = as.logical(trace),
+        verbDigits = max(3, min(20, -log10(tol)/2)),
+        tol = .Machine$double.eps^0.25, maxiter = 1000L,
+        check.conv = FALSE,
+        warn.no.convergence = !check.conv,
         epsC = NULL)
 }
-\arguments{
+\arguments{% base R : ~/R/D/r-devel/R/src/library/stats/man/uniroot.Rd
   \item{f}{the function for which the root is sought.}
   \item{interval}{a vector containing the end-points of the interval
     to be searched for the root.}
@@ -22,10 +25,23 @@ unirootR(f, interval, \dots,
     \code{f(lower)}, respectively.  Passing these values from the caller
     where they are often known is more economical as soon as \code{f()}
     contains non-trivial computations.}
+  \item{extendInt}{character string specifying if the interval
+    \code{c(lower,upper)} should be extended or directly produce an error
+    when \code{f()} does not have differing signs at the endpoints.  The
+    default, \code{"no"}, keeps the search interval and hence produces
+    an error.  Can be abbreviated.}
+  \item{trace}{integer number; if positive, tracing information is
+    produced.  Higher values giving more details.}
   \item{verbose}{logical (or integer) indicating if (and how much)
     verbose output should be produced during the iterations.}
+  \item{verbDigits}{used only if \code{verbose} is true, indicates the
+    number of digits numbers should be printed with, using
+    \code{\link{format}(., digits=verbDigits)}.}
   \item{tol}{the desired accuracy (convergence tolerance).}
   \item{maxiter}{the maximum number of iterations.}
+  \item{check.conv}{logical indicating whether non convergence
+    should be caught as an error, notably non-convergence in \code{maxiter}
+    iterations should be an error instead of a warning.}
   \item{warn.no.convergence}{if set to \code{FALSE} there's no warning
     about non-convergence.  Useful to just run a few iterations.}
   \item{epsC}{positive number or \code{NULL} in which case a smart
@@ -40,7 +56,7 @@ unirootR(f, interval, \dots,
 
     This is factually a lower bound for the achievable lower bound, and
     hence, setting \code{tol} smaller than \code{epsC} is typically
-    non-sensical sense and produces a warning.
+    non-sensical and produces a warning.
   }
 }
 \description{
@@ -58,7 +74,21 @@ unirootR(f, interval, \dots,
   Either \code{interval} or both \code{lower} and \code{upper} must be
   specified: the upper endpoint must be strictly larger than the lower
   endpoint.  The function values at the endpoints must be of opposite
-  signs (or zero).
+  signs (or zero), for \code{extendInt="no"}, the default.  Otherwise, if
+  \code{extendInt="yes"}, the interval is extended on both sides, in
+  search of a sign change, i.e., until the search interval \eqn{[l,u]}
+  satisfies \eqn{f(l) \cdot f(u) \le 0}{f(l) * f(u) <= 0}.
+
+  If it is \emph{known how} \eqn{f} changes sign at the root
+  \eqn{x_0}{x0}, that is, if the function is increasing or decreasing there,
+  \code{extendInt} can (and typically should) be specified as
+  \code{"upX"} (for \dQuote{upward crossing}) or \code{"downX"},
+  respectively.  Equivalently, define \eqn{S := \pm 1}{S:= +/- 1}, to
+  require \eqn{S = \mathrm{sign}(f(x_0 + \epsilon))}{S = sign(f(x0 +
+    eps))} at the solution.  In that case, the search interval \eqn{[l,u]}
+  possibly is extended to be such that \eqn{S\cdot f(l)\le 0}{%
+    S * f(l) <= 0} and \eqn{S \cdot f(u) \ge 0}{S * f(u) >= 0}.
+
 
   The function only uses \R code with basic arithmetic, such that it
   should also work with \dQuote{generalized} numbers (such as
@@ -95,6 +125,7 @@ unirootR(f, interval, \dots,
   Brent, R. (1973),   see \code{\link{uniroot}}.
 }
 \seealso{
+  \R's own (\pkg{stats} package) \code{\link{uniroot}}.
   \code{\link{polyroot}} for all complex roots of a polynomial;
   \code{\link{optimize}}, \code{\link{nlm}}.
 }
@@ -146,5 +177,26 @@ exp(minexp)     # typically denormalized
 r <- unirootR(function(x) 1e99* exp(x) - ep.M, mpfr(c(-1e20, 0), 200))
 r # 97 iterations; f.root is very similar to ep.M
 
+## interval extension 'extendInt'  --------------
+
+f1 <- function(x) (121 - x^2)/(x^2+1)
+f2 <- function(x) exp(-x)*(x - 12)
+tools::assertError(unirootR(f1, c(0,10)), verbose=TRUE)
+##--> error: f() .. end points not of opposite sign
+
+## where as  'extendInt="yes"'  simply first enlarges the search interval:
+u1 <- unirootR(f1, c(0,10),extendInt="yes", trace=1)
+u2 <- unirootR(f2, mpfr(c(0,2), 128), extendInt="yes", trace=2, verbose=FALSE, tol = 1e-25)
+stopifnot(all.equal(u1$root, 11, tolerance = 1e-5),
+          all.equal(u2$root, 12, tolerance = 1e-23))
+
+## The *danger* of interval extension:
+## No way to find a zero of a positive function, but
+## numerically, f(-|M|) becomes zero :
+u3 <- unirootR(exp, c(0,2), extendInt="yes", trace=TRUE)
+
+## Nonsense example (must give an error):
+tools::assertCondition( unirootR(function(x) 1, 0:1, extendInt="yes"),
+                       "error", verbose=TRUE)
 }
 \keyword{optimize}

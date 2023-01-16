@@ -18,16 +18,16 @@
 
 
 * Short or Mid Term
-** DONE 64) formatMpfr(x, scientific=FALSE)  does *not* "work" e.g., for  `x <- Const("pi", 128) * 2^200`.
 *** TODO Split this section into  Short | Mid  (?)
+** TODO 66) Improve pnorm(*, log.p=TRUE) using Abramowitz asymptotic formulas ==> 1st need Rmpfr'ified DPQ:pnormAsymp()
+   Abramowitz and Stegun (1972), p.932, (26.2.12) and (26.2.13)   see also ~/R/Pkgs/DPQ/vignettes/qnorm-asymp.Rnw
+*** TODO 66a) "mpfrify" pnormAsymp() and qnormAsymp() but in pkg {DPQmpfr} !!
 ** TODO 60) Should have *exact* as.bigq.mpfr(), i.e, "mpfr" --> "bigq". (R's "bigq" is C 'mpq')
 ** TODO 62) integrateR(): option 'all.sums=TRUE' --> R/integrate-Romberg.R
 ***  Inside the GMP library, have
 # -- Function: void mpq_set_f (mpq_t ROP, const mpf_t OP)
 #      Set ROP to the value of OP.  There is no rounding, this conversion is exact.
 ***  MPFR documents 'mpf2mpfr.h' after which you can compile any mpf_ program..
-** DONE 63) R interface to mpfr's functions `mpfr_get_ld_2exp()` and `mpfr_frexp()`
-   compatibly to DPQ's `ldexp(f, E)` and `frexp(x)`: -> frexpMpfr() and ldexpMpfr().
 ** TODO 53) plogis() {and dlogis, qlogis} are "easy": do use <R>/src/nmath/[dpq]logis.c, as they
  already use all the numerical tricks including R_Log1_Exp(x) .. :
  R_Log1_Exp(x) := ((x) > -M_LN2 ? log(-expm1(x)) : log1p(-exp(x)))
@@ -242,3 +242,9 @@
 ** DONE 56) Add regr.tests for new dgamma(<mpfr>) !!
 ** DONE 55a) .getPrec(), .mpfr_erange, .mpfr_erange_set, .mpfr_maxPrec, .mpfr_minPrec etc are documented now.
 
+** DONE 63) R interface to mpfr's functions `mpfr_get_ld_2exp()` and `mpfr_frexp()`
+   compatibly to DPQ's `ldexp(f, E)` and `frexp(x)`: -> frexpMpfr() and ldexpMpfr().
+** DONE 64) formatMpfr(x, scientific=FALSE)  does *not* "work" e.g., for  `x <- Const("pi", 128) * 2^200`.
+
+** DONE 65) unirootR(): *update* with R's uniroot() enhancements:
+     extendInt = c("no", "yes", "downX", "upX"), check.conv = FALSE,

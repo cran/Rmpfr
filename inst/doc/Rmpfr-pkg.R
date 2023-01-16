@@ -317,3 +317,55 @@ if(require("polynom")) {
 as.numeric(Itrue - c(Im$value, Id$value))
 
 
+###################################################
+### code chunk number 39: pnorm-extr
+###################################################
+pnorm(-1234, log.p=TRUE)
+
+
+###################################################
+### code chunk number 40: pnorm-extr
+###################################################
+(p123 <- Rmpfr::pnorm(mpfr(-123, 66), log.p=TRUE)) # is based on
+(ec123 <- erfc(123 * sqrt(mpfr(0.5, 66+4))) / 2) # 1.95....e-3288
+
+(p333 <- Rmpfr::pnorm(mpfr(-333, 66), log.p=TRUE))
+exp(p333)
+stopifnot(p123 == log(roundMpfr(ec123, 66)), ## '==' as we implemented our pnorm() 
+          all.equal(p333, -55451.22709, tol=1e-8))
+
+
+###################################################
+### code chunk number 41: mpfr-erange
+###################################################
+(old_erng <- .mpfr_erange() )
+
+
+###################################################
+### code chunk number 42: double-erange
+###################################################
+unlist( .Machine[c("double.min.exp", "double.max.exp")] )
+
+
+###################################################
+### code chunk number 43: really-min
+###################################################
+2^(-1022 - 52)
+
+
+###################################################
+### code chunk number 44: mpfr-all-eranges
+###################################################
+.mpfr_erange(.mpfr_erange_kinds) ## and then set
+# use very slightly smaller than extreme values:
+(myERng <- (1-2^-52) * .mpfr_erange(c("min.emin","max.emax")))
+.mpfr_erange_set(value = myERng) # and to see what happened:
+.mpfr_erange()
+
+
+###################################################
+### code chunk number 45: GMP-numbs
+###################################################
+.mpfr_gmp_numbbits()
+
+

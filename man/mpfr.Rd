@@ -40,7 +40,7 @@ is.mpfr(x)
     use \code{TRUE} when finding a \code{"p"} in \code{x}; see also
     \code{\link{formatBin}}.}
   \item{name}{a string specifying the mpfrlib - internal constant
-    computation.  \code{"gamma"} is Euler's gamma \eqn{(\gamma)}{}, and
+    computation.  \code{"gamma"} is Euler's gamma (\eqn{\gamma}), and
     \code{"catalan"} Catalan's constant.}
   \item{\dots}{potentially further arguments passed to and from methods.}
 }
@@ -82,7 +82,7 @@ is.mpfr(x)
   will detect the precision of the input object. %% FIXME examples
 }
 \references{
-  The MPFR team. (201x).
+  The MPFR team. (202x).
   \emph{GNU MPFR -- The Multiple Precision Floating-Point Reliable
     Library}; see \url{https://www.mpfr.org/mpfr-current/#doc} or directly
   \url{https://www.mpfr.org/mpfr-current/mpfr.pdf}.

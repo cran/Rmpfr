@@ -608,6 +608,66 @@ if(require("polynom")) {
 as.numeric(Itrue - c(Im$value, Id$value))
 @
 
+\section{Miscellaneous}
+For probability and density computations, it is known to be important in many contexts to work on the $\log$--scale, i.e., with log probabilities $\log P(.)$ or
+log densities $\log f()$.
+In \R{} itself, we (R Core) had introduced logical optional arguments \code{log} (for density) and \code{log.p} for probability (e.g., \code{pnorm()} and quantile (e.g., \code{qnorm}) functions.
+
+As our \code{pnorm()} is based on MPFR's \code{erf()} and \code{erfc()} which currently do \emph{not} have scaled versions, for \code{Rmpfr::pnorm(.., log.p=TRUE)} we do need to compute the logarithm (instead of working on the log scale).
+On the extreme left tail, \R{} correctly computes
+<<pnorm-extr>>=
+pnorm(-1234, log.p=TRUE)
+@
+i.e., \code{-761386.036955} to more digits.
+However, \code{erf()}  and \code{erfc()} do not have a log scale or other scaled versions.
+
+Thanks to the large range of exponents compared to double precision numbers it does less quickly underflow to zero, e.g.,
+
+<<pnorm-extr>>=
+(p123 <- Rmpfr::pnorm(mpfr(-123, 66), log.p=TRUE)) # is based on
+(ec123 <- erfc(123 * sqrt(mpfr(0.5, 66+4))) / 2) # 1.95....e-3288
+
+(p333 <- Rmpfr::pnorm(mpfr(-333, 66), log.p=TRUE))
+exp(p333)
+stopifnot(p123 == log(roundMpfr(ec123, 66)), ## '==' as we implemented our pnorm() 
+          all.equal(p333, -55451.22709, tol=1e-8))
+@
+and indeed, the default range for exponent (wrt base 2, not 10) is given by
+<<mpfr-erange>>=
+(old_erng <- .mpfr_erange() )
+@
+which shows the current minimal and maximal base-2 exponents for mpfr-numbers,
+by ``factory-fresh'' default, the number $-2^{30}$ and $2^{30}$, i.e., $\pm 1073741823$
+which is much larger than the corresponding limits for regular double precision numbers,
+<<double-erange>>=
+unlist( .Machine[c("double.min.exp", "double.max.exp")] )
+@
+which are basically $\pm 2^{10}$; note that double arithmetic typically allows subnormal numbers which are even smaller than $2^{-1024}$, also in \R{}, on all usual platforms,
+<<really-min>>=
+2^(-1022 - 52)
+@
+is equal to $2^{-1074}$ and the really smallest positive double precision number.
+
+Now, \emph{if} if the GMP library to which both \R{} package \pkg{gmp} and \pkg{Rmpfr} interface is built ``properly'', i.e., with full 64 bit ``numb''s, we can \emph{extend} the range of mpfr-numbers even further.
+By how much, we can read off
+<<mpfr-all-eranges>>=
+.mpfr_erange(.mpfr_erange_kinds) ## and then set
+# use very slightly smaller than extreme values:
+(myERng <- (1-2^-52) * .mpfr_erange(c("min.emin","max.emax")))
+.mpfr_erange_set(value = myERng) # and to see what happened:
+.mpfr_erange()
+@
+If that worked well, this shows \code{-/+ 4.611686e+18}, or actually $\mp 2^{62}$,
+ \code{log2(abs(.mpfr_erange()))} giving
+\Sexpr{log2(abs(.mpfr_erange()))}.
+
+However, currently on Winbuilder this does not extend, notably as the GMP numbs,
+<<GMP-numbs>>=
+.mpfr_gmp_numbbits()
+@
+have \emph{not} been 64, there.
+
+
 \section{Conclusion}
 The \R\ package \pkg{Rmpfr}, available from CRAN since August 2009,
 provides the possibility to run many computations in R with (arbitrarily)
