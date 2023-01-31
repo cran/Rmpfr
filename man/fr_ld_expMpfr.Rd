@@ -59,7 +59,7 @@ tail(d.fr)
 ar <- abs(rFM$r)
 stopifnot(0.5 <= ar[is.finite(x) & x != 0], ar[is.finite(x)] < 1,
           is.integer(rFM$e))
-ldx <- mpfr(with(rFM, ldexpMpfr(r, e)))
+ldx <- with(rFM, ldexpMpfr(r, e))
 (iN <- which(is.na(x))) # 10
 stopifnot(exprs = {
   all.equal(xM, ldx, tol = 2^-124) # allow 4 bits loss, but apart from the NA, even:

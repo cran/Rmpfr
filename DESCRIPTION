@@ -1,8 +1,8 @@
 Package: Rmpfr
 Title: R MPFR - Multiple Precision Floating-Point Reliable
-Version: 0.9-0
-Date: 2023-01-15
-DateNote: Previous CRAN version 0.8-9 on 2022-06-02
+Version: 0.9-1
+Date: 2023-01-30
+DateNote: Previous CRAN version 0.9-0 on 2023-01-16
 Type: Package
 Authors@R: c(person("Martin","Maechler", role = c("aut","cre"),
 	     email = "maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
@@ -23,7 +23,7 @@ SystemRequirements: gmp (>= 4.2.3), mpfr (>= 3.0.0), pdfcrop (part of
 SystemRequirementsNote: 'MPFR' (MP Floating-Point Reliable Library,
         https://www.mpfr.org/) and 'GMP' (GNU Multiple Precision
         library, https://gmplib.org/), see >> README.md
-Depends: gmp (>= 0.6-1), R (>= 3.5.0)
+Depends: gmp (>= 0.6-1), R (>= 3.6.0)
 Imports: stats, utils, methods
 Suggests: MASS, Bessel, polynom, sfsmisc (>= 1.1-14)
 SuggestsNote: MASS, polynom, sfsmisc: only for vignette;
@@ -34,7 +34,7 @@ BugReports: https://r-forge.r-project.org/tracker/?group_id=386
 License: GPL (>= 2)
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2023-01-16 17:18:23 UTC; maechler
+Packaged: 2023-01-30 09:49:09 UTC; maechler
 Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
   Richard M. Heiberger [ctb] (formatHex(), *Bin, *Dec),
   John C. Nash [ctb] (hjkMpfr(), origin of unirootR()),
@@ -42,4 +42,4 @@ Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
     hjkMpfr())
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2023-01-16 18:00:02 UTC
+Date/Publication: 2023-01-31 14:30:09 UTC

@@ -88,6 +88,7 @@ hjkMpfr(par, fn, control = list(), ...)
 ff <- function(x) sum((x - c(2:4))^2)
 str(rr <- hjkMpfr(rep(mpfr(0,128), 3), ff, control=list(info=TRUE)))
 
+doX <- Rmpfr:::doExtras(); cat("doExtras: ", doX, "\n") # slow parts only if(doX)
 
 ## Hooke-Jeeves solves high-dim. Rosenbrock function  {but slowly!}
 rosenbrock <- function(x) {
@@ -96,7 +97,7 @@ rosenbrock <- function(x) {
 }
 par0 <- rep(0, 10)
 str(rb.db <- hjkMpfr(rep(0, 10), rosenbrock, control=list(info=TRUE)))
-\donttest{
+if(doX) {
 ## rosenbrook() is quite slow with mpfr-numbers:
 str(rb.M. <- hjkMpfr(mpfr(numeric(10), prec=128), rosenbrock,
                      control = list(tol = 1e-8, info=TRUE)))
@@ -114,7 +115,7 @@ nsf <- function(x) {
 }
 par0 <- c(1, 1) # true min 7.2 at (1.2, 2.4)
 h.d <- hjkMpfr(par0,            nsf) # fmin=8 at xmin=(2,2)
-\donttest{
+if(doX) {
 ## and this is not at all better (but slower!)
 h.M <- hjkMpfr(mpfr(c(1,1), 128), nsf, control = list(tol = 1e-15))
 }

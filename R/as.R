@@ -180,7 +180,7 @@ mpfrImport <- function(mxp) {
 
 ldexpMpfr <- function(f, E, rnd.mode = c('N','D','U','Z','A')) {
     stopifnot(is.character(rnd.mode <- toupper(rnd.mode)))
-    .Call(R_mpfr_ldexp, f, E, match.arg(rnd.mode))
+    new("mpfr", .Call(R_mpfr_ldexp, f, E, match.arg(rnd.mode)))
 }
 
 frexpMpfr <- function(x, rnd.mode = c('N','D','U','Z','A')) {

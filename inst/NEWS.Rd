@@ -7,7 +7,14 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
-
+\section{Changes in version 0.9-1 [2023-01-30, r386]}{
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{ldexpMpfr(f, E)} now returns an \code{"mpfr"} vector
+      (instead of a \code{"mpfr1"}).
+    }
+  }
+}
 
 \section{Changes in version 0.9-0 [2023-01-16, r382]}{
   \subsection{NEW FEATURES}{
