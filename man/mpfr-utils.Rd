@@ -23,6 +23,15 @@
 \alias{.mpfr_maxPrec}
 \alias{.mpfr_minPrec}
 \alias{.mpfr_gmp_numbbits}
+\alias{.mpfrVersion}
+%- really internal
+\alias{..bigq2mpfr}
+\alias{..bigz2mpfr}
+\alias{.getSign}
+\alias{.mpfr_negative}
+\alias{.mpfr_sign}
+\alias{.mpfr}
+\alias{.mpfr.}
 \description{
   This page documents utilities from package \pkg{Rmpfr} which are
   typically not called by the user, but may come handy in some
@@ -66,6 +75,18 @@ mpfrImport(mxp)
 .mpfr_minPrec()
 
 .mpfr_gmp_numbbits()
+.mpfrVersion()
+
+## Really Internal and low level, no error checking (for when you know ..)
+.mpfr (x, precBits)
+.mpfr.(x, precBits, rnd.mode)
+.getSign(x)
+
+.mpfr_negative(x)
+.mpfr_sign(x)
+
+..bigq2mpfr(x, precB = NULL, rnd.mode = c("N", "D", "U", "Z", "A"))
+..bigz2mpfr(x, precB = NULL, rnd.mode = c("N", "D", "U", "Z", "A"))
 }
 \arguments{
   \item{x, from}{typically, an \R object of class \code{"\linkS4class{mpfr}"}, or
@@ -81,7 +102,7 @@ mpfrImport(mxp)
     known to be \code{"mpfr"}; typically should be kept at default, \code{NA}.}
   \item{bigq.}{for \code{getPrec()}, the precision to use for a big
     rational (class \code{"bigq"}); if not specified gives warning when used.}
-  \item{prec}{a positive integer, or missing.}
+  \item{prec, precB, precBits}{a positive integer, or missing.}
   \item{drop0trailing}{logical indicating if trailing \code{"0"}s should
     be omitted.}
   \item{right}{logical indicating \code{print()}ing should right
@@ -200,14 +221,28 @@ mpfrImport(mxp)
   cannot enlarge the exponential range of mpfr numbers via
   \code{.mpfr_erange()}, see above.
 
+  \code{.mpfrVersion()} returns a string, the version of the \file{MPFR}
+  library we are linking to.
+
   \code{.mpfr_formatinfo(x)} returns conceptually a subset of
   \code{\link{.mpfr2str}()}'s result, a list with three components
-  \item{exp}{the base-2 exponents of \code{x}, identical to \code{.mpfr2exp(x)}.}
-  \item{finite}{\code{\link{logical}} identical to \code{\link{is.finite}(x)}.}
-  \item{is.0}{\code{\link{logical}} indicating if the corresponding
-    \code{x[i]} is zero; identical to \code{\link{mpfrIs0}(x)}.}
+  \describe{
+    \item{exp}{the base-2 exponents of \code{x}, identical to \code{.mpfr2exp(x)}.}
+    \item{finite}{\code{\link{logical}} identical to \code{\link{is.finite}(x)}.}
+    \item{is.0}{\code{\link{logical}} indicating if the corresponding
+      \code{x[i]} is zero; identical to \code{\link{mpfrIs0}(x)}.}}
   (Note that \code{\link{.mpfr2str}(x, .., base)$exp} is wrt \code{base}
-  \emph{and} is not undefined but
+  \emph{and} is not undefined but ...)% FIXME
+
+  \code{.mpfr_sign(x)} only works for \code{mpfr} objects, then identical
+  to \code{\link{sign}(x)}.  Analogously, \code{.mpfr_negative(x)} is
+  \code{-x} in that case.
+  \code{.getSign(x)} is a low-level version of \code{\link{sign}(x)}
+  returning -1 or +1, but not 0.
+  \cr
+  Finally, \code{..bigq2mpfr(x, ..)} and \code{..bigz2mpfr(x, ..)} are fast
+  ways to coerce \code{bigz} and \code{bigq} number objects (created by
+  package \CRANpkg{gmp}'s functionality) to our \code{"mpfr"} class.
 }
 \note{
   \code{mpfrXport()} and \code{mpfrImport()} are \bold{experimental} and

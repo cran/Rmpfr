@@ -96,7 +96,7 @@ if(doX) {
   e2 <- 60
 }
 system.time( pn2 <- pnorm(qnormI(mpfr(p2, e2))) ) # 4.1 or 0.68
-           all.equal(p2, pn2, tol = 0) # 5.48e-29 // 1.05e-21
+           all.equal(p2, pn2, tol = 0) # 5.48e-29 // 5.2e-18
 2^-e2
 stopifnot(all.equal(p2, pn2, tol = 6 * 2^-e2)) # '4 *' needed
 
@@ -121,14 +121,14 @@ cM <- if(doX) { "2528468770.3432934368107681591972815143739328158518563149087539
 ## 7.64890682545699845135633468495894619457903458325606933043966616334460003e-1388255822130839040
 log(pM) # 233 bits: -3196577161300663205.8575919621115614148120323933633827052786873078552904
 
-if(lrgOK) {
+if(lrgOK) withAutoprint({
   %% FIXME : here, the internal qnInt() gives (-Inf, -Inf) :
   try( qnormI(pM) ) ## Error: lower < upper not fulfilled (evt. TODO)
   ## but this works
   print(qnI <- qnormI(log(pM), log.p=TRUE)) #  -2528468770.343293436
   all.equal(-qM, qnI, tol = 0) # << show how close; seen  1.084202e-19
   stopifnot( all.equal(-qM, qnI, tol = 1e-18) )
-}
+})
 
 if(FALSE) # this (*SLOW*) gives 21 x the *same* (wrong) result --- FIXME!
   qnormI(log(pM) * (2:22), log.p=TRUE)

@@ -6,9 +6,6 @@
  */
 
 #include <limits.h>
-#include <Rmath.h>
-/* imax2() */
-
 
 #include "Rmpfr_utils.h"
 extern
@@ -34,7 +31,7 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
     mpfr_t R_i,
 	Summ, Sum2; /* for range(), max(), min(), sum(), prod() */
 
-    mpfr_init(R_i); /* with default precision */
+    mpfr_init(R_i); /* with default precision; set prec in R_asMPFR() */
     if (return_list)
 	mpfr_init(Summ);
 
@@ -50,7 +47,7 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 	mpfr_set_inf(Sum2, -1);/* := -Inf for max() */
 	Rmpfr_set(2);
     case PROD: mpfr_set_d (Summ, 1., MPFR_RNDZ); Rmpfr_set(1);
-    case SUM: mpfr_set_d (Summ, 0., MPFR_RNDZ); Rmpfr_set(1);
+    case SUM:  mpfr_set_d (Summ, 0., MPFR_RNDZ); Rmpfr_set(1);
 
     case ANY: val = ScalarLogical(FALSE); break;
     case ALL: val = ScalarLogical(TRUE);  break;
@@ -214,20 +211,20 @@ SEXP R_mpfr_sumprod(SEXP x, SEXP y, SEXP minPrec, SEXP alternating_)
 	    R_asMPFR(VECTOR_ELT(x, i), x_i);
 	    R_asMPFR(VECTOR_ELT(y, i), y_i);
 	    IF_NA_set_and_continue(mpfr_nan_p(x_i) || mpfr_nan_p(y_i));
-	    xy_prec = imax2(mpfr_get_prec(x_i),
-			    mpfr_get_prec(y_i));
+	    xy_prec = max2_prec(mpfr_get_prec(x_i),
+				mpfr_get_prec(y_i));
 	    break;
 	case M_n :
 	    R_asMPFR(VECTOR_ELT(x, i), x_i);
 	    yi = yy[i];
 	    IF_NA_set_and_continue(mpfr_nan_p(x_i) || ISNA(yi));
-	    xy_prec = imax2(mpfr_get_prec(x_i), 53);
+	    xy_prec = max2_prec(mpfr_get_prec(x_i), 53);
 	    break;
 	case n_M :
 	    xi = xx[i];
 	    R_asMPFR(VECTOR_ELT(y, i), y_i);
 	    IF_NA_set_and_continue(ISNA(xi) || mpfr_nan_p(y_i));
-	    xy_prec = imax2(53, mpfr_get_prec(y_i));
+	    xy_prec = max2_prec(53, mpfr_get_prec(y_i));
 	    break;
 	} // switch()
 

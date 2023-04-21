@@ -274,7 +274,7 @@ formatMpfr <-
         else { ## scientific = (FALSE | NA | number) --- for now :
             if(is.na(scientific))
                 scientific <- scipen
-            isNum & (Ex < -4 + scientific | Ex > r.dig)
+            isNum & (Ex < -4 - scipen | Ex > r.dig)
         }
     }
     if(aE <- any(ii <- isNum & hasE)) {

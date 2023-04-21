@@ -238,6 +238,21 @@ stopifnot(exprs = {
     all.equal(n / (n + dOO), r)
 })
 
+##  log(., base)  :
+(ten40 <- as.bigz(10)^40)
+ten40m <- mpfr(ten40)
+(lt40 <- log(ten40m, 10)) # gave Error in ... : base != exp(1) is not yet implemented
+##  'mpfr' ..  133 bits \\ [1] 40
+stopifnot(exprs = {
+    grepl("^40[.]000+$", print(format(lt40, digits = 60)))
+    identical(lt40, log10(ten40m))
+    identical(log(ten40m, 2), log2(ten40m))
+    inherits(Pi <- Const("pi", 140), "mpfr")
+    all.equal(show(log(ten40m, Pi)),
+                   log(ten40m)/log(Pi), tol = 1e-40)
+})
+
+
 
 ###------Standard Statistics Functions --------------------------------------------------------
 

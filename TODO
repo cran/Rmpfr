@@ -1,5 +1,6 @@
 	-*- org -*-->  Emacs [Tab] key + [Org] menu; C-c C-o follows links
 * Very Short Term
+** TODO 67) BUG:   igamma() [incomplete gamma] always returns 53-bit ???????
 ** TODO 61) Q: Why is quantile() so slow [hence summary() very slow!]?  A: because sort() |--> rank() is so slow (in C code!)
    l2x <- seqMpfr(mpfr(4, 1024), 513, by=1/16) # 8000 numbers of 1024 bits
    system.time(ql2x <- quantile(l2x, names=FALSE)) # user: 10.735 (nb-mm5, Nov.2020)
@@ -19,6 +20,7 @@
 
 * Short or Mid Term
 *** TODO Split this section into  Short | Mid  (?)
+
 ** TODO 66) Improve pnorm(*, log.p=TRUE) using Abramowitz asymptotic formulas ==> 1st need Rmpfr'ified DPQ:pnormAsymp()
    Abramowitz and Stegun (1972), p.932, (26.2.12) and (26.2.13)   see also ~/R/Pkgs/DPQ/vignettes/qnorm-asymp.Rnw
 *** TODO 66a) "mpfrify" pnormAsymp() and qnormAsymp() but in pkg {DPQmpfr} !!
@@ -32,7 +34,6 @@
  already use all the numerical tricks including R_Log1_Exp(x) .. :
  R_Log1_Exp(x) := ((x) > -M_LN2 ? log(-expm1(x)) : log1p(-exp(x)))
 ** TODO 54) zapsmall() would be nice, base::zapsmall() fails
-** DONE 59) *exact* dhyper(), phyper().. -> in package 'DPQmpfr' dhyperQ() etc exact via 'gmp' exact rationals
 ** TODO 35) tests/bit-repr.R : Bits() fails to work with 2^k
 
 ** TODO 37) mpfrXport()/*Import() should work for arrays.  Test Windows-portability:
@@ -242,9 +243,15 @@
 ** DONE 56) Add regr.tests for new dgamma(<mpfr>) !!
 ** DONE 55a) .getPrec(), .mpfr_erange, .mpfr_erange_set, .mpfr_maxPrec, .mpfr_minPrec etc are documented now.
 
+** DONE 59) *exact* dhyper(), phyper().. -> in package 'DPQmpfr' dhyperQ() etc exact via 'gmp' exact rationals
+
 ** DONE 63) R interface to mpfr's functions `mpfr_get_ld_2exp()` and `mpfr_frexp()`
    compatibly to DPQ's `ldexp(f, E)` and `frexp(x)`: -> frexpMpfr() and ldexpMpfr().
 ** DONE 64) formatMpfr(x, scientific=FALSE)  does *not* "work" e.g., for  `x <- Const("pi", 128) * 2^200`.
-
+** DONE 64b) formatMpfr(x, scientific=FALSE) does *not* yet "work" for small x, i.e., x << 1;
+   e.g.  `x <- Const("pi", 128) * 2^-(10:20)`.
+   indeed we had the scipen = *penalize* scientific  wrong: *and* we used 'scientific' instead of 'scipen' !
 ** DONE 65) unirootR(): *update* with R's uniroot() enhancements:
      extendInt = c("no", "yes", "downX", "upX"), check.conv = FALSE,
+
+** DONE 67) BUG:   igamma() [incomplete gamma] always returns 53-bit ???????

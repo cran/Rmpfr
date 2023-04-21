@@ -226,8 +226,8 @@ formatAlign <- function(x, leftpad=" ", rightpad=leftpad, ...) {
 }
 
 
-##' currently still used in mpfr.Ncharacter(), but _not_ as a method
-mpfr.Bcharacter <- function(x, precBits, scientific = NA, ...) {
+##' used in mpfr.Ncharacter()
+mpfr_Bcharacter <- function(x, precBits, scientific = NA, ...) {
     ## was scanBin()
     stopifnot(is.numeric(precBits))
     if (is.na(scientific)) ## we look for a "p" exponent..
@@ -244,7 +244,7 @@ mpfr.Ncharacter <- function(x, precBits = attr(x, "precBits"), ...) {
     class(x) <- NULL
     B <- attr(x, "base")
     if(B == 2) ## formatBin() gives very special format :
-        mpfr.Bcharacter(x, precBits = precBits, ...)
+        mpfr_Bcharacter(x, precBits = precBits, ...)
     else
         mpfr(x, base = B, precBits = precBits, ...)
 }

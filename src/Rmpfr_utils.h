@@ -47,6 +47,10 @@
 
 #endif
 
+static R_INLINE mpfr_prec_t max2_prec(mpfr_prec_t x, mpfr_prec_t y) {
+    return (mpfr_prec_t) (x >= y) ? x : y;
+}
+
 /*----------------------------------------*/
 
 #ifdef _in_Rmpfr_init_
@@ -88,7 +92,7 @@ SEXP ALLOC_SLOT(SEXP obj, SEXP nm, SEXPTYPE type, int length)
     return val;
 }
 
-#define N_LIMBS(_PREC_) ceil(((double)_PREC_)/mp_bits_per_limb)
+#define N_LIMBS(_PREC_) (int)ceil(((double)_PREC_)/mp_bits_per_limb)
 
 static R_INLINE int R_mpfr_nr_limbs(mpfr_t r)
 {

@@ -234,11 +234,27 @@ roundMpfr <- function(x, precBits, rnd.mode = c('N','D','U','Z','A')) {
 }
 
 ## "log" is still special with its 'base' :
+## setMethod("log", signature(x = "mpfr", base = "mpfr"),
+## 	  function(x, base)
+## 	      setDataPart(x, .Call(Math_mpfr, x, .Math.codes[["log"]])) / log(base)
+## 	  )
+## setMethod("log", signature(x = "mpfr", base = "mNumber"), # including "numeric", "bigz", "bigq"
+## 	  function(x, base)
+## 	      setDataPart(x, .Call(Math_mpfr, x, .Math.codes[["log"]])) /
+##                   log(mpfr(base, getPrec(x)))
+##           )
+## setMethod("log", signature(x = "mpfr", base = "ANY"),
+## 	  function(x, base) {
+## 	      if(!missing(base) && base != exp(1))
+## 		  stop("base != exp(1) is not yet implemented")
+## 	      setDataPart(x, .Call(Math_mpfr, x, .Math.codes[["log"]]))
+## 	  })
 setMethod("log", signature(x = "mpfr"),
-	  function(x, base) {
-	      if(!missing(base) && base != exp(1))
-		  stop("base != exp(1) is not yet implemented")
-	      setDataPart(x, .Call(Math_mpfr, x, .Math.codes[["log"]]))
+	  function(x, base = exp(1)) {
+              r <- setDataPart(x, .Call(Math_mpfr, x, .Math.codes[["log"]]))
+	      if(!missing(base) && substitute(base) != quote(exp(1)))
+                  r / log(mpfr(base, getPrec(x)))
+              else r
 	  })
 
 setMethod("Math", signature(x = "mpfr"), function(x)

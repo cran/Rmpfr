@@ -7,6 +7,36 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
+\section{Changes in version 0.9-2 [2023-04-21, r392]}{
+  \subsection{USER-VISIBLE CHANGES}{
+    \itemize{
+      \item \code{formatMpfr()} and hence the \code{format()} method for
+      \code{"mpfr"} etc now uses a \code{scientific = <number>} the same as
+      \pkg{base} \code{format.default()};  accidentally it had the
+      \emph{sign} of the number interpreted differently and failed to use
+      e.g., \code{getOption("scipen")} correctly.
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item \code{log(<mpfr>, base=10)} now works.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{igamma()}, \code{hypot()}, and \code{atan2()} no longer
+      only return 53 bit (or more generally, mpfr default precision)
+      results.
+
+      \item New \code{max2_prec()} utility instead of \code{imax2()},
+      also curing compilation warning.
+
+      \item Internal (exported) objects are now (somewhat) documented, as
+      eventually required by \R.
+    }
+  }
+}
+
 \section{Changes in version 0.9-1 [2023-01-30, r386]}{
   \subsection{BUG FIXES}{
     \itemize{

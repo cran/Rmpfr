@@ -51,7 +51,7 @@ x <- c(seq(0,20, by=1/4), 21:50, seq(55, 100, by=5))
 if(mpfrVersion() >= "3.2.0") { print(
 all.equal(igamma(Const("pi", 80), x),
           pgamma(x, pi, lower.tail=FALSE) * gamma(pi),
-          tol=0, formatFUN = function(., ...) format(., digits = 7)) #-> 3.13e-16
+          tol=0, formatFUN = function(., ...) format(., digits = 7)) #-> 2.75e-16 (was 3.13e-16)
 )
 ## and ensure *some* closeness:
 stopifnot(exprs = {

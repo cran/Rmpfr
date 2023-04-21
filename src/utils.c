@@ -35,12 +35,11 @@ int my_mpfr_round (mpfr_t ROP, long prec, mpfr_t X, mpfr_rnd_t RND);
 /*------------------------------------------------------------------------*/
 int my_mpfr_beta (mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
 {
-    mpfr_prec_t p_a = mpfr_get_prec(a), p_b = mpfr_get_prec(b);
-    if(p_a < p_b) p_a = p_b;// p_a := max(p_a, p_b)
-    if(mpfr_get_prec(R) < p_a)
-	mpfr_prec_round(R, p_a, RND);// so prec(R) = max( prec(a), prec(b) )
+    mpfr_prec_t p_ab = max2_prec(mpfr_get_prec(a), mpfr_get_prec(b));
+    if(mpfr_get_prec(R) < p_ab)
+	mpfr_prec_round(R, p_ab, RND);// so prec(R) = max( prec(a), prec(b) )
     int ans;
-    mpfr_t s; mpfr_init2(s, p_a);
+    mpfr_t s; mpfr_init2(s, p_ab);
 #ifdef DEBUG_Rmpfr
     R_CheckUserInterrupt();
     int cc = 0;
@@ -110,7 +109,7 @@ int my_mpfr_beta (mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
 		    neg = (b_ % 2); // 1 iff b_ is odd,  0 otherwise
 		} else { // really large b; as we know it is integer, can still..
 		    // b2 := b / 2
-		    mpfr_t b2; mpfr_init2(b2, p_a);
+		    mpfr_t b2; mpfr_init2(b2, p_ab);
 		    mpfr_div_2ui(b2, b, 1, RND);
 		    neg = !mpfr_integer_p(b2); // b is odd, if b/2 is *not* integer
 #ifdef DEBUG_Rmpfr
@@ -165,13 +164,12 @@ int my_mpfr_beta (mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
 
 int my_mpfr_lbeta(mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
 {
-    mpfr_prec_t p_a = mpfr_get_prec(a), p_b = mpfr_get_prec(b);
-    if(p_a < p_b) p_a = p_b;// p_a := max(p_a, p_b)
-    if(mpfr_get_prec(R) < p_a)
-	mpfr_prec_round(R, p_a, RND);// so prec(R) = max( prec(a), prec(b) )
+    mpfr_prec_t p_ab = max2_prec(mpfr_get_prec(a), mpfr_get_prec(b));
+    if(mpfr_get_prec(R) < p_ab)
+	mpfr_prec_round(R, p_ab, RND);// so prec(R) = max( prec(a), prec(b) )
     int ans;
     mpfr_t s;
-    mpfr_init2(s, p_a);
+    mpfr_init2(s, p_ab);
 
     /* "FIXME": check each 'ans' below, and return when not ok ... */
     ans = mpfr_add(s, a, b, RND);
@@ -614,6 +612,8 @@ SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {		\
     for(i=0; i < n; i++) {				\
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);		\
 	R_asMPFR(VECTOR_ELT(yD, i % ny), y_i);		\
+	mpfr_set_prec(R, max2_prec(mpfr_get_prec(x_i),	\
+				   mpfr_get_prec(y_i))); \
 	_MPFR_NAME(R, x_i, y_i, rnd);			\
 	SET_VECTOR_ELT(val, i, MPFR_as_R(R));		\
     }							\
@@ -660,7 +660,7 @@ SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {				\
     nx = length(xD);							\
     n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);			\
     PROTECT(val = allocVector(VECSXP, n));	nprot++;		\
-    mpfr_init(x_i); /* with default precision */			\
+    mpfr_init(x_i); /* with default precision; set prec in R_asMPFR() */\
 									\
     for(i=0; i < n; i++) {						\
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);				\

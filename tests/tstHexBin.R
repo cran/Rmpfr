@@ -12,7 +12,7 @@ identical(n5.b2, mpfr("0b101"))
 ## We *could* say that  anything starting with '0b' is binary, anything with '0x' is hexadecimal
 
 
-### mpfr.Bcharacter() method [was 'mpfrBchar', was 'scanBin'] :
+### mpfr_Bcharacter() {no longer method} [was 'mpfrBchar', was 'scanBin'] :
 
 ##' Check the inverse of formatBin(), i.e., mpfr() working correctly
 chkInv.fBin <- function(x, ...) {

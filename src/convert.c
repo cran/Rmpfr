@@ -50,6 +50,7 @@ extern
     R_mpfr_dbg_printf(2,"dd[%d] = %10lu -> r..d[i=%d]= 0x%lx\n", \
 		      i, dd[i], i,r->_mpfr_d[i])
 
+// these work on (r, ex[0]) :
 # define R_mpfr_FILL_EXP ex[0] = (int)r->_mpfr_exp
 # define R_mpfr_GET_EXP  r->_mpfr_exp = (mpfr_exp_t) ex[0]
 
@@ -74,6 +75,8 @@ extern
     r->_mpfr_d[i] = (mp_limb_t)(RIGHT_HALF(dd[2*i]) | LEFT_SHIFT(dd[2*i+1])); \
     R_mpfr_dbg_printf(2,"dd[%d:%d]= (%10lu,%10lu) -> r..d[i=%d]= 0x%lx\n", \
 	     2*i,2*i+1, dd[2*i],dd[2*i+1], i,r->_mpfr_d[i])
+
+// these work on (r, ex[0], {ex[1] or ex1}) :
 
 # define R_mpfr_FILL_EXP				\
     R_mpfr_dbg_printf(2,"_exp = 0x%lx\n",r->_mpfr_exp);	\
@@ -292,7 +295,7 @@ SEXP d2mpfr(SEXP x, SEXP prec)
 #endif
 
 /* The inverse of  MPFR_as_R() :
- * From an R  "mpfr1" object, (re)build an mpfr one: */
+ * From an R  "mpfr1" object `x`,  create mpfr `r` (with correct prec): */
 void R_asMPFR(SEXP x, mpfr_ptr r)
 {
     SEXP prec_R = GET_SLOT(x, Rmpfr_precSym);
@@ -393,7 +396,7 @@ SEXP mpfr2d(SEXP x, SEXP rnd_mode) {
     SEXP val = PROTECT(allocVector(REALSXP, n));
     double *r = REAL(val);
     mpfr_t R_i;
-    mpfr_init(R_i); /* with default precision */
+    mpfr_init(R_i); /* with default precision; set prec in R_asMPFR() */
 
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
@@ -406,13 +409,15 @@ SEXP mpfr2d(SEXP x, SEXP rnd_mode) {
     return val;
 }
 
+
+
 /* Convert R "mpfr" object (list of "mpfr1")  to R "integer" vector : */
 SEXP mpfr2i(SEXP x, SEXP rnd_mode) {
     int n = length(x), i;
     SEXP val = PROTECT(allocVector(INTSXP, n));
     int *r = INTEGER(val);
     mpfr_t R_i;
-    mpfr_init(R_i); /* with default precision */
+    mpfr_init(R_i); /* with default precision; set prec in R_asMPFR() */
 
     for(i=0; i < n; i++) {
 	R_asMPFR(VECTOR_ELT(x, i), R_i);
@@ -448,7 +453,7 @@ SEXP R_mpfr_formatinfo(SEXP x) {
     int *is_fin= LOGICAL(fini),
 	*is_0  = LOGICAL(zero);
     mpfr_t R_i;
-    mpfr_init(R_i);
+    mpfr_init(R_i); /* with default precision; set prec in R_asMPFR() */
     if(erange_is_int) {
 	int *exp_ = INTEGER(exp);
 #define FOR_I_N_ASSIGN(exp_typ)				\
@@ -483,6 +488,8 @@ SEXP R_mpfr_formatinfo(SEXP x) {
  *     -------------   -----------------==> set digits  <=>  max(digit, getPrec(x), #{"digits left of '.'"}))
  *
  *  Rmpfr:::.mpfr_debug(1)  ==> to add debug output here
+ *
+ * mpfr2str() is the workhorse for R level  formatMpfr() , called from format(<mpfr>) <- print(<mpfr>)
  */
 SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybeFull, SEXP base) {
     int n = length(x), i;
@@ -511,7 +518,7 @@ SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybeFull, SEXP base) {
 
     Rboolean base_is_2_power = (B == 2 || B == 4 || B == 8 || B == 16 || B == 32);
     Rboolean n_dig_1_problem = (n_dig == 1) && base_is_2_power;
-    size_t N_digits = n_dig_1_problem ? 2 : n_dig;
+    int N_digits = n_dig_1_problem ? 2 : n_dig;
     static const char *ans_nms[] = {"str", "exp", "finite", "is.0", ""};
     SEXP val = PROTECT(mkNamed(VECSXP, ans_nms)), str, exp, fini, zero;
     // NB: 'exp' may have to be 'double' instead of 'integer', when erange allows large exponents
@@ -529,7 +536,7 @@ SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybeFull, SEXP base) {
     double p_fact = (B == 2) ? 1. : log(B) / M_LN2;// <==> P / p_fact == P *log(2)/log(B)
     int max_nchar = -1; // := max_i { dig_needed[i] }
     mpfr_t R_i;
-    mpfr_init(R_i); /* with default precision */
+    mpfr_init(R_i); /* with default precision; set prec in R_asMPFR() */
     if(erange_is_int)
 	i_exp = INTEGER(exp);
     else
@@ -642,7 +649,7 @@ SEXP R_mpfr_ldexp(SEXP f, SEXP E, SEXP rnd_mode) {
 	mismatch = 0;
     SEXP val = PROTECT(allocVector(VECSXP, n)); nprot++;
     mpfr_t x_i;
-    mpfr_init(x_i); /* with default precision */
+    mpfr_init(x_i); /* with default precision; set prec in R_asMPFR() */
 
     SET_MISMATCH;
     for(int i=0; i < n; i++) {
@@ -710,7 +717,7 @@ SEXP R_mpfr_frexp(SEXP x, SEXP rnd_mode) {
 	ed_ = REAL(e);
 
     mpfr_t x_i, y_i;
-    mpfr_init(x_i);
+    mpfr_init(x_i); /* with default precision; set prec in R_asMPFR() */
     mpfr_init(y_i);
     mpfr_exp_t Ex = (mpfr_exp_t)0; // create and initialize "valgrindably"
     // Rboolean int_ok = TRUE;
