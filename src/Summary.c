@@ -23,11 +23,11 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 */
     mpfr_prec_t current_prec = mpfr_get_default_prec();
     int n = length(x),
-	return_list = (i_op < ANY),
-	remove_na = asLogical(na_rm), n_valid = 0, i;
+	return_list = (i_op < ANY), // return "mpfr1" list;  any() | all() return logical
+	remove_na = asLogical(na_rm);
 
     SEXP val = R_NilValue;
-    int *ans = NULL; /*"Wall", will be := LOGICAL(val)   for any() / all() only */
+    int ans = -1; /*"-Wall"; result only for any() | all() */
     mpfr_t R_i,
 	Summ, Sum2; /* for range(), max(), min(), sum(), prod() */
 
@@ -49,22 +49,20 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
     case PROD: mpfr_set_d (Summ, 1., MPFR_RNDZ); Rmpfr_set(1);
     case SUM:  mpfr_set_d (Summ, 0., MPFR_RNDZ); Rmpfr_set(1);
 
-    case ANY: val = ScalarLogical(FALSE); break;
-    case ALL: val = ScalarLogical(TRUE);  break;
+    case ANY: ans = FALSE; break;
+    case ALL: ans = TRUE;  break;
 
     default:
 	error("invalid op code (%d) in Summary_mpfr", i_op);
     }
 
-    if (!return_list) /* will return logical */
-	ans = LOGICAL(val);
-
-    for(i=0; i < n; i++) {
+    Rboolean Fini = FALSE;
+    for(int i=0; i < n && !Fini; i++) {
 	SEXP xi = VECTOR_ELT(x, i);
 	R_asMPFR(xi, R_i);
 
 	if(mpfr_nan_p(R_i)) { /* handling does not depend on i_op */
-/* 	    REprintf("Summary_mpfr(), i=%d :  R_i is NaN\n", i); */
+	    /* REprintf("Summary_mpfr(), i=%d :  R_i is NA/NaN\n", i); */
 	    if(remove_na) /* skip this NA / NAN entry: */
 		continue;
 	    else { /* result is NA */
@@ -83,10 +81,10 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 		    break;
 		    /*---------------------------------------------*/
 		case ANY:
-		    if(*ans == FALSE) *ans = NA_LOGICAL;
+		    if(ans == FALSE) ans = NA_LOGICAL;
 		    break;
 		case ALL:
-		    if(*ans == TRUE) *ans = NA_LOGICAL;
+		    if(ans == TRUE) ans = NA_LOGICAL;
 		    break;
 		}
 	    }
@@ -95,8 +93,9 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 		UNPROTECT(1);
 		return val;
 	    }
+	    else
+		continue; /* next i; */
 	}
-	else n_valid++;
 
 	if(return_list) { /* hence using  Summ */
 	    mpfr_prec_t i_prec = mpfr_get_prec(R_i);
@@ -123,12 +122,17 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
 	case PROD: mpfr_mul(Summ, Summ, R_i, MPFR_RNDN); break;
 	case SUM:  mpfr_add(Summ, Summ, R_i, MPFR_RNDN); break;
 
-	case ANY: if(!mpfr_zero_p(R_i)) *ans = TRUE; break;
-	case ALL: if( mpfr_zero_p(R_i)) *ans = FALSE; break;
+	case ANY: if(!mpfr_zero_p(R_i)) { ans = TRUE ; Fini=TRUE; }; break;
+	case ALL: if( mpfr_zero_p(R_i)) { ans = FALSE; Fini=TRUE; }; break;
 
 	}
     } /* for(i .. n) */
 
+#if 0
+    if(!return_list) /* any() or all() */
+	REprintf("Summary_mpfr(), at end: ans = %s\n",
+		 ans == NA_LOGICAL ? "NA" : (ans ? "TRUE" : "FALSE"));
+#endif
     mpfr_clear (R_i);
     switch(i_op) {
     case MAX:
@@ -151,7 +155,10 @@ SEXP Summary_mpfr(SEXP x, SEXP na_rm, SEXP op)
     }
 
     mpfr_free_cache();
-    if(return_list) UNPROTECT(1);
+    if(!return_list) /* any() or all() */
+	return ScalarLogical(ans);
+    // else
+    UNPROTECT(1);
     return val;
 } /* Summary_mpfr() */
 

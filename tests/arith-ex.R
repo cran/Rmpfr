@@ -125,6 +125,33 @@ stopifnot(identical(L <- x > 0.5, L & x),
 	  identical(L, x & L),
 	  identical(x > 0, x | L))
 
+## Summary() methods {including NA
+stopifnot(exprs = {
+    is.na(min(x))
+    is.na(max(x))
+    is.na(range(x))
+    is.na(sum(x))
+    is.na(prod(x))
+    min(x, na.rm=TRUE) == 0
+    max(x, na.rm=TRUE) == 1
+    range(x, na.rm=TRUE) == 0:1
+    all.equal(sum (x, na.rm=TRUE)*7,  2+3+5+6+7,  tolerance = 1e-28) # 1.0975e-30
+    prod(x, na.rm=TRUE) == 0
+    all.equal(180, prod(x[-1], na.rm=TRUE)*7^4, tol = 1e-15) # 1.579e-16
+    ##
+    ## all(), any()  had memory bug [PROTECT missing, but more, somehow]
+    !all(x)
+    is.na( all(x[-1]) )
+    any(x)
+    is.na(any(x[c(2,5)]))
+    ## do these *twice* {that triggered R-forge bug  #6764 }
+    ! all(x, na.rm=TRUE)
+      any(x, na.rm=TRUE)
+    ##
+    ! all(x, na.rm=TRUE)
+      any(x, na.rm=TRUE)
+})
+
 ##-------------- Modulo and "integer division" -------------
 
 ## R's	?Arithmetic :

@@ -7,6 +7,21 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
+\section{Changes in version 0.9-3 [2023-07-27, r394]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item .
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{any()} and \code{all()} no longer damage \R's internal
+      FALSE or TRUE, fixing R-forge Rmpfr bug #6764 by Andrew Manderson.
+    }
+  }
+}
+
+
 \section{Changes in version 0.9-2 [2023-04-21, r392]}{
   \subsection{USER-VISIBLE CHANGES}{
     \itemize{

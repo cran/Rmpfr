@@ -11,6 +11,7 @@ storage.mode(.Summary.codes) <- "integer"
 setMethod("Summary", "mpfr",
 	  function(x, ..., na.rm=FALSE) {
 	      iop <- .Summary.codes[.Generic]
+              ## --> ../src/Summary.c
 	      r <- .Call(Summary_mpfr, if(length(x)) c(x, ...) else x, na.rm, iop)
 	      if(iop <= 5)
 		  new("mpfr", r)
