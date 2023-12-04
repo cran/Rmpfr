@@ -7,12 +7,18 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
-\section{Changes in version 0.9-3 [2023-07-27, r394]}{
-  \subsection{NEW FEATURES}{
+\section{Changes in version 0.9-4 [2023-12-04, r399]}{
+  \subsection{BUG FIXES}{
     \itemize{
-      \item .
+      \item Fixed Windows-only (long = 32 bit) bug; adapt mpfr1-validity() check.
+      \item allow `.Platform$endian != "little"  to 'work' in validity().
+      \item format ("\%ld" etc) fixes in \file{src/utils.c}
+      \item fix "lost braces"
     }
   }
+}
+
+\section{Changes in version 0.9-3 [2023-07-27, r394]}{
   \subsection{BUG FIXES}{
     \itemize{
       \item \code{any()} and \code{all()} no longer damage \R's internal
@@ -20,7 +26,6 @@
     }
   }
 }
-
 
 \section{Changes in version 0.9-2 [2023-04-21, r392]}{
   \subsection{USER-VISIBLE CHANGES}{
@@ -171,7 +176,7 @@
     \itemize{
       \item No longer include \file{Rdefines.h} as it is somewhat deprecated.
 
-      \item update \file{configure{.ac}} (for \command{autoconf 2.71}).
+      \item update both \file{configure\{,.ac\}} (for \command{autoconf 2.71}).
     }
   }
 }

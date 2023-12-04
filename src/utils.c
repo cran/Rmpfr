@@ -305,9 +305,9 @@ int my_mpfr_round (mpfr_t R, long prec, mpfr_t X, mpfr_rnd_t RND)
 {
     int ans;
     if(prec < MPFR_PREC_MIN)
-	error("prec = %d < %d  is too small", prec, MPFR_PREC_MIN);
+	error("prec = %ld < %ld  is too small", prec, (long)MPFR_PREC_MIN);
     if(prec > MPFR_PREC_MAX)
-	error("prec = %d > %d  is too large", prec, MPFR_PREC_MAX);
+	error("prec = %ld > %ld  is too large", prec, (long)MPFR_PREC_MAX);
     mpfr_set(R, X, RND);
     ans = mpfr_prec_round(R, (mpfr_prec_t) prec, RND);
     return ans;
@@ -393,9 +393,9 @@ SEXP R_mpfr_get_erange(SEXP kind_) {
 	case min_emax: r[j] = mpfr_get_emax_min(); if(int_ok) int_ok=FALSE; break;
 	case max_emax: r[j] = mpfr_get_emax_max(); if(int_ok) int_ok=FALSE; break;
 	default:
-	    error("invalid kind[j(=%d)] (code = %d) in R_mpfr_get_erange()", j, kind);
+	    error("invalid kind[j(=%d)] (code = %ld) in R_mpfr_get_erange()", j, (long)kind[j]);
 	}
-	R_mpfr_dbg_printf(1,"R_mpfr_get_erange(%d): %ld\n", kind[j], (long)r[j]);
+	R_mpfr_dbg_printf(1,"R_mpfr_get_erange(%ld): %ld\n", (long)kind[j], (long)r[j]);
     }
     SEXP ans;
     // int_ok: only now know if we can return integer or need double

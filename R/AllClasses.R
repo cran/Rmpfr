@@ -9,6 +9,11 @@
 ##     and 'd' (in mpfr a pointer to the limbs) is *not* used and not defined.
 ## Since Jan.2018, Rmpfr 0.7-0, we reflect this by using a 0-length 'd' slot
 
+long_is_4b <- (.Machine$sizeof.long == 4L) # long = 32 bit, on Windows
+if(long_is_4b)
+    specExps <- 2:0 - bitwShiftR(-1L, 1L) # -2147483647 -2147483646 -2147483645 (integer)
+
+
 setClass("mpfr1", ## a single Multi-precision float number
 	 slots = c(prec = "integer", # precision in bits
                    exp = "integer",  # exponent
@@ -34,16 +39,28 @@ setClass("mpfr1", ## a single Multi-precision float number
 		     else TRUE
 		 } else ## not regular: valid if exp slot shows so
 		     if(gmp.numb == 64) {  ## ex of length 2
-			 if((is.na(ex[2]) && any(ex[[1]] == (1:3))) ||  ## mpfr 3.1.5, Fedora 26
-			    (ex[1] == ex[2] && any(ex[1]+2^31 == 1:3))) ## mpfr 3.1.3, Windows
+			 if((long_is_4b && ## Windows
+			     ((ex[1] == ex[2] && any(ex[1] == specExps)) || ## mpfr 3.1.3, "old" R/Rtools
+                              ( -1L  == ex[2] && any(ex[1] == specExps)))   ## new Rtools (2023)
+                            ) || (!long_is_4b &&
+                                  (is.na(ex[2]) && any(ex[[1]] == (1:3)))) ## mpfr 3.1.5, Fedora 26++
+                         )
 			     TRUE
+			 else if(.Platform$endian != "little") {
+                             message(gettextf("@exp possibly invalid for non-regular number _or_ it seems so on a platform with endian=\"%s\".
+                                              Please report to maintainer(\"Rmpfr\")", .Platform$endian), domain=NA)
+                             TRUE
+                         }
 			 else
-			     "'exp' slot invalid for non-regular number (64b, length(d) == 0)"
+			     sprintf("@exp invalid for non-regular number (64b, le(d) == 0, |long|=%d bytes)",
+                                     .Machine$sizeof.long)
+
 		     } else { ## gmp.numb == 32: 'exp' slot of length one
 			 if(any(ex+2^31 == 1:3))
 			     TRUE
 			 else
-			     "'exp' slot invalid for non-regular number (32b, length(d) == 0)"
+			     sprintf("@exp invalid for non-regular number (32b, le(d) == 0, |long|=%d bytes)",
+                                     .Machine$sizeof.long)
 		     }
 	     }
 	 })
@@ -52,7 +69,7 @@ setClass("mpfr", ## a *vector* of "mpfr1", i.e., multi-precision float numbers
 	 contains = "list", ## of "mpfr1" entries:
 	 validity = function(object) {
 	     ## should be fast ( ==> not using	is(., "mpfr1") ) :
-	     if(all(lengths(cls <- lapply(object@.Data, class)) == 1L) && 
+	     if(all(lengths(cls <- lapply(object@.Data, class)) == 1L) &&
 		all(unlist(cls) == "mpfr1"))
 		 return(TRUE)
 	     ## else

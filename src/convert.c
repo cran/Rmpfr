@@ -81,7 +81,7 @@ extern
 # define R_mpfr_FILL_EXP				\
     R_mpfr_dbg_printf(2,"_exp = 0x%lx\n",r->_mpfr_exp);	\
     ex[0] = (int) RIGHT_HALF(r->_mpfr_exp);		\
-    ex[1] = (int) (r->_mpfr_exp >> 32)
+    ex[1] = (int) (((long long)r->_mpfr_exp) >> 32)
 
 # define R_mpfr_GET_EXP							\
     r->_mpfr_exp = (mpfr_exp_t) (RIGHT_HALF(ex[0]) | LEFT_SHIFT(ex1));	\

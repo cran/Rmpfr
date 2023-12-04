@@ -6,6 +6,8 @@ all.EQ <- function(x,y, tolerance = 2^-98, ...) # very small tol. for MPFR
     all.equal(x, y, tolerance=tolerance, ...)
 warningI <- function(...) warning(..., immediate. = TRUE)
 
+unlist(.Platform)
+
 ## Check that we got the "which.*" methods also from "bigq":
 bcl <- c("ANY", "bigq", "bigz", "mpfr")
 ##if(packageVersion("gmp") >= "0.5-8") {
