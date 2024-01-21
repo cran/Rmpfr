@@ -49,8 +49,8 @@ as.bigz.mpfr <-
 	      is.na(mod) || (length(mod) == 1L && is.numeric(mod)))
     dx <- dim(x)
 ### FIXME or rather  roundMpfr()  [or even round "RND" as in mpfr_get_z() above] ??
-    cx <- format(trunc(x), drop0trailing=TRUE)
-    dim(cx) <- dx ## needed?? {should *not* be, as in base R!}
+    cx <- format(trunc(x), scientific=FALSE, drop0trailing=TRUE)
+    if(!is.null(dx <- dim(x))) dim(cx) <- dx ## needed?? {should *not* be, as in base R!}
     ..as.bigz(cx, mod)
 }
 setAs("mpfr", "bigz", function(from) .mpfr2bigz(from))
@@ -76,6 +76,25 @@ setAs("mpfr", "bigz", function(from) .mpfr2bigz(from))
 }
 setAs("bigq", "mpfr", function(from) ..bigq2mpfr(from))
 
-## TODO(?)  "mpfr" ->  "bigq"
-## a) in the spirit  MASS::fractions()    or
-## b) "native" MPFR "support" -- not yet available: has mpfr_get_z() but not get_q()
+
+
+## not exported
+##' @title get denominator 'd' of  m = n/d
+##' @param m an mpfr number vector
+##' @return the denominator 'd' (also mpfr vector)
+##' @author Martin Maechler
+getDenom <-  function(m) {
+    ## stopifnot(is.mpfr(m))
+    e <- pmax(0L, -.mpfr2exp(m)) # 2-exponents to multiply with; integer *iff* ....
+    pre <- getPrec(m)
+    mpfr(2, pre)^(e + pre) ## MM: it *seems* that (e + pre -1) works too ?
+}
+
+## relies on .mpfr2bigz()  above  {which has TODO s !}
+.mpfr2bigq <- function(x) {
+    stopifnot(is.mpfr(x))
+    d <- getDenom(x)
+    as.bigq(.mpfr2bigz(x*d),
+            .mpfr2bigz( d ))
+}
+

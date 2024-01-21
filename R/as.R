@@ -95,8 +95,10 @@ setAs("logical", "mpfr", function(from) .mpfr(from,   2L))
 ## TODO?  base=16 for "0x" or "0X" prefix -- but base must have length 1 ..
 setAs("character", "mpfr", function(from) mpfr(from))
 
-setAs("mpfr", "numeric", function(from) .Call(mpfr2d, from, rnd.mode="N"))
-setAs("mpfr", "integer", function(from) .Call(mpfr2i, from, rnd.mode="N"))
+.mpfr2d <- function(from) .Call(mpfr2d, from, rnd.mode="N")
+.mpfr2i <- function(from) .Call(mpfr2i, from, rnd.mode="N")
+setAs("mpfr", "numeric", .mpfr2d)
+setAs("mpfr", "integer", .mpfr2i)
 setMethod("as.numeric", "mpfr", function(x, rnd.mode="N") .Call(mpfr2d, x, rnd.mode))
 ## "Z": round towards [Z]ero -- crucial for as.integer() :
 setMethod("as.integer", "mpfr", function(x, rnd.mode="Z") .Call(mpfr2i, x, rnd.mode))

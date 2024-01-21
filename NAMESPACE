@@ -4,6 +4,7 @@ useDynLib(Rmpfr, .registration=TRUE)
 
 ## The user can and typically should just use  mpfr(<bigz>)  or  mpfr(<bigq>)
 export(.mpfr2bigz, .bigz2mpfr, .bigq2mpfr,
+       .mpfr2bigq, # new in Jan. 2024
        ## e.g., for use in gmp :: Math.bigz & Math.bigq :
        ..bigz2mpfr, ..bigq2mpfr)
 
@@ -96,6 +97,7 @@ export(.mpfr, .mpfr.
        , ".mpfr_sign"
        ## , ".mpfr_subset"
        , ".mpfr2str"
+       , .mpfr2d, .mpfr2i
        , .mpfr_formatinfo
        , .mpfr2exp
        ## , ".mpfrA.subset"

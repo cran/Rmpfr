@@ -105,19 +105,20 @@ stopifnot(all.equal(p2, pn2, tol = 6 * 2^-e2)) # '4 *' needed
 ## 1) Use maximal ranges:
 (old_eranges <- .mpfr_erange()) # typically -/+ 2^30
 (myERng <- (1-2^-52) * .mpfr_erange(c("min.emin","max.emax")))
-(doIncr <- !isTRUE(all.equal(unname(myERng), unname(old_eranges))))
+(doIncr <- !isTRUE(all.equal(unname(myERng), unname(old_eranges)))) # ==>
+## TRUE only if long is 64-bit, i.e., *not* on Windows
 if(doIncr) .mpfr_erange_set(value = myERng)
 
-log2(abs(.mpfr_erange()))# 62 62 if the above increase worked
-(lrgOK <- all(log2(abs(.mpfr_erange())) >= 62))
-                                        # currently(2023-01) FALSE on Windows
+log2(abs(.mpfr_erange()))# 62 62 if(doIncr) i.e. not on Windows
+(lrgOK <- all(log2(abs(.mpfr_erange())) >= 62)) # FALSE on Windows
 ## The largest quantile for which our mpfr-ized qnorm() does *NOT* underflow :
 cM <- if(doX) { "2528468770.343293436810768159197281514373932815851856314908753969469064"
       } else    "2528468770.34329343681"
 ##               1 3 5 7 9  1 3 5 7 9 1 3 5 7 9 1 3 5 7 9 1 3 5 7 9 1 3 5 7 9 1 3 5 7 9 1 3
 ##                       10         20        30        40        50        60        70
 (qM <- mpfr(cM))
-(pM <- pnorm(-qM)) # precision  233   bits  if(doX)
+(pM <- pnorm(-qM)) # precision   if(doX) 233 else 70  bits of precision ;
+## |--> 0 on Windows {limited erange}; otherwise and if(doX) :
 ## 7.64890682545699845135633468495894619457903458325606933043966616334460003e-1388255822130839040
 log(pM) # 233 bits: -3196577161300663205.8575919621115614148120323933633827052786873078552904
 

@@ -167,12 +167,11 @@ int my_mpfr_lbeta(mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
     mpfr_prec_t p_ab = max2_prec(mpfr_get_prec(a), mpfr_get_prec(b));
     if(mpfr_get_prec(R) < p_ab)
 	mpfr_prec_round(R, p_ab, RND);// so prec(R) = max( prec(a), prec(b) )
-    int ans;
     mpfr_t s;
     mpfr_init2(s, p_ab);
 
     /* "FIXME": check each 'ans' below, and return when not ok ... */
-    ans = mpfr_add(s, a, b, RND);
+    int ans = mpfr_add(s, a, b, RND);
 
     if(mpfr_integer_p(s) && mpfr_sgn(s) <= 0) { // (a + b) is integer <= 0
 	if(!mpfr_integer_p(a) && !mpfr_integer_p(b)) {
@@ -239,16 +238,19 @@ int my_mpfr_lbeta(mpfr_t R, mpfr_t a, mpfr_t b, mpfr_rnd_t RND)
  */
 int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mpfr_rnd_t RND)
 {
-    int ans;
-    long i;
-    mpfr_t r, x;
     mpfr_prec_t p_X = mpfr_get_prec(X);
 
+    mpfr_t r, x;
     mpfr_init2(x, p_X); mpfr_set(x, X, RND);
     mpfr_init2(r, p_X);
+    if(mpfr_integer_p(X) && n > 0 && mpfr_cmp_si(X, n) >= 0 && mpfr_cmp_si(X, 2*n) < 0) { // integer X, 0 <= X-n < n ;
+	/* ==> choose(X,n) == choose(X, X-n) ; X-n is smaller => faster: do  n <--> X-n  */
+	mpfr_sub_si(r, X, n, RND); /* r = X-n */
+	n = mpfr_get_si(r, RND);
+    }
     if(n > 0) {
 	mpfr_set(r, X, RND);
-	for(i=1; i < n; ) {
+	for(long i=1; i < n; ) {
 	    if(!(i % 100000)) R_CheckUserInterrupt(); // for *large* n
 	    mpfr_sub_si(x, x, 1L, RND); // x = X - i
 	    mpfr_mul   (r, r, x, RND); // r := r * x = X(X-1)..(X-i)
@@ -260,9 +262,11 @@ int my_mpfr_choose (mpfr_t R, long n, mpfr_t X, mpfr_rnd_t RND)
 #endif
 	}
     }
+    else if(n < 0) // ==> result 0 as for R's choose()
+	mpfr_set_zero(r, +1);
     else // n = 0
 	mpfr_set_si(r, (long) 1, RND);
-    ans = mpfr_set(R, r, RND);
+    int ans = mpfr_set(R, r, RND);
     mpfr_clear (x);
     mpfr_clear (r);
     return ans;
@@ -531,9 +535,9 @@ SEXP _FNAME(SEXP x) {							\
 
 R_MPFR_Logic_Function(R_mpfr_is_finite,   mpfr_number_p)
 R_MPFR_Logic_Function(R_mpfr_is_infinite, mpfr_inf_p)
-R_MPFR_Logic_Function(R_mpfr_is_integer,  mpfr_integer_p)
+R_MPFR_Logic_Function(R_mpfr_is_integer,  mpfr_integer_p) // is.whole.mpfr() or .mpfr.is.whole(x)
 R_MPFR_Logic_Function(R_mpfr_is_na,       mpfr_nan_p)
-R_MPFR_Logic_Function(R_mpfr_is_zero,     mpfr_zero_p)
+R_MPFR_Logic_Function(R_mpfr_is_zero,     mpfr_zero_p)   // mpfrIs0()
 
 #define R_MPFRarray_Logic_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x) {							\
@@ -561,9 +565,9 @@ SEXP _FNAME(SEXP x) {							\
 
 R_MPFRarray_Logic_Function(R_mpfr_is_finite_A,   mpfr_number_p)
 R_MPFRarray_Logic_Function(R_mpfr_is_infinite_A, mpfr_inf_p)
-R_MPFRarray_Logic_Function(R_mpfr_is_integer_A,  mpfr_integer_p)
+R_MPFRarray_Logic_Function(R_mpfr_is_integer_A,  mpfr_integer_p) // is.whole() ..
 R_MPFRarray_Logic_Function(R_mpfr_is_na_A,       mpfr_nan_p)
-R_MPFRarray_Logic_Function(R_mpfr_is_zero_A,     mpfr_zero_p)
+R_MPFRarray_Logic_Function(R_mpfr_is_zero_A,     mpfr_zero_p) // mpfrIs0()
 
 
 SEXP R_mpfr_fac (SEXP n_, SEXP prec, SEXP rnd_mode)

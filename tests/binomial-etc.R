@@ -1,12 +1,16 @@
 stopifnot(require("Rmpfr"))
 
-stopifnot(chooseMpfr(1:10, 0) == 1,# failed earlier
-	  chooseMpfr(20, 0:20) == choose(20, 0:20),
-	  chooseMpfr(19, 0:20) == choose(19, 0:20),
-	  chooseMpfr	(30, 4:30) * (-1)^(4:30) ==
-	  chooseMpfr.all(30, k0=4, alternating=TRUE)
-          )
-
+n <- 10000 + 0:10
+stopifnot(exprs = {
+    chooseMpfr(1:10, 0) == 1 # failed earlier
+    chooseMpfr(20, 0:20) == choose(20, 0:20)
+    chooseMpfr(19, 0:20) == choose(19, 0:20)
+    chooseMpfr	(30, 4:30) * (-1)^(4:30) ==
+        chooseMpfr.all(30, k0=4, alternating=TRUE)
+    chooseMpfr(mpfr(1111, 2^8), 1111) == 1
+    chooseMpfr(mpfr(n,256), n  ) == 1 # was wrong in <= 2023
+    chooseMpfr(mpfr(n,256), n-1) == n #  "    "
+})
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
 
 ## sumBinomMpfr() ... had embarrasing bug for a while

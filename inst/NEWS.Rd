@@ -7,6 +7,38 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
+\section{Changes in version 0.9-5 [2024-01-20, r407]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item New \code{.mpfr2bigq(m)} transforms <mpfr>-number vectors to
+      big rational aka \code{bigq} ones (from package \CRANpkg{gmp}).
+
+      \item New low-level utility functions \code{.mpfr2d()} and \code{.mpfr2i()}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{x == y} and other comparisons of two \code{"mpfr"}
+      operands now return \code{NaN} when an operand is \code{NaN} (mpfr
+      numbers are never \code{NA}).
+
+      \item \code{dbinom(x, *)} and \code{dnbinom(x, *)} now use the
+      precision of \code{x} when it is an (integer valued) \code{"mpfr"}
+      object, and then notice or even error when precision is lost as
+      \code{x} is coerced to integer.
+
+      \item (erange-related comments in examples)
+
+      \item \code{chooseMpfr(a, n)} gives \code{0} when \code{n < 0}, as
+      \R's \code{choose()} and when \code{a} is integer valued, may use
+      the equivalent of \code{chooseMpfr(a, a-n)} when \code{a-n < n} to be
+      more accurate and faster.
+
+      \item \code{.mpfr2bigz(m)} now also works for really large \code{m}.
+    }
+  }
+}
+
 \section{Changes in version 0.9-4 [2023-12-04, r399]}{
   \subsection{BUG FIXES}{
     \itemize{

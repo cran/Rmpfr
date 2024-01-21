@@ -151,7 +151,8 @@ pochMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
 ##' We want to do this well for *integer* n
 chooseMpfr <- function(a, n, rnd.mode = c('N','D','U','Z','A')) {
     if(!length(n)) return(a[FALSE])
-    stopifnot(is.integer(n <- as.integer(n)), n >= 0)
+    stopifnot(is.integer(n <- as.integer(n)))
+    ## if(n < 0) ==> result 0  as for base::choose()
     if(!is(a, "mpfr")) { ## use high enough default precision
         lc <- lchoose(a,n)
         precB <- if(any(iF <- is.finite(lc))) ceiling(max(lc[iF])/log(2)) else 0

@@ -152,11 +152,15 @@ dbinom <- function(x, size, prob, log = FALSE,
 {
     if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) ## standard R
 	stats__dbinom(x, size, prob, log=log)
-    else if((s.mp <- is.mpfr(size)) |
-	    (p.mp <- is.mpfr(prob)) || is.mpfr(x)) {
+    else if((s.mp <- is.mpfr(size)) | (p.mp <- is.mpfr(prob)) | (x.mp <- is.mpfr(x))) {
 	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
-        if(!is.integer(x)) x <- as.integer(x) # chooseMpfr() needs
-	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
+	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x)) # full prec(x)
+        if(!is.integer(x) && !useLog) {
+            xi <- as.integer(x) # chooseMpfr() needs it
+            if(x.mp) (if(anyNA(xi) || any(xi != x)) stop else message)(
+                "'x' coerced from \"mpfr\" to integer -- necessary for chooseMpfr()")
+            x <- xi
+        }
 	if(!s.mp) size <- mpfr(size, prec)
 	if(!p.mp) prob <- mpfr(prob, prec)
 	## n:= size, p:= prob,	compute	 P(x) = choose(n, x) p^x (1-p)^(n-x)
@@ -193,9 +197,13 @@ dnbinom <- function (x, size, prob, mu, log = FALSE, useLog = any(x > 1e6)) {
             stats__dnbinom(x, size, prob=prob, log=log)
     } else if((s.mp <- is.mpfr(size)) | (p.mp <- is.mpfr(prob)) | (x.mp <- is.mpfr(x))) {
 	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
-        if(!is.integer(x) && !useLog)
-            x <- as.integer(x) # chooseMpfr() needs it
 	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x))
+        if(!is.integer(x) && !useLog) {
+            xi <- as.integer(x) # chooseMpfr() needs it
+            if(x.mp) (if(anyNA(xi) || any(xi != x)) stop else message)(
+                "'x' coerced from \"mpfr\" to integer -- necessary for chooseMpfr()")
+            x <- xi
+        }
 	if(!s.mp) size <- mpfr(size, prec)
 	if(!p.mp) prob <- mpfr(prob, prec)
         if(!x.mp && !is.integer(x)) x <- mpfr(x, prec)

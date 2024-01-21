@@ -140,3 +140,16 @@ assertError( mpfr(as.bigz(3), precBits= 1e11) )
 
 stopifnot(identical(mpfr(NULL), mpfr(logical())))
 
+## mpfr --> bigInteger "bigz"
+Pi <- Const("pi", prec = 300)
+twoP <- mpfr(2, 100)^(-2:80)
+m <- Pi * twoP
+L <- mpfr(2, 256)^1000
+stopifnot(exprs = {
+    .mpfr2bigz(Pi) == 3
+    .mpfr2bigz(twoP) == as.bigz(c(0,0, 2^(0:80)))
+    .mpfr2bigz(m)       == floor(m)
+    .mpfr2bigz(m / L)   == 0
+    .mpfr2bigz(m * L)   == floor(m * L)   ## used to fail
+    .mpfr2bigz(m * L^8) == floor(m * L^8) ##   (ditto)
+})

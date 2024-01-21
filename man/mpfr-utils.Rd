@@ -11,6 +11,8 @@
 \alias{print.mpfr}
 \alias{print.mpfrArray}
 \alias{toNum}
+\alias{.mpfr2d}
+\alias{.mpfr2i}
 \alias{.mpfr2list}
 %-
 \alias{.mpfr_formatinfo}
@@ -57,6 +59,9 @@ mpfr_default_prec(prec)
       exponent.plus = getOption("Rmpfr.print.exponent.plus", TRUE),
       \dots)
 toNum(from, rnd.mode = c('N','D','U','Z','A'))
+.mpfr2d(from)
+.mpfr2i(from)
+
 mpfr2array(x, dim, dimnames = NULL, check = FALSE)
 
 .mpfr2list(x, names = FALSE)
@@ -196,6 +201,9 @@ mpfrImport(mxp)
   respectively.  It should be equivalent to \code{as(m, "array")} or
   \code{... "matrix"}.   Note that the slightly more general
   \code{\link{asNumeric}()} is preferred now.
+  \code{.mpfr2d()} is similar to but simpler than \code{toNum()}, whereas
+  \code{.mpfr2i()} is an analogue low level utility for
+  \code{\link{as.integer}(<mpfr>)}.
 
   \code{mpfr2array()} a slightly more flexible alternative to
   \code{dim(.) <- dd}.
@@ -298,16 +306,28 @@ B6
 .mpfr_erange_kinds
 .mpfr_erange(.mpfr_erange_kinds)
 eLimits <- .mpfr_erange(c("min.emin", "max.emin", "min.emax", "max.emax"))
-## Typically true in "current" MPFR versions:
-eLimits == c(-1,1, -1,1) * (2^62 - 1)
+## Typically true in MPFR versions *iff* long is 64-bit, i.e. *not* on Windows
+if(.Machine$sizeof.long == 8L) {
+    eLimits == c(-1,1, -1,1) * (2^62 - 1)
+} else if(.Machine$sizeof.long == 4L) # on Windows
+    eLimits == c(-1,1, -1,1) * (2^30 - 1)
 
 
 ## Looking at internal representation [for power users only!]:
 
 i8 <- mpfr(-2:5, 32)
 x4 <- mpfr(c(NA, NaN, -Inf, Inf), 32)
+stopifnot(exprs = {
+    identical(x4[1], x4[2])
+    is.na(x4[1] == x4[2]) # <- was *wrong* in Rmpfr <= 0.9-4
+    is.na(x4[1] != x4[2]) #  (ditto)
+    identical(x4 < i8[1:4], c(NA,NA, TRUE,FALSE))
+    !is.finite(x4)
+    identical(is.infinite(x4), c(FALSE,FALSE, TRUE,TRUE))
+})
 ## The output of the following depends on the GMP "numb" size
-## (32 bit vs. 64 bit), and may be even more platform specific:
+## (32 bit vs. 64 bit), *and* additionally
+## on sizeof.long (mostly non-Windows <-> Windows, see above):
 str( .mpfr2list(i8) )
 str( .mpfr2list(x4, names = TRUE) )
 

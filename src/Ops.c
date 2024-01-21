@@ -742,6 +742,9 @@ SEXP Compare_mpfr(SEXP x, SEXP y, SEXP op)
 	R_asMPFR(VECTOR_ELT(xD, i % nx), x_i);
 	R_asMPFR(VECTOR_ELT(yD, i % ny), y_i);
 
+      if(mpfr_nan_p(x_i) || mpfr_nan_p(y_i)) {
+	  r[i] = NA_LOGICAL;
+      } else {
 	switch(i_op) {
 	case 1: /* == */ r[i] = mpfr_equal_p(x_i, y_i); break;
 	case 2: /* >  */ r[i] = mpfr_greater_p(x_i, y_i); break;
@@ -752,6 +755,7 @@ SEXP Compare_mpfr(SEXP x, SEXP y, SEXP op)
 	default:
 	    error("invalid op code (%d) in Compare_mpfr", i_op);
 	}
+      }
     }
     MISMATCH_WARN;
 

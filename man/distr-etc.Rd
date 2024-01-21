@@ -79,7 +79,8 @@ print(dnorm(     -5:5), digits=18)
 (old_eranges <- .mpfr_erange()) # typically -/+ 2^30:
 log2(abs(old_eranges))   # 30  30
 .mpfr_erange_set(value = (1-2^-52)*.mpfr_erange(c("min.emin","max.emax")))
-log2(abs(.mpfr_erange()))# 62  62  **iff** setup -- 2023-01: *not* on Winbuilder
+log2(abs(.mpfr_erange()))# 62  62  *if* setup -- 2023-01: *not* on Winbuilder, nor
+## other Windows where long is 4 bytes (32 bit) and the erange typically cannot be extended.
 tens <- mpfr(10^(4:7), 128)
 pnorm(tens, lower.tail=FALSE, log.p=TRUE) # "works" (iff ...)
 ## "the" boundary:

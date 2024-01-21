@@ -1,10 +1,11 @@
 \name{gmp-conversions}
+\title{Conversion Utilities gmp <-> Rmpfr}
 \alias{.bigq2mpfr}
 \alias{.bigz2mpfr}
 \alias{.mpfr2bigz}
+\alias{.mpfr2bigq}
 \alias{coerce,bigq,mpfr-method}
 \alias{coerce,bigz,mpfr-method}
-\title{Conversion Utilities gmp <-> Rmpfr}
 \description{
   Coerce from and to big integers (\code{\link[gmp]{bigz}}) and
   \code{\link{mpfr}} numbers.
@@ -16,9 +17,10 @@
 .bigz2mpfr(x, precB = NULL, rnd.mode = c('N','D','U','Z','A'))
 .bigq2mpfr(x, precB = NULL, rnd.mode = c('N','D','U','Z','A'))
 .mpfr2bigz(x, mod = NA)
+.mpfr2bigq(x)
 
-% as(x, "mpfr")
-}
+}% TODO as(x, "mpfr")
+
 \arguments{
   \item{x}{an \R object of class \code{bigz}, \code{bigq} or \code{mpfr}
     respectively.}
@@ -58,5 +60,25 @@
  MP <- as(sq, "mpfr")
  stopifnot(identical(MP, .bigq2mpfr(sq)),
            SS == MP * as(2, "mpfr")^100)
+
+ ## New since 2024-01-20:   mpfr --> big rational "bigq"
+ Pi <- Const("pi", 128)
+ m <- Pi* 2^(-5:5)
+ (m <- c(m, mpfr(2, 128)^(-5:5)))
+
+ getDenom <- Rmpfr:::getDenom
+ stopifnot(is.whole(m * (d.m <- getDenom(m))))
+ stopifnot(all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 2^-130)) # I see even
+ all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 0) # TRUE
+
+ m <- m * mpfr(2, 128)^200 # quite a bit larger
+ stopifnot(is.whole(m * (d.m <- getDenom(m))))
+ stopifnot(all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 2^-130)) # I see even
+ all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 0) # TRUE
+
+ m2 <- m * mpfr(2, 128)^20000 ## really huge
+ stopifnot(is.whole(m2 * (d.m2 <- getDenom(m2))))
+ stopifnot(all.equal(m2, mpfr(.mpfr2bigq(m2), 130), tolerance = 2^-130)) # I see even
+           all.equal(m2, mpfr(.mpfr2bigq(m2), 130), tolerance = 0) # TRUE
 }
 \keyword{arith}% <- or better ?
