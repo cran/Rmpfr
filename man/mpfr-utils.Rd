@@ -200,7 +200,7 @@ mpfrImport(mxp)
   \code{"\linkS4class{mpfrArray}"} or \code{"\linkS4class{mpfrMatrix}"},
   respectively.  It should be equivalent to \code{as(m, "array")} or
   \code{... "matrix"}.   Note that the slightly more general
-  \code{\link{asNumeric}()} is preferred now.
+  \code{\link[gmp]{asNumeric}()} from \CRANpkg{gmp} is preferred now.
   \code{.mpfr2d()} is similar to but simpler than \code{toNum()}, whereas
   \code{.mpfr2i()} is an analogue low level utility for
   \code{\link{as.integer}(<mpfr>)}.

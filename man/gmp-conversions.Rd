@@ -66,19 +66,23 @@
  m <- Pi* 2^(-5:5)
  (m <- c(m, mpfr(2, 128)^(-5:5)))
 
+ ## 1 x large num/denom, then 2^(-5:5) as frac
+ tail( Q <- .mpfr2bigq(m) , 12)
  getDenom <- Rmpfr:::getDenom
  stopifnot(is.whole(m * (d.m <- getDenom(m))))
- stopifnot(all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 2^-130)) # I see even
- all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 0) # TRUE
+ stopifnot(all.equal(m, mpfr(Q, 130), tolerance = 2^-130)) # I see even
+           all.equal(m, mpfr(Q, 130), tolerance = 0) # TRUE
 
  m <- m * mpfr(2, 128)^200 # quite a bit larger
+ tail( Q. <- .mpfr2bigq(m) , 12) # large integers ..
  stopifnot(is.whole(m * (d.m <- getDenom(m))))
- stopifnot(all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 2^-130)) # I see even
- all.equal(m, mpfr(.mpfr2bigq(m), 130), tolerance = 0) # TRUE
+ stopifnot(all.equal(m, mpfr(Q., 130), tolerance = 2^-130)) # I see even
+           all.equal(m, mpfr(Q., 130), tolerance = 0) # TRUE
 
  m2 <- m * mpfr(2, 128)^20000 ## really huge
  stopifnot(is.whole(m2 * (d.m2 <- getDenom(m2))))
- stopifnot(all.equal(m2, mpfr(.mpfr2bigq(m2), 130), tolerance = 2^-130)) # I see even
-           all.equal(m2, mpfr(.mpfr2bigq(m2), 130), tolerance = 0) # TRUE
+ denominator(Q2 <- .mpfr2bigq(m2)) ## all 1 ! (all m2 ~~ 2^20200 )
+ stopifnot(all.equal(m2, mpfr(Q2, 130), tolerance = 2^-130)) # I see even
+           all.equal(m2, mpfr(Q2, 130), tolerance = 0) # TRUE
 }
 \keyword{arith}% <- or better ?

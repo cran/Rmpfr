@@ -196,7 +196,7 @@ formatDec <- function(x, precBits = min(getPrec(x)), digits=decdigits,
     if (is.character(x)) x <- as.numeric(x)
     if (is.numeric(x)) x <- mpfr(x, precBits)
     else if (is.complex(x)) stop("complex 'x' are not supported in \"Rmpfr\" (yet)")
-    decdigits <- ceiling(log(2^precBits, 10)) + 1
+    decdigits <- ceiling(precBits*log10(2)) + 1
     chx <- format(x, digits=max(digits, decdigits), nsmall=nsmall,
                   scientific=scientific, style=style, ...)
     if (decimalPointAlign) {

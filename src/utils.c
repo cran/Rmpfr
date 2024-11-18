@@ -515,7 +515,7 @@ SEXP const_asMpfr(SEXP I, SEXP prec, SEXP rnd_mode)
  */
 #define R_MPFR_Logic_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x) {							\
-    SEXP D = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));/* R list() */	\
+    SEXP D = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));/* R list() */	\
     int n = length(D), i;						\
     SEXP val = PROTECT(allocVector(LGLSXP, n));				\
     int *r = LOGICAL(val);						\
@@ -541,9 +541,9 @@ R_MPFR_Logic_Function(R_mpfr_is_zero,     mpfr_zero_p)   // mpfrIs0()
 
 #define R_MPFRarray_Logic_Function(_FNAME, _MPFR_NAME)			\
 SEXP _FNAME(SEXP x) {							\
-    SEXP D = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym)),/* R list() */	\
-       dim = PROTECT(GET_SLOT(x, Rmpfr_Dim_Sym)),			\
-        dn = PROTECT(GET_SLOT(x, Rmpfr_Dimnames_Sym));			\
+    SEXP D = PROTECT(R_do_slot(x, Rmpfr_Data_Sym)),/* R list() */	\
+       dim = PROTECT(R_do_slot(x, Rmpfr_Dim_Sym)),			\
+        dn = PROTECT(R_do_slot(x, Rmpfr_Dimnames_Sym));			\
     int n = length(D), i;						\
     SEXP val = PROTECT(allocVector(LGLSXP, n));				\
     int *r = LOGICAL(val);						\
@@ -603,8 +603,8 @@ SEXP R_mpfr_fac (SEXP n_, SEXP prec, SEXP rnd_mode)
  */
 #define R_MPFR_2_Numeric_Function(_FNAME, _MPFR_NAME)	\
 SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {		\
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));	\
-    SEXP yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));	\
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));	\
+    SEXP yD = PROTECT(R_do_slot(y, Rmpfr_Data_Sym));	\
     mpfr_rnd_t rnd = R_rnd2MP(rnd_mode);		\
     int nx = length(xD), ny = length(yD), i,		\
 	n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);	\
@@ -660,7 +660,7 @@ SEXP _FNAME(SEXP x, SEXP y, SEXP rnd_mode) {				\
     } else {								\
 	yy = INTEGER(y);						\
     }									\
-    PROTECT(xD = GET_SLOT(x, Rmpfr_Data_Sym));	nprot++;		\
+    PROTECT(xD = R_do_slot(x, Rmpfr_Data_Sym));	nprot++;		\
     nx = length(xD);							\
     n = (nx == 0 || ny == 0) ? 0 : imax2(nx, ny);			\
     PROTECT(val = allocVector(VECSXP, n));	nprot++;		\

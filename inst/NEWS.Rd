@@ -7,6 +7,46 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
+\section{Changes in version 1.1-0 [2024-11-15, r422]}{
+  \subsection{USER-VISIBLE CHANGES}{
+    \itemize{
+      \item The low-level bug fix about conversion has slightly changed the
+      ABI and the low-level \code{validity} method on Windows: Non-finite
+      mpfr-numbers, e.g., \code{NA}, \code{Inf}, now have different
+      mantissa slot \code{@ d}, now starting with \code{0L} instead of
+      previously \code{-1L}.
+    }
+  }
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item New \code{num2bigq(x)} finds \dQuote{small} denominator
+      \code{bigq} / \sQuote{bigRational} approximation to numeric or <mpfr> \code{x}.
+      Basically a \CRANpkg{MASS}\code{::fractions()} version for
+      \CRANpkg{Rmpfr} and \CRANpkg{gmp}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item \code{format(mpfr())} no longer warns.
+
+      \item in \code{formatDec()}: use \code{p*log(2, 10)} instead of
+      \code{log(2^p, 10)}!
+
+      \item low-level C fixes in \file{src/convert.c} thanks to analysis
+      and proposition by Mikael Jagan.  Entails update of \code{validity()}
+      for \code{"mpfr1"}.
+
+      \item add \code{\\link[pkg]{...}} where needed.
+    }
+  }
+  \subsection{Misc}{
+    \itemize{
+      \item new \file{../tests/special-fun-dgamma.R} file; partly from \file{..../special-fun-ex.R}:
+      accuracy checking for more accurate \code{stirlerr()} in \R 4.4.0 and later.
+    }
+  }
+}
+
 \section{Changes in version 0.9-5 [2024-01-20, r407]}{
   \subsection{NEW FEATURES}{
     \itemize{

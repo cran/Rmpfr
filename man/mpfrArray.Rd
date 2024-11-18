@@ -34,8 +34,8 @@ mpfrArray(x, precBits, dim = length(x), dimnames = NULL,
  \code{"\linkS4class{mpfrMatrix}"} when \code{length(dim) == 2}.
 }
 \seealso{\code{\link{mpfr}}, \code{\link{array}};
-  \code{\link{asNumeric}()} as \dQuote{inverse} of \code{mpfrArray()},
-  to get back a numeric array.
+  \code{\link[gmp]{asNumeric}()} from \CRANpkg{gmp}
+  as \dQuote{inverse} of \code{mpfrArray()}, to get back a numeric array.
 
   \code{\link{mpfr2array}(x)} is for \code{"mpfr"} classed \code{x},
   only, whereas \code{mpfrArray(x)} is for numeric (\dQuote{non-mpfr})

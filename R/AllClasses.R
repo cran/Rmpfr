@@ -41,7 +41,8 @@ setClass("mpfr1", ## a single Multi-precision float number
 		     if(gmp.numb == 64) {  ## ex of length 2
 			 if((long_is_4b && ## Windows
 			     ((ex[1] == ex[2] && any(ex[1] == specExps)) || ## mpfr 3.1.3, "old" R/Rtools
-                              ( -1L  == ex[2] && any(ex[1] == specExps)))   ## new Rtools (2023)
+                              (  0L  == ex[2] && any(ex[1] == specExps)))   ## new Rtools (2023); convert.c chg
+                                 ## (was  `-1L`  till Aug.2024)
                             ) || (!long_is_4b &&
                                   (is.na(ex[2]) && any(ex[[1]] == (1:3)))) ## mpfr 3.1.5, Fedora 26++
                          )
@@ -51,7 +52,7 @@ setClass("mpfr1", ## a single Multi-precision float number
                                               Please report to maintainer(\"Rmpfr\")", .Platform$endian), domain=NA)
                              TRUE
                          }
-			 else
+			 else ## with MJ's change in convert.c --> now on Windows:
 			     sprintf("@exp invalid for non-regular number (64b, le(d) == 0, |long|=%d bytes)",
                                      .Machine$sizeof.long)
 
@@ -174,4 +175,4 @@ setValidity("mNumber",
                    is.mpfr(object)) return(TRUE)
                 ## else
                 "Not a valid 'mNumber' class object"
-		})
+	    })

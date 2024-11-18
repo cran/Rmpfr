@@ -89,7 +89,8 @@ is.mpfr(x)
 }
 \author{Martin Maechler}
 \seealso{The class documentation \code{\linkS4class{mpfr}} contains more
-  details.  Use \code{\link{asNumeric}} to transform back to double
+  details.  Use \code{\link[gmp]{asNumeric}()} from \CRANpkg{gmp} to
+  transform back to double
   precision ("\code{\link{numeric}}").
 }
 \examples{

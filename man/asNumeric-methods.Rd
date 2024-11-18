@@ -33,7 +33,7 @@
 \author{Martin Maechler}
 \seealso{
   our lower level (non-generic) \code{\link{toNum}()}. Further,
-  \code{\link[gmp]{asNumeric}} (package \pkg{gmp}),
+  \code{\link[gmp]{asNumeric}} (package \CRANpkg{gmp}),
   standard \R's \code{\link{as.numeric}()}.
 }
 \examples{

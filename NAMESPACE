@@ -142,6 +142,7 @@ export(.mpfr, .mpfr.
        , "mpfr2array", "mpfrArray"
        , "mpfrVersion"
        , "mpfr_default_prec"
+     , num2bigq # our "fractions", new Jan.2024
        , "optimizeR"
        , outer # <- our own instead of base, so it uses tcrossprod() methods
        , "hjkMpfr" ## <-- FIXME, rather part of an  optimR(...., method = "hjk")

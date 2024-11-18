@@ -26,7 +26,7 @@
   equivalent to \code{x == round(x)}, but \emph{not} at all to
   \code{is.integer(as(x, "numeric"))}.\cr
   You should typically rather use (the \code{"mpfr"} method of the
-  generic function) \code{\link{is.whole}(x)} instead.
+  generic function) \code{\link[gmp]{is.whole}(x)} from \CRANpkg{gmp} instead.
   The former name \code{mpfr.is.integer} is deprecated now.
 }
 \usage{

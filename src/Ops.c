@@ -19,9 +19,9 @@ SEXP Rmpfr_minus(SEXP x)
     int n = length(x);
     SEXP val = PROTECT(duplicate(x));
     for(int i=0; i < n; i++) {
-	int sign = asInteger(GET_SLOT(VECTOR_ELT(x,i), Rmpfr_signSym));
+	int sign = asInteger(R_do_slot(VECTOR_ELT(x,i), Rmpfr_signSym));
 	SEXP r_i = VECTOR_ELT(val, i);
-	SET_SLOT(r_i, Rmpfr_signSym, ScalarInteger(-sign));
+	R_do_slot_assign(r_i, Rmpfr_signSym, ScalarInteger(-sign));
 	SET_VECTOR_ELT(val, i, r_i);
     }
 
@@ -35,7 +35,7 @@ SEXP Rmpfr_abs(SEXP x)
     SEXP val = PROTECT(duplicate(x));
     for(int i=0; i < n; i++) {
 	SEXP r_i = VECTOR_ELT(val, i);
-	SET_SLOT(r_i, Rmpfr_signSym, ScalarInteger(1));
+	R_do_slot_assign(r_i, Rmpfr_signSym, ScalarInteger(1));
 	SET_VECTOR_ELT(val, i, r_i);
     }
     UNPROTECT(1);
@@ -48,7 +48,7 @@ SEXP Rmpfr_abs(SEXP x)
 SEXP Math_mpfr(SEXP x, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP D = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));
+    SEXP D = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));
 #else
 # define D x
 #endif
@@ -286,8 +286,8 @@ static int R_mpfr_mod(mpfr_t r, mpfr_t x, mpfr_t y, mpfr_rnd_t RND)
 SEXP Arith_mpfr(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym)),
-	 yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym)),
+	 yD = PROTECT(R_do_slot(y, Rmpfr_Data_Sym));
 #else
 # define xD x
 # define yD y
@@ -359,7 +359,7 @@ SEXP Arith_mpfr(SEXP x, SEXP y, SEXP op)
 SEXP Arith_mpfr_i(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));
 #else
 # define xD x
 #endif
@@ -429,7 +429,7 @@ SEXP Arith_mpfr_i(SEXP x, SEXP y, SEXP op)
 SEXP Arith_i_mpfr(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));
+    SEXP yD = PROTECT(R_do_slot(y, Rmpfr_Data_Sym));
 #else
 # define yD y
 #endif
@@ -512,7 +512,7 @@ SEXP Arith_i_mpfr(SEXP x, SEXP y, SEXP op)
 SEXP Arith_mpfr_d(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));
 #else
 # define xD x
 #endif
@@ -615,7 +615,7 @@ SEXP Arith_mpfr_d(SEXP x, SEXP y, SEXP op)
 SEXP Arith_d_mpfr(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));
+    SEXP yD = PROTECT(R_do_slot(y, Rmpfr_Data_Sym));
 #else
 # define yD y
 #endif
@@ -722,8 +722,8 @@ SEXP Arith_d_mpfr(SEXP x, SEXP y, SEXP op)
 SEXP Compare_mpfr(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym)),
-	yD = PROTECT(GET_SLOT(y, Rmpfr_Data_Sym));
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym)),
+	yD = PROTECT(R_do_slot(y, Rmpfr_Data_Sym));
 #else
 # define xD x
 # define yD y
@@ -772,7 +772,7 @@ SEXP Compare_mpfr(SEXP x, SEXP y, SEXP op)
 SEXP Compare_mpfr_i(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));
 #else
 # define xD x
 #endif
@@ -821,7 +821,7 @@ SEXP Compare_mpfr_i(SEXP x, SEXP y, SEXP op)
 SEXP Compare_mpfr_d(SEXP x, SEXP y, SEXP op)
 {
 #ifdef using_Data_slot
-    SEXP xD = PROTECT(GET_SLOT(x, Rmpfr_Data_Sym));
+    SEXP xD = PROTECT(R_do_slot(x, Rmpfr_Data_Sym));
 #else
 # define xD x
 #endif

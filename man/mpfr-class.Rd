@@ -386,7 +386,7 @@ hypot(x,y, rnd.mode = c("N","D","U","Z","A"))
   \code{\link{roundMpfr}} to \emph{change} precision of an \code{"mpfr"}
   object which is typically desirable \emph{instead} of or in addition
   to \code{signif()} or \code{round()};
-  \code{\link{is.whole}()} etc.
+  \code{\link[gmp]{is.whole}()} from \CRANpkg{gmp}, etc.
 
   Special mathematical functions such as some Bessel ones, e.g., \code{\link{jn}};
   further, \code{\link{zeta}(.)} \eqn{(= \zeta(.))}, \code{Ei()} etc.

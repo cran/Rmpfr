@@ -98,3 +98,81 @@ getDenom <-  function(m) {
             .mpfr2bigz( d ))
 }
 
+##---- Find "as small as possible" rational approximation to real number ---
+## Adapted .rat() from  MASS/R/fractions.R
+## Copyright (C) 1994-2005 W. N. Venables and B. D. Ripley
+##
+num2bigq <- function(x, cycles = 50L, max.denominator = 2^25, verbose = FALSE)
+{
+    n <- length(x <- as(x, "mpfr"))# precBits = 128  if(is.numeric(x))
+    fin <- is.finite(x)
+    a0 <- rep(0, n)
+    Z1 <- as.bigz(1)
+    b0 <- rep(Z1, n)
+    A <- matrix(b0) # == b0
+    bb <- .mpfr2bigz(x)
+    r <- x - bb     # fractional part of x
+    B <- matrix(bb) #  integer   part of x
+    len <- 0L
+    while(any(do <- fin & (r > 1/max.denominator)) && (len <- len + 1L) <= cycles) {
+              a <- a0 # a[] will be in {0,1}
+              b <- b0
+              which <- which(do)
+              a[which] <- 1
+              r[which] <- 1/r[which]
+              b[which] <- .mpfr2bigz(r[which]) # includes floor(.)
+              r[which] <- r[which] - b[which]
+### FIXME: bug in {gmp} ?  cbind(A, a, deparse.level = 0) ## adds a 0-column !!!
+              A <- cbind(A, a) # is always in {0,1}
+              B <- cbind(B, b) # always bigz
+              if(verbose) { cat("it=", len,":  r="); print(r); cat("B =\n"); print(B) }
+          }
+    pq1 <- cbind(b0,     a0)
+    pq  <- cbind(B[, 1], b0)
+    len <- 1L
+    while((len <- len + 1L) <= ncol(B)) {
+        pq0 <- pq1
+        pq1 <- pq
+        pq <- B[, len] * pq1 + A[, len] * pq0
+    }
+    if(any(N <- !fin)) pq[N, 1L] <- .mpfr2bigz(x[N])
+    as.bigq(pq[,1L], pq[,2L])
+}
+
+## The .rat() version  -- i.e. working with double()   ---- *not* exported; just for debugging ..
+.num2bigq <- function(x, cycles = 50L, max.denominator = 2^25, verbose = FALSE)
+{
+    n <- length(x <- as.numeric(x))
+    fin <- is.finite(x)
+    a0 <- rep(0, n)
+    Z1 <- 1 #N as.bigz(1)
+    b0 <- rep(Z1, n)
+    A <- matrix(b0) # == b0
+    bb <- floor(x) #N .mpfr2bigz(x)
+    r <- x - bb     # fractional part of x
+    B <- matrix(bb) #  integer   part of x
+    len <- 0L
+    while(any(do <- fin & (r > 1/max.denominator)) && (len <- len + 1L) <= cycles) {
+              a <- a0 # a[] will be in {0,1}
+              b <- b0
+              which <- which(do)
+              a[which] <- 1
+              r[which] <- 1/r[which]
+              b[which] <- floor(r[which]) #N .mpfr2bigz(r[which]) # includes floor(.)
+              r[which] <- r[which] - b[which]
+              A <- cbind(A, a, deparse.level=0L) # is always in {0,1}
+              B <- cbind(B, b, deparse.level=0L) # always bigz
+              ## if(verbose) { cat("it=", len,":  r="); print(r); cat("A, B =\n"); print(A); print(B) }
+              if(verbose) { cat("it=", len,":  r="); print(r); cat("B =\n"); print(B) }
+          }
+    pq1 <- cbind(b0,     a0, deparse.level=0L)
+    pq  <- cbind(B[, 1], b0, deparse.level=0L)
+    len <- 1L
+    while((len <- len + 1L) <= ncol(B)) {
+        pq0 <- pq1
+        pq1 <- pq
+        pq <- B[, len] * pq1 + A[, len] * pq0
+    }
+    pq[!fin, 1] <- x[!fin] #N .mpfr2bigz(x[!fin])
+    pq ## list(rat = pq, x = x)
+}

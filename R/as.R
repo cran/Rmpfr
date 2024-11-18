@@ -192,7 +192,8 @@ frexpMpfr <- function(x, rnd.mode = c('N','D','U','Z','A')) {
 
 
 formatMpfr <-
-    function(x, digits = NULL, trim = FALSE, scientific = NA,
+    function(x, digits = NULL, # digits = NULL : use as many digits "as needed"
+             trim = FALSE, scientific = NA,
 	     maybe.full = (!is.null(digits) && is.na(scientific)) || isFALSE(scientific),
              base = 10, showNeg0 = TRUE, max.digits = Inf,
 	     big.mark = "", big.interval = 3L,
@@ -202,7 +203,7 @@ formatMpfr <-
              exponent.plus = TRUE,
 	     zero.print = NULL, drop0trailing = FALSE, ...)
 {
-    ## digits = NULL : use as many digits "as needed"
+    if(!length(x)) return(character())
     ff <- .mpfr2str(x, digits, maybe.full=maybe.full, base=base) # (checks its args!)
     ## FIXME/TODO: If have very large numbers, but not high precision, should detect it
     ## ==========  and use  maybe.full = FALSE also for the default scientific = NA

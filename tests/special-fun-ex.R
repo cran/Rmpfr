@@ -16,6 +16,7 @@ drawEps.h <- function(p2 = -(53:51), side = 4, lty=3, lwd=2, col=adjustcolor(2, 
          labels = as.expression(lapply(p2, function(p) substitute(2^E, list(E=p)))),
          col.axis = col, col=NA, col.ticks=NA)
 }
+
 mtextVersion <- function(adj = 1, col = 1) {
     mtext(osVersion, line=1, col=col, adj=adj)
     mtext(sfsmisc::shortRversion(spaces=FALSE), col=col, adj=adj)
@@ -405,53 +406,13 @@ eaxis(1, nintLog=22) ; eaxis(2, line=-1/2); drawEps.h()
 legend("topright", legend = paste0("x=",formatC(x0,wid=3)), ncol=7,
        bty="n", lwd=1, pch=pch, col=1:6, lty=1:5, cex = 0.8)
 
-
 1
 ## dnbinom() -- has mode as expected, but with huge size, the scales are "off reality" ..
 
 ### ..... TODO !
 
-### dgamma(): ----------------------------------------------------
-if(do.pdf) { dev.off(); pdf("special-fun-dgamma.pdf") }
 
-xe <- c(-2e5, -1e5, -2e4, -1e4, -2000, -1000, -500, -200, -100, -50, -20, -10)
-(xe <- c(xe, -8:8, -rev(xe)))
-two <- mpfr(2, 64)
-## For centering at E[.], will use xP(x, shp) :
-xP <- function(x, d) x - d*(x > d)
-aEQformat <- function(xy, ...) format(xy, digits = 7, ...)
-allEQ_0 <- function (target, current, ...)
-    all.equal(target, current, tolerance = 0, formatFUN = aEQformat, ...)
-stopIfNot <-
-    if("allow.logical0" %in% names(formals(stopifnot))) { # experimental (MM only)
-        stopifnot
-    } else function(exprs, allow.logical0) stopifnot(exprs=exprs)
-
-for(shp in c(2^c(-20, -3, -1:1, 4, 10, 50))) {
-    cat("shape = 2^", log2(shp), ":\n-------------\n")
-    d.dg  <- dgamma(xP(2 ^ xe, shp), shape=shp)
-    m.dg  <- dgamma(xP(two^xe, shp), shape=shp)
-    m.ldg <- dgamma(xP(two^xe, shp), shape=shp, log=TRUE)
-    stopIfNot(exprs = {
-        !is.unsorted(xe)
-        is.finite(m.dg)
-        m.dg >= 0
-        shp > 1  || all(diff(m.dg) <= 0)
-        shp > 100|| all((m.dg > 0) >= (d.dg > 0))
-        any(fin.d <- is.finite(d.dg))
-        m.dg[!fin.d] > 1e300
-        { cat("all.EQ(<mpfr>, <doubl>):", allEQ_0(m.dg[fin.d], d.dg[fin.d]), "\n")
-          shp > 100  ||                   all.equal(m.dg[fin.d], d.dg[fin.d],
-                                                    tol = 1e-13) # 2.063241e-14
-        }
-        ## compare with log scale :
-        if(any(pos.d <- m.dg > 0)) {
-            cat("all.EQ(log(d), d*(log)):",
-              allEQ_0  (log(m.dg[pos.d]), m.ldg[pos.d]),"\n")
-              all.equal(log(m.dg[pos.d]), m.ldg[pos.d], tol = 1e-14)
-        }
-    }, allow.logical0 = TRUE)
-}
+##--> >>>>>>>>  ./special-fun-dgamma.R <<<  (was here originally)
 
 cat('Time elapsed: ', proc.time(),'\n') # "stats"
 if(!interactive()) warnings()

@@ -27,33 +27,49 @@ extern
 
 // Initialize contents (4 slots) of a "mpfr1" R object
 #define R_mpfr_MPFR_2R_init(_V_, _d_length_)				\
-    SEXP _V_ = PROTECT(NEW_OBJECT(PROTECT(MAKE_CLASS("mpfr1"))));	\
+    SEXP _V_ = PROTECT(R_do_new_object(PROTECT(R_do_MAKE_CLASS("mpfr1"))));	\
     SEXP prec_R = PROTECT(ALLOC_SLOT(_V_, Rmpfr_precSym, INTSXP, 1));	\
     SEXP sign_R = PROTECT(ALLOC_SLOT(_V_, Rmpfr_signSym, INTSXP, 1));	\
     SEXP exp_R  = PROTECT(ALLOC_SLOT(_V_, Rmpfr_expSym,  INTSXP, R_mpfr_exp_size)); \
     SEXP d_R    = PROTECT(ALLOC_SLOT(_V_, Rmpfr_d_Sym,   INTSXP, _d_length_)); \
     /* the integer vector which makes up the mantissa: */		\
-    int *dd = INTEGER(d_R),						\
-	*ex = INTEGER(exp_R) /* the one for the exponent */
+    unsigned int *dd = (unsigned int *) INTEGER(d_R),			\
+	*ex = (unsigned int *) INTEGER(exp_R) /* the one for the exponent */
 
 /*------------------------*/
+
+/* Convert integer 'u' of unsigned type 'utype' to corresponding signed
+ * type 'stype' without relying on implementation-defined behaviour when
+ * 'u' exceeds the maximum of 'stype'; see C99 6.3.1.3
+ */
+#define CAST_SIGNED(u, utype, stype) \
+    (((u) <= ((utype) -1 >> 1)) ? (stype) u : -(stype) ~(u) - 1)
+
 #if GMP_NUMB_BITS == 32
 /*                  ---- easy : a gmp-limb is an int <--> R */
 
-// This is only ok  if( mpfr_regular_p(.) ), i.e. not for {0, NaN, Inf}:
-# define R_mpfr_FILL_DVEC(i)					\
-    R_mpfr_dbg_printf(2,"r..d[i=%d] = 0x%lx\n",i,r->_mpfr_d[i]); \
-    dd[i] = (int) r->_mpfr_d[i]
+static R_INLINE void R_mpfr_FILL_DVEC(int i, mpfr_t r, unsigned int *dd) {
+    mp_limb_t limb = r->_mpfr_d[i];
+    dd[i] = (unsigned int) limb;
+    R_mpfr_dbg_printf(2, "r..d[i=%d] = 0x%lx\n",
+                      i, limb);
+}
 
-# define R_mpfr_GET_DVEC(i)					\
-    r->_mpfr_d[i] = (mp_limb_t) dd[i];				\
-    R_mpfr_dbg_printf(2,"dd[%d] = %10lu -> r..d[i=%d]= 0x%lx\n", \
-		      i, dd[i], i,r->_mpfr_d[i])
+static R_INLINE void R_mpfr_GET_DVEC(int i, mpfr_t r, unsigned int *dd) {
+    mp_limb_t limb = (mp_limb_t) dd[i];
+    r->_mpfr_d[i] = limb;
+    R_mpfr_dbg_printf(2, "dd[%d] = %10lu -> r..d[i=%d] = 0x%lx\n",
+                      i, limb, i, limb);
+}
 
 // these work on (r, ex[0]) :
-# define R_mpfr_FILL_EXP ex[0] = (int)r->_mpfr_exp
-# define R_mpfr_GET_EXP  r->_mpfr_exp = (mpfr_exp_t) ex[0]
-
+static R_INLINE void R_mpfr_FILL_EXP(mpfr_t r, unsigned int *ex) {
+    ex[0] = (unsigned int) r->_mpfr_exp;
+}
+static R_INLINE void R_mpfr_GET_EXP(mpfr_t r, unsigned int *ex,
+                                    unsigned int ex1) {
+    r->_mpfr_exp = (mpft_exp_t) CAST_SIGNED(ex[0], unsigned int, int);
+}
 
 
 /*------------------------*/
@@ -61,32 +77,39 @@ extern
 /*                    ---- here a gmp-limb is 64-bit (long long):
  * ==> one limb  <---> 2 R int.s : */
 
-# define RIGHT_HALF(_LONG_) ((long long)(_LONG_) & 0x00000000FFFFFFFF)
-//                                                   1  4   8|  4   8
-# define LEFT_SHIFT(_LONG_) (((unsigned long long)(_LONG_)) << 32)
-
 // This is only ok  if( mpfr_regular_p(.) ), i.e. not for {0, NaN, Inf}:
-# define R_mpfr_FILL_DVEC(i)						\
-    R_mpfr_dbg_printf(2,"r..d[i=%d] = 0x%lx\n",i,r->_mpfr_d[i]);	\
-    dd[2*i]  = (int) RIGHT_HALF(r->_mpfr_d[i]);				\
-    dd[2*i+1]= (int) (r->_mpfr_d[i] >> 32)
+static R_INLINE void R_mpfr_FILL_DVEC(int i, mpfr_t r, unsigned int *dd) {
+    mp_limb_t limb = r->_mpfr_d[i];
+    dd[2*i  ] = (unsigned int) (limb & 0x00000000FFFFFFFFu);
+    dd[2*i+1] = (unsigned int) (limb >> 32);
+    R_mpfr_dbg_printf(2, "r..d[i=%d] = 0x%llx\n",
+                      i, (unsigned long long) limb);
+}
 
-# define R_mpfr_GET_DVEC(i)						\
-    r->_mpfr_d[i] = (mp_limb_t)(RIGHT_HALF(dd[2*i]) | LEFT_SHIFT(dd[2*i+1])); \
-    R_mpfr_dbg_printf(2,"dd[%d:%d]= (%10lu,%10lu) -> r..d[i=%d]= 0x%lx\n", \
-	     2*i,2*i+1, dd[2*i],dd[2*i+1], i,r->_mpfr_d[i])
+static R_INLINE void R_mpfr_GET_DVEC(int i, mpfr_t r, unsigned int *dd) {
+    mp_limb_t limb = ((mp_limb_t) dd[2*i+1] << 32) | ((mp_limb_t) dd[2*i] & 0x00000000FFFFFFFFu);
+    r->_mpfr_d[i] = limb;
+    R_mpfr_dbg_printf(2, "dd[%d:%d] = (%10lu,%10lu) -> r..d[i=%d] = 0x%llx\n",
+                      2*i, 2*i+1, dd[2*i], dd[2*i+1],
+                      i, (unsigned long long) limb);
+}
 
 // these work on (r, ex[0], {ex[1] or ex1}) :
+static R_INLINE void R_mpfr_FILL_EXP(mpfr_t r, unsigned int *ex) {
+    mpfr_uexp_t exponent = (mpfr_uexp_t) r->_mpfr_exp;
+    ex[0] = (unsigned int) (exponent & 0x00000000FFFFFFFFu);
+    ex[1] = (unsigned int) (exponent >> 32);
+    R_mpfr_dbg_printf(2, "_exp = 0x%llx\n",
+                      (unsigned long long) exponent);
+}
 
-# define R_mpfr_FILL_EXP				\
-    R_mpfr_dbg_printf(2,"_exp = 0x%lx\n",r->_mpfr_exp);	\
-    ex[0] = (int) RIGHT_HALF(r->_mpfr_exp);		\
-    ex[1] = (int) (((long long)r->_mpfr_exp) >> 32)
-
-# define R_mpfr_GET_EXP							\
-    r->_mpfr_exp = (mpfr_exp_t) (RIGHT_HALF(ex[0]) | LEFT_SHIFT(ex1));	\
-    R_mpfr_dbg_printf(2,"ex[0:1]= (%10lu,%10lu) -> _exp = 0x%lx\n",	\
-		      ex[0],ex1, r->_mpfr_exp)
+static R_INLINE void R_mpfr_GET_EXP(mpfr_t r, unsigned int *ex,
+                                    unsigned int ex1) {
+    mpfr_uexp_t exponent = ((mpfr_uexp_t) ex1 << 32) | ((mpfr_uexp_t) ex[0] & 0x00000000FFFFFFFFu);
+    r->_mpfr_exp = CAST_SIGNED(exponent, mpfr_uexp_t, mpfr_exp_t);
+    R_mpfr_dbg_printf(2, "ex[0:1] = (%10lu,%10lu) -> _exp = 0x%llx\n",
+                      ex[0], ex1, (unsigned long long) exponent);
+}
 
 /*------------------------*/
 #else
@@ -95,27 +118,37 @@ extern
 
 
 
-#define R_mpfr_MPFR_2R_fill			\
-    /* now fill the slots of val */		\
-    INTEGER(prec_R)[0] = (int)r->_mpfr_prec;	\
-    INTEGER(sign_R)[0] = (int)r->_mpfr_sign;	\
-    R_mpfr_FILL_EXP;				\
-    if(regular_p) {				\
-	/* the full *vector* of limbs : */	\
-	for(i=0; i < nr_limbs; i++) {		\
-            R_mpfr_FILL_DVEC(i);		\
-	}					\
+static R_INLINE void
+R_mpfr_MPFR_2R_fill(mpfr_t r, unsigned int *ex, int nr_limbs, int regular_p,
+		    // Fill (i.e., modify) these :
+		    unsigned int *dd, /* = INTEGER(d_R) , the vector which makes up the mantissa */
+		    SEXP prec_R, SEXP sign_R)
+{
+    /* now fill the slots of val */
+    INTEGER(prec_R)[0] = (int)r->_mpfr_prec;
+    INTEGER(sign_R)[0] = (int)r->_mpfr_sign;
+    R_mpfr_FILL_EXP(r, ex);
+    if(regular_p) {
+	/* the full *vector* of limbs : */
+	for(int i=0; i < nr_limbs; i++) {
+            R_mpfr_FILL_DVEC(i, r, dd);
+	}
     }
+}
+
 
 /* Return an R "mpfr1" object corresponding to mpfr input: */
 SEXP MPFR_as_R(mpfr_t r) {
 
     int nr_limbs = R_mpfr_nr_limbs(r),
-	regular_p = mpfr_regular_p(r), i;
+	regular_p = mpfr_regular_p(r);
 
     R_mpfr_MPFR_2R_init(val, (regular_p ? R_mpfr_nr_ints : 0));
 
-    R_mpfr_MPFR_2R_fill;
+    R_mpfr_MPFR_2R_fill(r, ex, nr_limbs, regular_p,
+			// Fill these :
+			dd, /* = INTEGER(d_R) , the vector which makes up the mantissa */
+			prec_R, sign_R);
 
     UNPROTECT(6);
     return val;
@@ -123,18 +156,20 @@ SEXP MPFR_as_R(mpfr_t r) {
 
 SEXP d2mpfr1_(double x, int i_prec, mpfr_rnd_t rnd)
 {
-    mpfr_t r;
-    int nr_limbs = N_LIMBS(i_prec), regular_p, i;
-
     R_mpfr_check_prec(i_prec);
 
+    mpfr_t r;
     mpfr_init2 (r, (mpfr_prec_t)i_prec);
     mpfr_set_d (r, x, rnd);
 
-    regular_p = mpfr_regular_p(r);
+    int nr_limbs  = N_LIMBS(i_prec),
+	regular_p = mpfr_regular_p(r);
     R_mpfr_MPFR_2R_init(val, (regular_p ? R_mpfr_nr_ints : 0));
 
-    R_mpfr_MPFR_2R_fill;
+    R_mpfr_MPFR_2R_fill(r, ex, N_LIMBS(i_prec), regular_p,
+			// Fill these :
+			dd, /* = INTEGER(d_R) , the vector which makes up the mantissa */
+			prec_R, sign_R);
 
     /* free space used by the MPFR variables */
     mpfr_clear (r);
@@ -266,18 +301,17 @@ SEXP str2mpfr1_list(SEXP x, SEXP prec, SEXP base, SEXP rnd_mode)
 }
 
 #undef R_mpfr_MPFR_2R_init
-#undef R_mpfr_MPFR_2R_fill
 
 
 #ifdef _not_used_
-/* This does *not* work: gives *empty* .Data slot [bug in NEW_OBJECT()? ] */
+/* This does *not* work: gives *empty* .Data slot [bug in R_do_new_object()? ] */
 SEXP d2mpfr(SEXP x, SEXP prec)
 {
     int i_prec = asInteger(prec),
 	nx = LENGTH(x), np = LENGTH(prec),
 	n = (nx == 0 || np == 0) ? 0 : imax2(nx, np),
 	nprot = 1;
-    SEXP val = PROTECT(NEW_OBJECT(MAKE_CLASS("mpfr"))),
+    SEXP val = PROTECT(R_do_new_object(R_do_MAKE_CLASS("mpfr"))),
 	lis = ALLOC_SLOT(val, Rmpfr_Data_Sym, VECSXP, n);
     double *dx;
 
@@ -298,16 +332,17 @@ SEXP d2mpfr(SEXP x, SEXP prec)
  * From an R  "mpfr1" object `x`,  create mpfr `r` (with correct prec): */
 void R_asMPFR(SEXP x, mpfr_ptr r)
 {
-    SEXP prec_R = GET_SLOT(x, Rmpfr_precSym);
-    // SEXP sign_R = GET_SLOT(x, Rmpfr_signSym);// only used once
-    SEXP exp_R  = GET_SLOT(x, Rmpfr_expSym);
-    SEXP d_R    = GET_SLOT(x, Rmpfr_d_Sym);
+    SEXP prec_R = R_do_slot(x, Rmpfr_precSym);
+    // SEXP sign_R = R_do_slot(x, Rmpfr_signSym);// only used once
+    SEXP exp_R  = R_do_slot(x, Rmpfr_expSym);
+    SEXP d_R    = R_do_slot(x, Rmpfr_d_Sym);
 
     int x_prec = INTEGER(prec_R)[0],
 	nr_limbs = N_LIMBS(x_prec), i;
     Rboolean regular_x = length(d_R) > 0;
-    int *dd = INTEGER(d_R),/* the vector which makes up the mantissa */
-	*ex = INTEGER(exp_R), ex1; /* the one for the exponent */
+    /* the integer vector which makes up the mantissa: */
+    unsigned int *dd = (unsigned int *) INTEGER(d_R),
+	*ex = (unsigned int *) INTEGER(exp_R), ex1; /* the one for the exponent */
 
     if(regular_x && length(d_R) != R_mpfr_nr_ints)
 	error("nr_limbs(x_prec)= nr_limbs(%d)= %d : length(<d>) == %d != R_mpfr_nr_ints == %d",
@@ -320,12 +355,12 @@ void R_asMPFR(SEXP x, mpfr_ptr r)
     } else ex1 = ex[1];
 
     mpfr_set_prec(r, (mpfr_prec_t) x_prec);
-    r->_mpfr_sign = (mpfr_sign_t) INTEGER(GET_SLOT(x, Rmpfr_signSym))[0];
-    R_mpfr_GET_EXP;
+    r->_mpfr_sign = (mpfr_sign_t) INTEGER(R_do_slot(x, Rmpfr_signSym))[0];
+    R_mpfr_GET_EXP(r, ex, ex1);
     if(regular_x)
 	/* the full *vector* of limbs : */
 	for(i=0; i < nr_limbs; i++) {
-	    R_mpfr_GET_DVEC(i);
+	    R_mpfr_GET_DVEC(i, r, dd);
 	}
     return;
 }
@@ -359,7 +394,7 @@ SEXP print_mpfr1(SEXP x, SEXP digits)
 
 SEXP print_mpfr(SEXP x, SEXP digits)
 {
-    SEXP D = GET_SLOT(x, Rmpfr_Data_Sym);/* an R list() of length n */
+    SEXP D = R_do_slot(x, Rmpfr_Data_Sym);/* an R list() of length n */
     int n = length(D), i;
     mpfr_t r;
     Rboolean use_x_digits = INTEGER(digits)[0] == NA_INTEGER;
@@ -530,17 +565,20 @@ SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybeFull, SEXP base) {
     SET_VECTOR_ELT(val, 3, zero= PROTECT(allocVector(LGLSXP, n)));
     // depending on erange_is_int, only need one of  d_exp or i_exp  (but don't see a more elegant way):
     double *d_exp; // = REAL(exp);
-    int *i_exp, // = INTEGER(exp),
-	*is_fin= LOGICAL(fini),
+    int    *i_exp; // = INTEGER(exp),
+    int *is_fin= LOGICAL(fini),
 	*is_0  = LOGICAL(zero);
     double p_fact = (B == 2) ? 1. : log(B) / M_LN2;// <==> P / p_fact == P *log(2)/log(B)
     int max_nchar = -1; // := max_i { dig_needed[i] }
     mpfr_t R_i;
     mpfr_init(R_i); /* with default precision; set prec in R_asMPFR() */
-    if(erange_is_int)
+    if(erange_is_int) {
 	i_exp = INTEGER(exp);
-    else
+	d_exp = NULL;
+    } else {
+	i_exp = NULL;
 	d_exp = REAL(exp);
+    }
 
     for(i=0; i < n; i++) {
 	mpfr_exp_t exp = (mpfr_exp_t) 0;

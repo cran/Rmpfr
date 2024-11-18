@@ -281,3 +281,6 @@ for(nm in ls())
                 stop(".mpfr_formatinfo(*) and .mpfr2str(*, base=2) do not match")
         }
     }
+
+stopifnot(identical(character(),
+                    format(mpfr())))# gave warning

@@ -13,13 +13,6 @@
 #include <R.h>  /* includes Rconfig.h */
 #include <Rversion.h>
 #include <Rinternals.h>
-// previously from <Rdefines.h> :
-#ifndef GET_SLOT
-# define GET_SLOT(x, what)       R_do_slot(x, what)
-# define SET_SLOT(x, what, value) R_do_slot_assign(x, what, value)
-# define MAKE_CLASS(what)	R_do_MAKE_CLASS(what)
-# define NEW_OBJECT(class_def)	R_do_new_object(class_def)
-#endif
 
 #include <R_ext/Print.h>
 
@@ -88,7 +81,7 @@ SEXP ALLOC_SLOT(SEXP obj, SEXP nm, SEXPTYPE type, int length)
 {
     SEXP val = allocVector(type, length);
 
-    SET_SLOT(obj, nm, val);
+    R_do_slot_assign(obj, nm, val);
     return val;
 }
 
@@ -117,7 +110,7 @@ static R_INLINE void R_mpfr_check_prec(int prec)
     return;
 }
 
-#define R_mpfr_prec(x) INTEGER(GET_SLOT(x, Rmpfr_precSym))[0]
+#define R_mpfr_prec(x) INTEGER(R_do_slot(x, Rmpfr_precSym))[0]
 
 
 #define MISMATCH_WARN							\

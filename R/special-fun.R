@@ -34,6 +34,7 @@ pnorm <- function (q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
 	    rr[neg] <- pnorm(-q[neg], lower.tail = !lower.tail, log.p=log.p)
 	if(any(pos <- !neg)) {
 	    q <- q[pos] #==> now  q >= 0
+            ## use slightly higher precision  and then "round back":
 	    prec.q <- max(.getPrec(q))
 	    two <- mpfr(2, prec.q + 4L)
 	    Irt2 <- sqrt(mpfr(0.5, prec.q + 4L)) # 1 / sqrt(2)
@@ -110,7 +111,7 @@ dt <- function (x, df, ncp, log = FALSE) {
 
         } else stop("invalid arguments (x,df,ncp)")
     }
-    else stop("ncp != 0 not yet implemented")
+    else stop("ncp != 0 not yet implemented; see pnt*() function in {DPQmpfr}")# Gil_et_al'23
 }
 
 dpois <- function (x, lambda, log = FALSE,
@@ -463,7 +464,7 @@ hypot <- function(x,y, rnd.mode = c('N','D','U','Z','A')) {
 	new("mpfr", .Call(R_mpfr_hypot, as(x, "mpfr"), as(y, "mpfr"), match.arg(rnd.mode)))
 }
 
-## The Beta(a,b)  Cumulative Probabilities are exactly computable for *integer* a,b:
+## The Beta(a,b)  Cumulative Probabilities are exactly computable for *integer* (a,b) = (shape1,shape2):
 pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
 		   precBits = NULL,
                    useRational = !log.p && !is.mpfr(q) && is.null(precBits) && int2,
@@ -478,8 +479,8 @@ pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
 	      (is.numeric(precBits) && is.whole(precBits) && precBits >= 2))
 
     int2 <- i1 && i2 # both integer -> can use rational
+
 ### TODO: Also have finite (but non-rational) sum if only *one* is an integer number
-### ----
 
     ## Care for too large (a,b) and "integer overflow".
     ## NB:  below have 0:(b - 1) or 0:(a - 1)
@@ -527,12 +528,6 @@ pbetaI <- function(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE,
             ## reduce the precision, in order to not "claim wrongly":
             precBits=precBits, match.arg(rnd.mode))
     }
-}
-
-## TODO  1) add (and test) R mpfr version R's bpser() in toms708.c
-##       2) compare with bpser() from package DPQ which should have more flexible variant
-##          ~/R/Pkgs/DPQ/R/beta-fns.R  &  ~/R/Pkgs/DPQ/src/bpser.c
-pbeta_ser <- function(q, shape1, shape2, log.p=FALSE) {
 }
 
 ### MPFR version >= 3.2.0 :

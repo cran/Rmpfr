@@ -17,6 +17,9 @@
      design a "test all Ops" with all combinations of "mpfr", "numeric","logical"
      (and possibly more).
 
+* Short Term
+Change Macros  to  static  R_INLINE Functions 
+Tomas K: "Macros were outdated even when I was a CS student .."
 
 * Short or Mid Term
 *** TODO Split this section into  Short | Mid  (?)

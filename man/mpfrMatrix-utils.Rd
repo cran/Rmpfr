@@ -6,7 +6,7 @@
 \description{
   \code{determinant(x, ..)} computes the determinant of the mpfr square
   matrix \code{x}.  May work via coercion to \code{"numeric"}, i.e., compute
-  \code{determinant(\link{asNumeric}(x), logarithm)}, if
+  \code{determinant(\link[gmp]{asNumeric}(x), logarithm)}, if
   \code{asNumeric} is true, by default, if the dimension is larger
   than three.  Otherwise, use precision \code{precBits} for the
   \dQuote{accumulator} of the result, and use the
@@ -24,7 +24,7 @@
     absolute determinant should be returned.
   }
   \item{asNumeric}{logical .. .. if rather
-    \code{determinant(\link{asNumeric}(x), ...)} should be computed.
+    \code{determinant(\link[gmp]{asNumeric}(x), ...)} should be computed.
   }
   \item{precBits}{the number of binary digits for the result (and the
     intermediate accumulations).}
