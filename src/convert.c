@@ -531,10 +531,9 @@ SEXP mpfr2str(SEXP x, SEXP digits, SEXP maybeFull, SEXP base) {
     int B = asInteger(base); // = base for output
     int n_dig = isNull(digits) ? 0 : asInteger(digits);
     if(n_dig < 0) error("'digits' must be NULL or a positive integer");
-    Rboolean maybe_full = asLogical(maybeFull);
-    if(maybe_full == NA_LOGICAL) // cannot happen when called "regularly"
+    if(asLogical(maybeFull) == NA_LOGICAL) // cannot happen when called "regularly"
 	error("'maybe.full' must be TRUE or FALSE");
-
+    Rboolean maybe_full = asLogical(maybeFull);
     R_mpfr_dbg_printf(1,"mpfr2str(*, digits=%d, maybeF=%s, base=%d):\n",
 		      n_dig, (maybe_full ? "TRUE" : "False"), B);
 

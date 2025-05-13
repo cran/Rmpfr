@@ -222,13 +222,13 @@ stopifnot(validObject(xx <- outer(b10, runif(20))),
 	  validObject(vx <- as(xx, "mpfr")), class(vx) == "mpfr", is.null(dim(vx)))
 C1 <- replicate(10, system.time(bb <<- beta(vx, vx+2)))
 C2 <- replicate(10, system.time(b2 <<-    B(vx, vx+2)))
-summary(1000*C1[1,]) ##  80.3 {cmath-5, 2009}
-summary(1000*C2[1,]) ## 125.1 { " }
+summary(1000*C1[1,]) ## 13 (lynne 2023) 80.3 {cmath-5, 2009}
+summary(1000*C2[1,]) ## 18    "        125.1 { " }
 stopifnot(all.equal(bb, b2))
 ## and for a single number, the speedup is a factor 3:
 x1 <- vx[1]; x2 <- x1+2
-system.time(for(i in 1:100) bb <- beta(x1, x2))# .27
-system.time(for(i in 1:100) b2 <-    B(x1, x2))# .83
+system.time(for(i in 1:100) bb <- beta(x1, x2))# .056  was .27
+system.time(for(i in 1:100) b2 <-    B(x1, x2))# .129  was .83
 
 ## a+b is integer <= 0, but a and b are not integer:
 a <- b <- .5 + -10:10

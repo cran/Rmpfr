@@ -74,6 +74,7 @@ dnorm <- function (x, mean = 0, sd = 1, log = FALSE) {
 	if(!x.mp) x <- mpfr(x, prec)
 	x <- (x - mean) / sd
 	twopi <- 2*Const("pi", prec)
+                                        # or max(prec) ?? {maybe L.o.n.g. vector ..}; ditto for mpfr(sd, prec) below
 	## f(x) =  1/(sigma*sqrt(2pi)) * exp(-1/2 x^2)
 	if(log) ## log( f(x) ) = -[ log(sigma) + log(2pi)/2 + x^2 / 2]
 	    -(log(if(is.mpfr(sd)) sd else mpfr(sd, prec))  + (log(twopi) + x*x)/2)
@@ -91,6 +92,7 @@ dt <- function (x, df, ncp, log = FALSE) {
             prec <- pmax(53L, getPrec(x), getPrec(df), if(missing(ncp)) 0L else getPrec(ncp))
             if(! x.mp)  x <- mpfr( x, prec)
             if(!df.mp) df <- mpfr(df, prec)
+                                        # or max(prec) ?? {maybe L.o.n.g. vector ..}; ditto for other (*, prec) below
             twopi <- 2*Const("pi", prec)
         ## From Catherine Loader's comment in src/nmath/dt.c  (n := df) :
         ## the following form should be "stable" ["contrary" to the direct formula]:
@@ -147,29 +149,34 @@ dpois <- function (x, lambda, log = FALSE,
 }
 
 dbinom <- function(x, size, prob, log = FALSE,
-                   useLog = any(abs(x) > 1e6) || ## MPFR overflow:
-                       max(x*log(prob), (size-x)*log1p(-prob)) >=
-                         .mpfr_erange("Emax")*log(2))
+                   useLog = any(abs(x) > 1e6) || ## MPFR overflow ["platform dep.": Windoof typically has reduced erange]
+                       max(abs((size-x)*log1p(-prob)), abs(x*log(prob))) >= .mpfr_erange("Emax")*log(2),
+                   warnLog = TRUE)
 {
     if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) ## standard R
 	stats__dbinom(x, size, prob, log=log)
     else if((s.mp <- is.mpfr(size)) | (p.mp <- is.mpfr(prob)) | (x.mp <- is.mpfr(x))) {
 	stopifnot(is.whole(x)) # R's dbinom() gives NaN's with a warning..
 	prec <- pmax(53, getPrec(size), getPrec(prob), getPrec(x)) # full prec(x)
-        if(!is.integer(x) && !useLog) {
-            xi <- as.integer(x) # chooseMpfr() needs it
-            if(x.mp) (if(anyNA(xi) || any(xi != x)) stop else message)(
-                "'x' coerced from \"mpfr\" to integer -- necessary for chooseMpfr()")
-            x <- xi
+        if(!useLog) {
+            if(is.integer(x))
+                xi <- x
+            else {
+                xi <- as.integer(x) # needed for chooseMpfr()
+                if(anyNA(xi) || any(xi != x))
+                    stop("'x' coerced from non-equal integer -- used for chooseMpfr()")
+            }
         }
 	if(!s.mp) size <- mpfr(size, prec)
 	if(!p.mp) prob <- mpfr(prob, prec)
+	if(!x.mp) x    <- mpfr(x,    prec)
+        if(log && !useLog && warnLog) warning("'log' but not 'useLog': maybe losing efficiency")
 	## n:= size, p:= prob,	compute	 P(x) = choose(n, x) p^x (1-p)^(n-x)
         if(useLog) { # do *not* use chooseMpfr() {which is O(x^2)}
             lC.nx <- ## lchoose(size, x), but that is *not* yet available for "mpfr" __FIXME?__
                 lfactorial(size) - (lfactorial(x) + lfactorial(size-x))
-        } else {
-            C.nx <- chooseMpfr(size, x)
+        } else { # use xi :
+            C.nx <- chooseMpfr(size, xi)
             lC.nx <- log(C.nx)
         }
         if(log || useLog) {
@@ -186,10 +193,12 @@ dnbinom <- function (x, size, prob, mu, log = FALSE, useLog = any(x > 1e6)) {
         if (!missing(prob))
             stop("'prob' and 'mu' both specified")
         ## Using argument 'mu' instead of 'prob'
-        if (size == Inf)
+        if (all(sI <- size == Inf))
             return( dpois(x, lambda=mu, log) )
-        else
-            prob <- size/(size+mu)  #  and continue :
+        ## else
+        if(any(sI))
+            warning("some but not all 'size == Inf' giving invalid/NaN -- rather use dpois(.) (FIXME)")
+        prob <- size/(size+mu)  #  and continue :
     }
     if(is.numeric(x) && is.numeric(size) && is.numeric(prob)) { ## standard R
         if(!missing(mu))
@@ -271,6 +280,57 @@ dgamma <- function(x, shape, rate = 1, scale = 1/rate, log = FALSE) {
 	stop("(x, shape, scale) must be numeric or \"mpfr\"")
 }## {dgamma}
 
+pgamma <- function(q, shape, rate = 1, scale = 1/rate,
+                   lower.tail = TRUE, log.p = FALSE,
+                   rnd.mode = c('N','D','U','Z','A')) {
+    if (!missing(rate) && !missing(scale)) {
+        if (abs(rate * scale - 1) < 1e-15)
+            warning("specify 'rate' or 'scale' but not both")
+        else stop  ("specify 'rate' or 'scale' but not both")
+    }
+    if(is.numeric(q) && is.numeric(shape) && is.numeric(scale))
+        return(stats__pgamma(q, shape, scale=scale,
+                             lower.tail=lower.tail, log.p=log.p))
+    ## else
+    rnd.mode <- match.arg(rnd.mode)
+    if((sh.mp <- is.mpfr(shape)) |
+       (sc.mp <- is.mpfr(scale)) || is.mpfr(q)) {
+	if(!sh.mp || !sc.mp) {
+	    prec <- pmax(53, getPrec(shape), getPrec(scale), getPrec(q)) # *vector*
+	    if(!sh.mp)
+		shape <- mpfr(shape, prec)
+	    else  ## !sc.mp :
+		scale <- mpfr(scale, prec)
+	}
+    }
+    ## for now, "cheap", relying on "mpfr" arithmetic to be smart
+    ## work via  igamma() above --> ../man/igamma.Rd
+    ##  igamma(a,q) ==  gamma(a) * pgamma(q, a, lower.tail=FALSE)
+    if(lower.tail) { # will quickly suffer from cancellation  |--> 1-1 = 0  or  log1p(-1) = -Inf :
+        if(log.p)
+            log1p( - igamma(shape, q/scale, rnd.mode=rnd.mode) / gamma(shape))
+        else
+                 1 - igamma(shape, q/scale, rnd.mode=rnd.mode) / gamma(shape)
+    } else { # lower.tail = FALSE --> use igamma() directly
+        if(log.p)
+            log(igamma(shape, q/scale, rnd.mode=rnd.mode)) - lgamma(shape)
+        else if(any(Lsh <- shape > 4e7)) { # even gamma(<mpfr>) eventually overflows
+            ## could expand exponenetial range ("erange") but typically *not* on Windows
+            q <- q/scale
+            r <- q + 0*shape # mpfr of full length
+            if(length(Lsh) < (n <- length(r))) { # recycle:
+                Lsh   <- rep_len(Lsh,   n)
+                shape <- rep_len(shape, n)
+            }
+            r[Lsh] <- exp(log(igamma(shape[Lsh], q[Lsh], rnd.mode=rnd.mode)) -
+                              lgamma(shape[Lsh]))
+            S <- !Lsh
+            r[S] <- igamma(shape[S], q[S], rnd.mode=rnd.mode) / gamma(shape[S])
+        }
+        else # non-large shape
+            igamma(shape, q/scale, rnd.mode=rnd.mode) / gamma(shape)
+    }
+}## {pgamma}
 
 
 ## zeta()

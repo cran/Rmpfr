@@ -27,14 +27,15 @@ importFrom("methods",
 
 importFrom("utils", str)
 importFrom("stats"  # import *and* rename -- we extend these :
-	   ,stats__pnorm  = pnorm
-	   ,stats__qnorm  = qnorm
-	   ,stats__dnorm  = dnorm
-	   ,stats__dpois  = dpois
-	   ,stats__dbinom = dbinom
-	   ,stats__dgamma  = dgamma
-	   ,stats__dnbinom = dnbinom
-	   ,stats__dt     = dt
+          , stats__pnorm  = pnorm
+          , stats__qnorm  = qnorm
+          , stats__dnorm  = dnorm
+          , stats__dpois  = dpois
+          , stats__dbinom = dbinom
+          , stats__dgamma  = dgamma
+          , stats__dnbinom = dnbinom
+          , stats__dt     = dt
+          , stats__pgamma  = pgamma
 	   )
 
 importClassesFrom("gmp", "bigz", "bigq")
@@ -147,6 +148,7 @@ export(.mpfr, .mpfr.
        , outer # <- our own instead of base, so it uses tcrossprod() methods
        , "hjkMpfr" ## <-- FIXME, rather part of an  optimR(...., method = "hjk")
        , "pbetaI"
+     , pgamma
        , "pmax", "pmin"
        , "pnorm"
      , qnormI

@@ -7,7 +7,37 @@
 %% -- not yet in tar ball --
       %% \item Start vignette about \code{gamma()} inaccuracies and possible
       %% remedies (is \bold{unfinished}).
-\section{Changes in version 1.1-0 [2024-11-15, r422]}{
+
+\section{Changes in version 1.1-0 [2025-05-08, r426]}{
+  \subsection{NEW FEATURES}{
+    \itemize{
+      \item New \code{pgamma()}, simply via \code{igamma()}, to become
+      more visible to probability and statistics.\cr
+      Note that in some regions of its domain, it is currently severely
+      limited (both slow and inaccurate)
+      as by its implementation in MPFR, see the \sQuote{Warning} in \code{?igamma}.
+    }
+  }
+  \subsection{BUG FIXES}{
+    \itemize{
+      \item The default for our \code{dbinom()}'s \code{useLog} argument
+      was determined alone by \code{any(abs(x) > 1e6)}; it is now also
+      true, for smaller \code{x} and large \code{size} or extreme \code{prob}, e.g., in
+      \code{dbinom(7L, mpfr(1e10, 96), prob = 1/4)}.
+
+      Notably a bad thinko has been fixed which lead to only double precision accuracy
+      results for \code{useLog = TRUE}.
+    }
+  }
+  \subsection{Misc}{
+    \itemize{
+      \item Requiring MPFR >= 3.2.0 such that \code{gamma_inc()} is
+      available for our \code{igamma()} and \code{pgamma()}.
+    }
+  }
+}
+
+\section{Changes in version 1.0-0 [2024-11-15, r422]}{
   \subsection{USER-VISIBLE CHANGES}{
     \itemize{
       \item The low-level bug fix about conversion has slightly changed the

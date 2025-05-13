@@ -22,7 +22,9 @@ igamma(a, x, rnd.mode = c("N", "D", "U", "Z", "A"))
 }
 %% MM FIXME: "Copy paste" from hypot() -- which strangely we have in >> ./mpfr-class.Rd <<
 \arguments{
-  \item{a, x}{an object of class \code{mpfr} or \code{\link{numeric}}.}
+  \item{a, x}{an object of class \code{mpfr} or
+    \code{\link{numeric}}, where only one of \code{rate} and \code{scale}
+    should be specified.}
   \item{rnd.mode}{a 1-letter string specifying how \emph{rounding}
     should happen at C-level conversion to MPFR, see \code{\link{mpfr}}.}
 }
@@ -38,12 +40,22 @@ igamma(a, x, rnd.mode = c("N", "D", "U", "Z", "A"))
 
   Wikipedia (2019). \emph{Incomplete gamma function};
   \url{https://en.wikipedia.org/wiki/Incomplete_gamma_function}
-
   %% .. arXiv  paper TODO % see --> ../TODO
+}
+\section{Warning}{
+  The MPFR library documentation on \code{mpfr_gamma_inc()}
+  \url{https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005fgamma_005finc}
+  contains
+  \subsection{Note}{the current implementation of \code{mpfr_gamma_inc(rop, op, op2, <rnd>)}
+    is slow for large values of \code{rop} or \code{op}, in which case some
+    internal overflow might also occur.
+  }
 }
 \author{\R interface: Martin Maechler}
 \seealso{
-  \R's \code{\link{gamma}} (function) and \code{\link{pgamma}} (probability distribution).
+  \R's \code{\link{gamma}} (function) and \code{\link{pgamma}} (probability
+  distribution).
+  Rmpfr's own \code{\link{pgamma}()}, a thin wrapper around \code{igamma()}.
 }
 \examples{
 ## show how close pgamma() is :

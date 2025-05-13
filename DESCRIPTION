@@ -1,8 +1,8 @@
 Package: Rmpfr
 Title: Interface R to MPFR - Multiple Precision Floating-Point Reliable
-Version: 1.0-0
-Date: 2024-11-15
-DateNote: Previous CRAN version 0.9-5 on 2024-01-20
+Version: 1.1-0
+VersionNote: Last CRAN: 1.0-0 on 2024-11-15; 0.9-5 on 2024-01-20
+Date: 2025-05-08
 Type: Package
 Authors@R: c(person("Martin","Maechler", role = c("aut","cre"),
 	     email = "maechler@stat.math.ethz.ch", comment = c(ORCID="0000-0002-8685-9910"))
@@ -19,7 +19,7 @@ Description: Arithmetic (via S4 classes and methods) for
   ("special") functions.  To this end, the package interfaces to
   the 'LGPL' licensed 'MPFR' (Multiple Precision Floating-Point Reliable) Library
   which itself is based on the 'GMP' (GNU Multiple Precision) Library.
-SystemRequirements: gmp (>= 4.2.3), mpfr (>= 3.1.0), pdfcrop (part of
+SystemRequirements: gmp (>= 4.2.3), mpfr (>= 3.2.0), pdfcrop (part of
         TexLive) is required to rebuild the vignettes.
 SystemRequirementsNote: 'MPFR' (MP Floating-Point Reliable Library,
         https://www.mpfr.org/) and 'GMP' (GNU Multiple Precision
@@ -35,14 +35,15 @@ BugReports: https://r-forge.r-project.org/tracker/?group_id=386
 License: GPL (>= 2)
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2024-11-15 14:10:23 UTC; maechler
-Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
+Packaged: 2025-05-08 08:23:23 UTC; maechler
+Author: Martin Maechler [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-8685-9910>),
   Richard M. Heiberger [ctb] (formatHex(), *Bin, *Dec),
   John C. Nash [ctb] (hjkMpfr(), origin of unirootR()),
   Hans W. Borchers [ctb] (optimizeR(*, "GoldenRatio"); origin of
     hjkMpfr()),
-  Mikael Jagan [ctb] (safer convert.c,
+  Mikael Jagan [ctb] (safer convert.c, ORCID:
     <https://orcid.org/0000-0002-3542-2938>)
 Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
 Repository: CRAN
-Date/Publication: 2024-11-18 08:30:02 UTC
+Date/Publication: 2025-05-13 15:40:01 UTC

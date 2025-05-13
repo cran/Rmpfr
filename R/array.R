@@ -513,7 +513,7 @@ rm(it,jt)
 ## in any case, we do only want to support the   diag(<matrix>)    case.
 
 setMethod("diag", signature(x = "mpfrMatrix"),
-	  function(x, nrow, ncol) {
+	  function(x, nrow, ncol, names) {
 	      n <- min(dim(x)); i <- seq_len(n); x[cbind(i,i)] })
 
 setMethod("diag<-", signature(x = "mpfrMatrix"),
